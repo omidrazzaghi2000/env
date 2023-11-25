@@ -1,4 +1,4 @@
-import { CameraIcon } from "@heroicons/react/24/outline";
+import { PresentationChartLineIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import {
   Camera,
@@ -33,7 +33,7 @@ export function CameraListItem({
       )}
       onClick={() => toggleCameraSelection(camera.id)}
     >
-      <CameraIcon className="w-4 h-4 text-green-400" />
+      <PresentationChartLineIcon className="w-4 h-4 text-green-400" />
       <input
         type="checkbox"
         hidden

@@ -65,17 +65,17 @@ export function Outliner() {
     <div className="w-full h-full flex flex-col">
       <div className="flex justify-between items-center p-4 border-b border-white/10">
         <h2 className="uppercase font-light text-xs tracking-widest text-gray-300">
-          Cameras
+          Scenarios
         </h2>
         <button
           className="rounded p-1 -m-1 hover:bg-white/20 transition-colors"
           onClick={() => {
-            addCamera({
-              ...currentCamera,
-              selected: false,
-              name: `Camera ${String.fromCharCode(cameraAtoms.length + 65)}`,
-              id: THREE.MathUtils.generateUUID(),
-            });
+            // addCamera({
+            //   ...currentCamera,
+            //   selected: false,
+            //   name: `Camera ${String.fromCharCode(cameraAtoms.length + 65)}`,
+            //   id: THREE.MathUtils.generateUUID(),
+            // });
           }}
         >
           <PlusIcon className="w-4 h-4" />
@@ -94,7 +94,7 @@ export function Outliner() {
 
       <div className="flex justify-between items-center p-4 border-b border-white/10">
         <h2 className="uppercase font-light text-xs tracking-widest text-gray-300">
-          Lights
+          Markers
         </h2>
         <button
           className="rounded p-1 -m-1 hover:bg-white/20 transition-colors"
