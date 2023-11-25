@@ -3,14 +3,13 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 import { Outliner } from "../Outliner/Outliner";
 import { Properties } from "../Properties";
-import { HDRIPreview } from "../HDRIPreview";
-import { ScenePreview } from "../ScenePreview";
 import { MapPreview } from "../MapPreview";
-import { Code } from "../Code";
+import { TimelinePreview } from "../TimelinePreview";
 import { useAtomValue } from "jotai";
 import { modeAtom } from "../../store";
 
 export function AppContent() {
+
   const mode = useAtomValue(modeAtom);
 
   return (
@@ -24,6 +23,7 @@ export function AppContent() {
         className="isolate shadow-inner shadow-white/5 ring-offset-white/10 ring-offset-1 ring-1 ring-black/20 bg-neutral-900 rounded-lg"
       >
         <Outliner />
+
       </Panel>
 
       <PanelResizeHandle className="w-2 grid place-items-center transition-all hover:bg-white/40 rounded-sm mx-1">
@@ -38,7 +38,10 @@ export function AppContent() {
             order={1}
             className="isolate shadow-inner shadow-white/5 ring-offset-white/10 ring-offset-1 ring-1 ring-black/20 bg-neutral-900 bg-[conic-gradient(#202020_90deg,#313131_90deg_180deg,#202020_180deg_270deg,#313131_270deg)] bg-repeat bg-left-top bg-[length:20px_20px] rounded-lg"
           >
-            <MapPreview></MapPreview>
+            
+<MapPreview></MapPreview>
+            
+            
             
           </Panel>
 
@@ -56,7 +59,7 @@ export function AppContent() {
                 collapsible
                 className="isolate shadow-inner shadow-white/5 ring-offset-white/10 ring-offset-1 ring-1 ring-black/20 bg-neutral-900 bg-[conic-gradient(#202020_90deg,#313131_90deg_180deg,#202020_180deg_270deg,#313131_270deg)] bg-repeat bg-left-top bg-[length:20px_20px] rounded-lg"
               >
-                <Code />
+                <TimelinePreview/>
               </Panel>
             </>
           )}
