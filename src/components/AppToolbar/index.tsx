@@ -20,7 +20,7 @@ export function AppToolbar() {
     >
       <span className="p-3 flex items-center gap-4">
         <Logo />
-        <h1 className="font-bold tracking-wide text-xl">Env</h1>
+        <h1 className="font-bold tracking-wide text-xl">OMulator</h1>
       </span>
 
       <Toolbar.ToggleGroup
