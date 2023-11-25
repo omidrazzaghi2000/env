@@ -6,6 +6,7 @@ import {
   MagnifyingGlassIcon,
   PhotoIcon,
 } from "@heroicons/react/24/outline";
+import { DroneIcon } from "./images/Drone";
 import clsx from "clsx";
 import { useAtom, useSetAtom } from "jotai";
 import { Light, isCommandPaletteOpenAtom, lightsAtom } from "../../store";
@@ -59,11 +60,19 @@ export function CommandPalette() {
             <Command.Group
               heading={
                 <h3 className="text-neutral-400 text-xs font-light select-none px-2 my-2">
-                  Lights
+                  Markers
                 </h3>
               }
             >
               <Item
+                label="Parrot Bebop 2"
+                value="parrot_bebop_2"
+                subtitle="Weight class with a 25 minute battery life"
+                colorTheme="orange"
+              >
+                <DroneIcon />
+              </Item>
+              {/* <Item
                 label="Softbox"
                 value="softbox"
                 subtitle="Even, diffused light source"
@@ -102,10 +111,10 @@ export function CommandPalette() {
                 colorTheme="orange"
               >
                 <LightBulbIcon className="w-5 h-5 text-white" />
-              </Item>
+              </Item> */}
             </Command.Group>
 
-            <Command.Group
+            {/* <Command.Group
               heading={
                 <h3 className="text-neutral-400 text-xs font-light select-none px-2 my-2">
                   Backgrounds
@@ -128,7 +137,7 @@ export function CommandPalette() {
               >
                 <ChartBarIcon className="w-5 h-5 text-white" />
               </Item>
-            </Command.Group>
+            </Command.Group> */}
           </div>
 
           <div className="w-px h-auto block border-none bg-neutral-800" />
@@ -137,7 +146,7 @@ export function CommandPalette() {
             {value && (
               <div className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 absolute w-16 h-16 rounded-full bg-white blur-3xl" />
             )}
-            {value === "softbox" && <Softbox />}
+            {value === "parrot_bebop_2" && <ParrotBebop2 />}
             {value === "procedural_scrim" && <Scrim />}
             {value === "umbrella" && <Umbrella />}
             {value === "procedural_umbrella" && <Umbrella />}
@@ -231,7 +240,7 @@ function Item({
         color: "#ff0000",
         color2: "#0000ff",
       });
-    }
+    } 
 
     setOpen(false);
   }
@@ -262,6 +271,17 @@ function Item({
         </span>
       </div>
     </Command.Item>
+  );
+}
+
+function ParrotBebop2() {
+  return (
+    <img
+      src="/textures/ParrotBebop.jpg"
+      alt="Parrot Bebop 2"
+      className=" h-48"
+      loading="lazy"
+    />
   );
 }
 

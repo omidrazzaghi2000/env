@@ -29,6 +29,8 @@ import {
 import { LightListItem } from "./LightListItem";
 import { CameraListItem } from "./CameraListItem";
 import { useAtomValue, useSetAtom } from "jotai";
+import { toast } from "sonner";
+
 
 export function Outliner() {
   const lightIds = useAtomValue(lightIdsAtom);
@@ -70,6 +72,7 @@ export function Outliner() {
         <button
           className="rounded p-1 -m-1 hover:bg-white/20 transition-colors"
           onClick={() => {
+            toast("Not Implemented.")
             // addCamera({
             //   ...currentCamera,
             //   selected: false,

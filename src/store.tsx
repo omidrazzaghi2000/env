@@ -93,28 +93,28 @@ export const pointerAtom = atom({
 });
 
 export const lightsAtom = atomWithStorage<Light[]>("lights", [
-  {
-    name: `Light A`,
-    id: THREE.MathUtils.generateUUID(),
-    ts: Date.now(),
-    shape: "rect",
-    type: "procedural_scrim",
-    color: "#fff",
-    latlon: { x: 0, y: 0 },
-    intensity: 1,
-    rotation: 0,
-    scale: 2,
-    scaleX: 1,
-    scaleY: 1,
-    target: { x: 0, y: 0, z: 0 },
-    selected: false,
-    visible: true,
-    solo: false,
-    opacity: 1,
-    animate: false,
-    lightDistance: 0.3,
-    lightPosition: { x: 0, y: 0 },
-  },
+  // {
+  //   name: `Light A`,
+  //   id: THREE.MathUtils.generateUUID(),
+  //   ts: Date.now(),
+  //   shape: "rect",
+  //   type: "procedural_scrim",
+  //   color: "#fff",
+  //   latlon: { x: 0, y: 0 },
+  //   intensity: 1,
+  //   rotation: 0,
+  //   scale: 2,
+  //   scaleX: 1,
+  //   scaleY: 1,
+  //   target: { x: 0, y: 0, z: 0 },
+  //   selected: false,
+  //   visible: true,
+  //   solo: false,
+  //   opacity: 1,
+  //   animate: false,
+  //   lightDistance: 0.3,
+  //   lightPosition: { x: 0, y: 0 },
+  // },
 ]);
 
 export const lightIdsAtom = atom((get) => get(lightsAtom).map((l) => l.id));
@@ -282,3 +282,46 @@ export const selectCameraAtom = atom(
     );
   }
 );
+
+
+// Marker Properties
+type Path = {
+  src:{x:number,y:number},
+  dst:{x:number,y:number},
+  id: string,
+  name: string,
+  color: 'orange',
+
+}
+
+
+type BaseMarker = {
+  id: string;
+  ts: number;
+  name: string;
+
+  shape: "rect" | "circle" | "ring";
+  color: "red" | "orange" | "green" | "blue";
+  speed: number;
+  heading : number;
+  opacity: number;
+
+  scale: number;
+  scaleX: number;
+  scaleY: number;
+  rotation: number;
+
+  latlon: { x: number; y: number };
+
+  selected: boolean;
+  visible: boolean;
+  
+  path:Path[];
+
+  
+};
+
+
+export type Marker = BaseMarker & {} 
+
+export const markersAtom = atomWithStorage<Light[]>("markers", []);
