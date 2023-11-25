@@ -72,9 +72,8 @@ export type Light =
 export const debugAtom = atom(false);
 
 export const modeAtom = atomWithStorage("mode", {
-  scene: true,
-  hdri: true,
-  code: false,
+  map: true,
+  timeline: false,
 });
 
 export const activeModesAtom = atom((get) => {

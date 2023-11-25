@@ -2,6 +2,7 @@ import {
   ArrowTopRightOnSquareIcon,
   CodeBracketIcon,
   PaintBrushIcon,
+  MapIcon,
   PhotoIcon,
 } from "@heroicons/react/24/solid";
 import * as Toolbar from "@radix-ui/react-toolbar";
@@ -31,34 +32,29 @@ export function AppToolbar() {
         onValueChange={(modes) =>
           setMode(
             modes.reduce((acc, mode) => ({ ...acc, [mode]: true }), {
-              scene: false,
-              code: false,
-              hdri: false,
+              map: false,
+              timeline: false,
             })
           )
         }
       >
         {[
           {
-            value: "scene",
-            label: "Scene",
-            icon: PaintBrushIcon,
+            value: "map",
+            label: "Map",
+            icon: MapIcon,
           },
           {
-            value: "code",
-            label: "Code",
+            value: "timeline",
+            label: "Timeline",
             icon: CodeBracketIcon,
           },
-          {
-            value: "hdri",
-            label: "HDRI",
-            icon: PhotoIcon,
-          },
+          
         ].map(({ value, label, icon: Icon }) => (
           <Toolbar.ToggleItem
             key={value}
             value={value}
-            disabled={value === "scene"}
+            disabled={value === "map"}
             className="px-3 py-1.5 leading-4 text-xs tracking-wide uppercase font-semibold bg-white/0 hover:bg-white/10 bg-gradient-to-b data-[state=on]:from-blue-500 data-[state=on]:to-blue-600 data-[state=on]:text-white flex items-center"
           >
             <Icon className="w-4 h-4 mr-2" />
@@ -66,16 +62,9 @@ export function AppToolbar() {
           </Toolbar.ToggleItem>
         ))}
       </Toolbar.ToggleGroup>
-
-      <Toolbar.Link
-        href="https://github.com/pmndrs/env"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex justify-center items-center text-xs px-3 py-1.5 leading-4 tracking-wide uppercase font-semibold bg-white/0 hover:bg-white/100 text-white hover:text-black rounded-md transition-all duration-500 ease-in-out"
-      >
-        <span>Source Code</span>
-        <ArrowTopRightOnSquareIcon className="w-4 h-4 ml-2" />
-      </Toolbar.Link>
+      {/* dumb division to set map and timeline toggle item at center */}
+      <div  className="w-1/4"
+      ></div>
     </Toolbar.Root>
   );
 }
