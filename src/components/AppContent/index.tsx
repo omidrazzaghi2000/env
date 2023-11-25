@@ -5,6 +5,7 @@ import { Outliner } from "../Outliner/Outliner";
 import { Properties } from "../Properties";
 import { HDRIPreview } from "../HDRIPreview";
 import { ScenePreview } from "../ScenePreview";
+import { MapPreview } from "../MapPreview";
 import { Code } from "../Code";
 import { useAtomValue } from "jotai";
 import { modeAtom } from "../../store";
@@ -37,7 +38,8 @@ export function AppContent() {
             order={1}
             className="isolate shadow-inner shadow-white/5 ring-offset-white/10 ring-offset-1 ring-1 ring-black/20 bg-neutral-900 bg-[conic-gradient(#202020_90deg,#313131_90deg_180deg,#202020_180deg_270deg,#313131_270deg)] bg-repeat bg-left-top bg-[length:20px_20px] rounded-lg"
           >
-            <ScenePreview />
+            <MapPreview></MapPreview>
+            
           </Panel>
 
           
