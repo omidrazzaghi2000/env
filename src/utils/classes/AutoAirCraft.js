@@ -3,8 +3,7 @@ import {LinearPath} from './Path.js';
 import { uuid } from 'vue-uuid';
 export default class AutoAirCraft{
     constructor(name,lat,long,icon){
-        console.log(name)
-        this.id = uuid.v1();
+        this.id = uuid.v4();
         this.name = name;
         this.lat = lat;
         this.long = long;
@@ -14,6 +13,7 @@ export default class AutoAirCraft{
         this.path = []
         this.path_number = 0 // this member is for showing the last path of marker
         this.isAllPathFinished = false;
+        this.selected = false;
     }
     addLinearPath(destination,delay,desired){
         let x1 = destination[0];
