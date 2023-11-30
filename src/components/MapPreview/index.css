@@ -1,0 +1,20 @@
+.lat-long-shower{
+    background-color: #333;
+    padding-inline: 4px;
+    border-radius: 2px;
+    z-index: 1000;
+    position: absolute;
+    top: 0;
+    left: 0;
+
+}
+
+.arrow-marker-cursor{
+    /* cursor: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 512 512'%3e%3cg transform='rotate(45 256 256)'%3e%3crect id='r' x='16' y='216' width='480' height='80' rx='14'/%3e%3cuse href='%23r' transform='rotate(90 256 256)'/%3e%3c/g%3e%3c/svg%3e") 16 16, pointer; */
+    /* cursor:url("data:image/svg+xml,%3c%3fxml version='1.0' encoding='iso-8859-1'%3f%3e %3c!-- Uploaded to: SVG Repo%2c www.svgrepo.com%2c Generator: SVG Repo Mixer Tools --%3e %3csvg fill='black' height='28px' width='28px' version='1.1' id='Capa_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 447.342 447.342' xml:space='preserve'%3e%3cpath d='M443.537%2c3.805c-3.84-3.84-9.686-4.893-14.625-2.613L7.553%2c195.239c-4.827%2c2.215-7.807%2c7.153-7.535%2c12.459 c0.254%2c5.305%2c3.727%2c9.908%2c8.762%2c11.63l129.476%2c44.289c21.349%2c7.314%2c38.125%2c24.089%2c45.438%2c45.438l44.321%2c129.509 c1.72%2c5.018%2c6.325%2c8.491%2c11.63%2c8.762c5.306%2c0.271%2c10.244-2.725%2c12.458-7.535L446.15%2c18.429 C448.428%2c13.491%2c447.377%2c7.644%2c443.537%2c3.805z'/%3e%3c/svg%3e"); */
+    /* cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Cpath%20d%3D%22M224%20387.814V512L32%20320l192-192v126.912C447.375%20260.152%20437.794%20103.016%20380.93%200%20521.287%20151.707%20491.48%20394.785%20224%20387.814z%22%2F%3E%3C%2Fsvg%3E"); */
+    /* cursor: url("data:image/svg+xml,%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22iso-8859-1%22%3F%3E%0D%0A%3C%21--%20Uploaded%20to%3A%20SVG%20Repo%2C%20www.svgrepo.com%2C%20Generator%3A%20SVG%20Repo%20Mixer%20Tools%20--%3E%0D%0A%3Csvg%20fill%3D%22%23000000%22%20height%3D%2232px%22%20width%3D%2232px%22%20version%3D%221.1%22%20id%3D%22Capa_1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20%0D%0A%09%20viewBox%3D%220%200%20447.342%20447.342%22%20xml%3Aspace%3D%22preserve%22%3E%0D%0A%3Cpath%20d%3D%22M443.537%2C3.805c-3.84-3.84-9.686-4.893-14.625-2.613L7.553%2C195.239c-4.827%2C2.215-7.807%2C7.153-7.535%2C12.459%0D%0A%09c0.254%2C5.305%2C3.727%2C9.908%2C8.762%2C11.63l129.476%2C44.289c21.349%2C7.314%2C38.125%2C24.089%2C45.438%2C45.438l44.321%2C129.509%0D%0A%09c1.72%2C5.018%2C6.325%2C8.491%2C11.63%2C8.762c5.306%2C0.271%2C10.244-2.725%2C12.458-7.535L446.15%2C18.429%0D%0A%09C448.428%2C13.491%2C447.377%2C7.644%2C443.537%2C3.805z%22%2F%3E%0D%0A%3C%2Fsvg%3E"); */
+    cursor: crosshair;
+    /* cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;background:red;"></div></foreignObject></svg>') , auto; */
+    /* background-image: url('./gps-arrow.png'); */
+}

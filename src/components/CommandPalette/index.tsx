@@ -9,7 +9,7 @@ import {
 import { DroneIcon } from "./images/Drone";
 import clsx from "clsx";
 import { useAtom, useSetAtom } from "jotai";
-import { Light, isCommandPaletteOpenAtom, lightsAtom } from "../../store";
+import { Light, isCommandPaletteOpenAtom, lightsAtom ,showVHLineAtom } from "../../store";
 import * as THREE from "three";
 
 export function CommandPalette() {
@@ -174,6 +174,7 @@ function Item({
   colorTheme?: "orange" | "blue" | "green" | "red" | "purple";
 }) {
   const setOpen = useSetAtom(isCommandPaletteOpenAtom);
+  const setShowVHLineAtom = useSetAtom(showVHLineAtom);
   const [lights, setLights] = useAtom(lightsAtom);
   const addLight = (light: Light) => setLights((lights) => [...lights, light]);
 
@@ -241,6 +242,16 @@ function Item({
         color2: "#0000ff",
       });
     } 
+
+    else if(value === "parrot_bebop_2")
+    {
+      //just for debug
+      console.log('omid')
+
+      //add event listener for mouse
+      setShowVHLineAtom(true);
+
+    }
 
     setOpen(false);
   }

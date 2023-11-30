@@ -325,3 +325,9 @@ type BaseMarker = {
 export type Marker = BaseMarker & {} 
 
 export const markersAtom = atomWithStorage<Light[]>("markers", []);
+
+
+//map 
+export const showVHLineAtom = atom(false);
+export const currentMouseLatAtom = atom(null);
+export const currentMouseLongAtom = atom(null);
