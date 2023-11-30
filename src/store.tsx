@@ -324,7 +324,9 @@ type BaseMarker = {
 
 export type Marker = BaseMarker & {} 
 
-export const markersAtom = atomWithStorage<Light[]>("markers", []);
+import AutoAirCraft from './utils/classes/AutoAirCraf.js';
+export const markersAtom = atomWithStorage<AutoAirCraft[]>("markers", []);
+export const markerAtomsAtom = splitAtom(markersAtom);
 
 
 //map 

@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import {
   currentMouseLatAtom,
   currentMouseLongAtom,
@@ -10,6 +10,7 @@ import {
 import L, { latLng } from 'leaflet'
 import { useEffect, useRef, useState } from 'react'
 import './index.css'
+import AutoAirCraft from '../../utils/classes/AutoAirCraft.js';
 // export function MapPreview () {
 //   const markers = useAtomValue(markersAtom)
 
@@ -30,11 +31,13 @@ const center = new L.LatLng(34.641955754083504, 50.878976024718725)
 
 function MyComponent () {
   const map = useMap()
-  let [showVHLine, setShowVHLine] = useAtom(showVHLineAtom)
-  let [currentLatMouse, setCurrentLatMouse] = useAtom(currentMouseLatAtom)
-  let [currentLongMouse, setCurrentLongMouse] = useAtom(currentMouseLongAtom)
-  let [currentLat , setCurrentLat] = useState(null)
-  let [currentLong , setCurrentLong] = useState(null)
+  let [showVHLine, setShowVHLine] = useAtom(showVHLineAtom);
+  // const [currentMouseLat,setCurrentLatMouse] = useState(null);
+  // const [currentMouseLong,setCurrentLongMouse] = useState(null);
+  let currentMouseLat = null;
+  let currentMouseLong = null;
+  const setMarkers = useSetAtom(markersAtom);
+  const addMarker = (marker: AutoAirCraft) => setMarkers((markers) => [...markers, marker]);
   map.attributionControl.setPrefix(false)
 
   //just for first time concentrate to center of the map
@@ -69,6 +72,13 @@ function MyComponent () {
 
       element?.appendChild(LatLongShower)
     }
+    //update cuurent latlong of mouse
+    // setCurrentLatMouse(event.latlng.lat);
+    // setCurrentLongMouse(event.latlng.lng);
+    // currentMouseLat = event.latlng.lat;
+    // currentMouseLong = event.latlng.lng;
+
+
     LatLongShower.innerHTML = `(${event.latlng.lat},${event.latlng.lng})`
     LatLongShower.style.transform = LatLongShowerTrans
   }
@@ -78,8 +88,25 @@ function MyComponent () {
       element?.classList.add('arrow-marker-cursor')
 
       drawShower(e)
+
+    
     }
   })
+
+  //add event listener for right click 
+  map?.addEventListener('contextmenu',
+  function(e){
+    if(showVHLine){
+      // e.preventDefault();
+      console.log("Lat",e.latlng.lat);
+      console.log("Long",e.latlng.lng);
+      addMarker(
+        new AutoAirCraft("Aziz",e.latlng.lat,e.latlng.lng,null)
+      );
+      setShowVHLine(false);
+    }
+  }
+  )
 
   return null
 }

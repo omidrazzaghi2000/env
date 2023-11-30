@@ -25,11 +25,15 @@ import {
   lightIdsAtom,
   lightsAtom,
   selectedCameraAtom,
+
+  markersAtom,
+  markerAtomsAtom
 } from "../../store";
 import { LightListItem } from "./LightListItem";
 import { CameraListItem } from "./CameraListItem";
 import { useAtomValue, useSetAtom } from "jotai";
 import { toast } from "sonner";
+import { MarkerListItem } from "./MarkerListItem";
 
 
 export function Outliner() {
@@ -40,6 +44,9 @@ export function Outliner() {
   const cameraAtoms = useAtomValue(cameraAtomsAtom);
   const setCameras = useSetAtom(camerasAtom);
   const currentCamera = useAtomValue(selectedCameraAtom);
+
+  const markerAtoms = useAtomValue(markerAtomsAtom);
+
   const addCamera = (camera: Camera) =>
     setCameras((cameras) => [...cameras, camera]);
 
@@ -119,8 +126,8 @@ export function Outliner() {
             items={lightIds}
             strategy={verticalListSortingStrategy}
           >
-            {lightAtoms.map((lightAtom) => (
-              <LightListItem key={lightAtom.toString()} lightAtom={lightAtom} />
+            {markerAtoms.map((markerAtom) => (
+              <MarkerListItem key={markerAtom.toString()} markerAtom={markerAtom} />
             ))}
           </SortableContext>
         </DndContext>
