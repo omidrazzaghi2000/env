@@ -1,4 +1,4 @@
-
+import AutoAirCraft  from "./AutoAirCraft";
 export default class Scenario{
     constructor(name){
         this.name = name;
@@ -12,6 +12,7 @@ export default class Scenario{
         for(let i = 0 ; i < this.markers.length ; i++)
         {
             let name = this.markers[i].name;
+            
             marker_positions.push({
                 "name" : name,
                 "position" : this.markers[i].getPosition(time)

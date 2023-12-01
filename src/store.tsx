@@ -325,9 +325,10 @@ type BaseMarker = {
 export type Marker = BaseMarker & {} 
 
 import AutoAirCraft from './utils/classes/AutoAirCraf.js';
+import Scenario from './utils/classes/scenario.js';
 export const markersAtom = atomWithStorage<AutoAirCraft[]>("markers", []);
 export const markerAtomsAtom = splitAtom(markersAtom);
-
+export const mainScenario = atomWithStorage<Scenario>("main_scenario",new Scenario('MainScenario'));
 
 //map 
 export const showVHLineAtom = atom(false);

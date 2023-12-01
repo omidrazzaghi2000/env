@@ -6,12 +6,15 @@ import {
   currentMouseLatAtom,
   currentMouseLongAtom,
   markersAtom,
+  markerAtomsAtom,
+  mainScenario,
   showVHLineAtom
 } from '../../store'
 import L, { latLng } from 'leaflet'
 import { useEffect, useRef, useState } from 'react'
 import './index.css'
-import AutoAirCraft from '../../utils/classes/AutoAirCraft.js'
+import AutoAirCraft from '../../utils/classes/AutoAirCraft.js';
+import Scenario from '../../utils/classes/scenario.js'
 // export function MapPreview () {
 //   const markers = useAtomValue(markersAtom)
 
@@ -42,9 +45,19 @@ function MyComponent () {
   // const [currentMouseLong,setCurrentLongMouse] = useState(null);
   let currentMouseLat = null
   let currentMouseLong = null
-  const [markers, setMarkers] = useAtom(markersAtom)
+  const markers = useAtomValue(markersAtom);
+  // const markers = markerAtoms.map(
+  //   function(markerAtom){
+  //     return useAtomValue<AutoAirCraft>(markerAtom);
+  //   }
+  // )
+  
+  const mapMarkerArray = []
+  const [scenario , setScenario] = useAtom(mainScenario)
+
+  
   const addMarker = (marker: AutoAirCraft) =>
-    setMarkers(markers => [...markers, marker])
+    markers.push(marker)
   map.attributionControl.setPrefix(false)
 
   useEffect(function () {
@@ -52,7 +65,21 @@ function MyComponent () {
     setTimeout(function () {
       map.invalidateSize(true)
       map.flyTo(center, 14)
-    }, 200)
+    }, 200);
+
+    //for test movement
+    let t = 0;
+    setInterval(
+      function(){
+        t+=0.1;
+        for(let i = 0;i < mapMarkerArray.length ; i++){
+          let currMapMarker = mapMarkerArray[i];
+          let currLat = currMapMarker._latlng.lat;
+          let currLong = currMapMarker._latlng.lng;
+          currMapMarker.setLatLng([currLat-0.000001,currLong-0.000001]);
+        }
+      },10
+    )
   }, [])
 
   //update markerse
@@ -61,9 +88,13 @@ function MyComponent () {
       for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
         let curMarker = markers[markerIndex]
         let mapMarker = L.marker([curMarker.lat, curMarker.long], {
-          icon: curMarker.icon
+          // It is because it has error when i use curMarker.icon
+          icon: L.icon(curMarker.icon.options)
         }).addTo(map)
-        mapMarker.setRotationAngle(curMarker.yaw)
+        mapMarker.setRotationAngle(curMarker.yaw);
+        // curMarker.getPosition(0);    
+        mapMarkerArray.push(mapMarker);   
+
       }
     },
     [markers]

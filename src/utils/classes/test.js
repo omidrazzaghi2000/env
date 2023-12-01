@@ -1,6 +1,6 @@
 console.log("In the name of Allah")
 import AutoAirCraft from "./AutoAirCraft.js"
-import Scenario from "./Scenario.js"
+import Scenario from "./scenario.js"
 let s = new Scenario("Test_1")
 // let Hasan = new AutoAirCraft("hassan",-1,-1,'');
 let Ali = new AutoAirCraft("Ali",1,1,'')
