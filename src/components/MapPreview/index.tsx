@@ -63,13 +63,17 @@ function MyComponent () {
       }
   }, [])
 
-  //update markerse
-  // useEffect(
-  //   function () {
-      
-  //   },
-  //   [markers]
-  // )
+  //update positions
+  useEffect(
+    function () {
+     setInterval(
+      function(){
+        console.log("oMID")
+      },1000
+     ) 
+    },
+    []
+  )
 
   //for centering selected marker
   useEffect(
@@ -98,7 +102,7 @@ function MyComponent () {
         selectedMapMarker.setRotationAngle(curMarker.yaw);
       }
     },
-    [...markers.map(m => m.selected)]
+    [markers]
   )
 
   useEffect(

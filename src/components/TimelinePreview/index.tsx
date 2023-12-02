@@ -1,7 +1,7 @@
 import { Timeline, TimelineEffect, TimelineRow } from '@xzdarcy/react-timeline-editor';
 import { useAtomValue } from 'jotai';
 import { useEffect } from 'react';
-import { markerAtomsAtom } from '../../store';
+import { markerAtomsAtom, markersAtom } from '../../store';
 import AutoAirCraft from '../../utils/classes/AutoAirCraft.js'
 
 // MUST Delete last line in onScroll.js in utils folder in react-virtualized node modules
@@ -40,8 +40,8 @@ const mockEffect: Record<string, TimelineEffect> = {
   },
 };
 const getEditorData = function(markers:any):TimelineRow[]{
-  return markers.map(function(markerAtom:any){
-    const marker:AutoAirCraft = useAtomValue(markerAtom);
+  return markers.map(function(marker:any){
+    // const marker:AutoAirCraft = useAtomValue(markerAtom);
      return {
       id:marker.id,
 
@@ -62,7 +62,7 @@ const getEditorData = function(markers:any):TimelineRow[]{
 }
 
 export const TimelinePreview = ( ) => { 
-  const markerAtoms = useAtomValue(markerAtomsAtom);     
+  const markerAtoms = useAtomValue(markersAtom);     
   
   return ( 
     
