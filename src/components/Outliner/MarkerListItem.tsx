@@ -17,7 +17,8 @@ import {
   toggleSoloAtom,
   toggleLightSelectionAtom,
   deleteLightAtom,
-  duplicateLightAtom
+  duplicateLightAtom,
+  toggleMarkerSelectionAtom
 } from '../../store'
 import { PropertiesPanelTunnel } from '../Properties'
 import { PrimitiveAtom, useAtom, useAtomValue, useSetAtom } from 'jotai'
@@ -28,7 +29,7 @@ import { DragHandleIcon } from './DragHandleIcon'
 import AtuoAirCraft from '../../utils/classes/AutoAirCraft.js'
 
 
-function MarkerIcon(props)
+function MarkerIcon(props:any)
 {
   return <svg fill="#eee" height="12px" width="12px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" 
   viewBox="0 0 447.342 410" >
@@ -46,16 +47,18 @@ export function MarkerListItem ({
   markerAtom: PrimitiveAtom<AtuoAirCraft>
 }) {
   const [marker, setMarker] = useAtom(markerAtom);
-
+  const toggleSelection = useSetAtom(toggleMarkerSelectionAtom)
   return (
     <ContextMenu.Root>
       <ContextMenu.Trigger asChild>
         <div
+        onClick={() => toggleSelection(marker.id)}
         className={clsx(
           "group flex text-left p-2 gap-2 rounded-md bg-transparent cursor-pointer transition-colors",
           marker.selected && "bg-white/20",
           !marker.selected && "hover:bg-white/10"
         )}
+        
         >
           <input
               type="checkbox"

@@ -329,6 +329,34 @@ import Scenario from './utils/classes/scenario.js';
 export const markersAtom = atomWithStorage<AutoAirCraft[]>("markers", []);
 export const markerAtomsAtom = splitAtom(markersAtom);
 export const mainScenario = atomWithStorage<Scenario>("main_scenario",new Scenario('MainScenario'));
+export const selectMarkerAtom = atom(null, (get, set, markerId: AutoAirCraft["id"]) => {
+  set(markersAtom, (markers) =>
+    markers.map((m) => ({
+      ...m,
+      selected: m.id === markerId,
+    }))
+  );
+});
+export const deselectMarkersAtom = atom(null, (get, set) => {
+  set(markersAtom, (markers) =>
+    markers.map((m) => ({
+      ...m,
+      selected: false,
+    }))
+  );
+});
+export const toggleMarkerSelectionAtom = atom(
+  null,
+  (get, set, markerId: AutoAirCraft["id"]) => {
+    set(markersAtom, (markers) =>
+      markers.map((m) => ({
+        ...m,
+        selected: m.id === markerId ? !m.selected : false,
+      }))
+    );
+  }
+);
+
 
 //map 
 export const showVHLineAtom = atom(false);

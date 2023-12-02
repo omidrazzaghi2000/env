@@ -13,24 +13,8 @@ import {
 import L, { latLng } from 'leaflet'
 import { useEffect, useRef, useState } from 'react'
 import './index.css'
-import AutoAirCraft from '../../utils/classes/AutoAirCraft.js';
-import Scenario from '../../utils/classes/scenario.js'
-// export function MapPreview () {
-//   const markers = useAtomValue(markersAtom)
-
-//   return (
-//     <MapContainer
-//       style={{  height: '100%',width:'100%' }}
-//       center={[34.641955754083504, 50.878976024718725]}
-//       zoom={13}
-//       scrollWheelZoom={true}
-//       attributionControl={false}
-//     >
-//       <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
-//       <Marker position={[34.641955754083504, 50.878976024718725]}></Marker>
-//     </MapContainer>
-//   )
-// }
+import AutoAirCraft from '../../utils/classes/AutoAirCraft.js'
+import { LinearOPath } from './map_marker/path'
 const center = new L.LatLng(34.641955754083504, 50.878976024718725)
 const AutoAirCraftIcon = L.icon({
   iconUrl: '/textures/arrow-aircraft.png',
@@ -38,26 +22,27 @@ const AutoAirCraftIcon = L.icon({
   iconAnchor: [16, 16]
 })
 
+const AutoAirCraftSelectedIcon = L.icon({
+  iconUrl: '/textures/arrow-marker.png',
+  iconSize: [32, 32],
+  iconAnchor: [16, 16]
+})
+
 function MyComponent () {
   const map = useMap()
   let [showVHLine, setShowVHLine] = useAtom(showVHLineAtom)
-  // const [currentMouseLat,setCurrentLatMouse] = useState(null);
-  // const [currentMouseLong,setCurrentLongMouse] = useState(null);
+
   let currentMouseLat = null
   let currentMouseLong = null
-  const markers = useAtomValue(markersAtom);
-  // const markers = markerAtoms.map(
-  //   function(markerAtom){
-  //     return useAtomValue<AutoAirCraft>(markerAtom);
-  //   }
-  // )
-  
-  const mapMarkerArray = []
-  const [scenario , setScenario] = useAtom(mainScenario)
 
-  
+  const markers = useAtomValue(markersAtom)
+  const setMarker = useSetAtom(markersAtom)
+  const [mapMarkerArray ,setMarkerArray] = useState([])
+
+  const [scenario, setScenario] = useAtom(mainScenario)
+
   const addMarker = (marker: AutoAirCraft) =>
-    markers.push(marker)
+    setMarker(markers => [...markers, marker])
   map.attributionControl.setPrefix(false)
 
   useEffect(function () {
@@ -65,39 +50,55 @@ function MyComponent () {
     setTimeout(function () {
       map.invalidateSize(true)
       map.flyTo(center, 14)
-    }, 200);
+    }, 200)
 
-    //for test movement
-    let t = 0;
-    setInterval(
-      function(){
-        t+=0.1;
-        for(let i = 0;i < mapMarkerArray.length ; i++){
-          let currMapMarker = mapMarkerArray[i];
-          let currLat = currMapMarker._latlng.lat;
-          let currLong = currMapMarker._latlng.lng;
-          currMapMarker.setLatLng([currLat-0.000001,currLong-0.000001]);
-        }
-      },10
-    )
-  }, [])
-
-  //update markerse
-  useEffect(
-    function () {
-      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+    for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
         let curMarker = markers[markerIndex]
         let mapMarker = L.marker([curMarker.lat, curMarker.long], {
           // It is because it has error when i use curMarker.icon
           icon: L.icon(curMarker.icon.options)
         }).addTo(map)
-        mapMarker.setRotationAngle(curMarker.yaw);
-        // curMarker.getPosition(0);    
-        mapMarkerArray.push(mapMarker);   
+        mapMarker.setRotationAngle(curMarker.yaw)
+        mapMarkerArray.push(mapMarker)
+      }
+  }, [])
 
+  //update markerse
+  // useEffect(
+  //   function () {
+      
+  //   },
+  //   [markers]
+  // )
+
+  //for centering selected marker
+  useEffect(
+    function () {
+      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+        let curMarker = markers[markerIndex]
+        let selectedMapMarker = mapMarkerArray[markerIndex]
+        if (curMarker.selected) {
+          
+          console.log(mapMarkerArray)
+          //map center changing
+          map.invalidateSize(true)
+          map.flyTo(
+            [selectedMapMarker._latlng.lat, selectedMapMarker._latlng.lng],
+            14
+          )
+
+          //change icon
+          // map.removeLayer(sele)
+          selectedMapMarker.setIcon(AutoAirCraftSelectedIcon);
+          
+            
+        }else{
+          selectedMapMarker.setIcon(AutoAirCraftIcon);
+        }
+        selectedMapMarker.setRotationAngle(curMarker.yaw);
       }
     },
-    [markers]
+    [...markers.map(m => m.selected)]
   )
 
   useEffect(
@@ -132,14 +133,30 @@ function MyComponent () {
       let rightClickAddMarker = function (e: any) {
         // e.preventDefault();
         if (showVHLine) {
-          addMarker(
-            new AutoAirCraft(
-              'Aziz',
-              e.latlng.lat,
-              e.latlng.lng,
-              AutoAirCraftIcon
+          let newMarker = new AutoAirCraft(
+            'Aziz',
+            e.latlng.lat,
+            e.latlng.lng,
+            AutoAirCraftIcon
+          )
+
+          addMarker(newMarker)
+
+          let mapMarker = L.marker([newMarker.lat, newMarker.long], {
+                    icon: newMarker.icon
+                  }).addTo(map)
+          mapMarker.setRotationAngle(newMarker.yaw)
+          mapMarkerArray.push(mapMarker)
+
+          newMarker.path.push(
+            new LinearOPath(
+              L.latLng(e.latlng.lat, e.latlng.lng),
+              L.latLng(e.latlng.lat + 1, e.latlng.lng + 1)
             )
           )
+          
+
+          console.log(newMarker)
 
           //remove box
           var LatLongShower = element?.querySelector('.lat-long-shower')

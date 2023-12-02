@@ -14,9 +14,11 @@ export default class AutoAirCraft{
         this.path_number = 0 // this member is for showing the last path of marker
         this.isAllPathFinished = false;
         this.selected = false;
+        this.mapMarker = null;
 
-        this.getPosition= ()=>console.log("YA FATEMEH");
     }
+    
+
     addLinearPath(destination,delay,desired){
         let x1 = destination[0];
         let y1 = destination[1];
