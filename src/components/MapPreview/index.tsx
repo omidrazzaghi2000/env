@@ -8,7 +8,8 @@ import {
   markersAtom,
   markerAtomsAtom,
   mainScenario,
-  showVHLineAtom
+  showVHLineAtom,
+  toggleMarkerSelectionAtom
 } from '../../store'
 import L, { latLng } from 'leaflet'
 import { useEffect, useRef, useState } from 'react'
@@ -38,6 +39,7 @@ function MyComponent () {
   const markers = useAtomValue(markersAtom)
   const setMarker = useSetAtom(markersAtom)
   const [mapMarkerArray ,setMarkerArray] = useState([])
+  const toggleSelection = useSetAtom(toggleMarkerSelectionAtom)
 
   const [scenario, setScenario] = useAtom(mainScenario)
 
@@ -46,11 +48,7 @@ function MyComponent () {
   map.attributionControl.setPrefix(false)
 
   useEffect(function () {
-    //just for first time concentrate to center of the map
-    setTimeout(function () {
-      map.invalidateSize(true)
-      map.flyTo(center, 14)
-    }, 200)
+    
 
     for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
         let curMarker = markers[markerIndex]
@@ -58,9 +56,28 @@ function MyComponent () {
           // It is because it has error when i use curMarker.icon
           icon: L.icon(curMarker.icon.options)
         }).addTo(map)
+
         mapMarker.setRotationAngle(curMarker.yaw)
         mapMarkerArray.push(mapMarker)
+
+
+        mapMarker.on("click",function(e){
+          toggleSelection(curMarker.id)
+        })
+
+
+        if(curMarker.selected){
+          //just for first time concentrate to center of the map
+          setTimeout(function () {
+            map.invalidateSize(true)
+            map.flyTo([curMarker.lat,curMarker.long], 14)
+          }, 200)
+        }
       }
+
+      setTimeout(function () {
+        map.invalidateSize(true)
+      }, 200)
   }, [])
 
   //update positions
@@ -68,7 +85,7 @@ function MyComponent () {
     function () {
      setInterval(
       function(){
-        console.log("oMID")
+        
       },1000
      ) 
     },
@@ -83,7 +100,7 @@ function MyComponent () {
         let selectedMapMarker = mapMarkerArray[markerIndex]
         if (curMarker.selected) {
           
-          console.log(mapMarkerArray)
+
           //map center changing
           map.invalidateSize(true)
           map.flyTo(
@@ -145,6 +162,7 @@ function MyComponent () {
           )
 
           addMarker(newMarker)
+          toggleSelection(newMarker.id)
 
           let mapMarker = L.marker([newMarker.lat, newMarker.long], {
                     icon: newMarker.icon
@@ -152,10 +170,11 @@ function MyComponent () {
           mapMarker.setRotationAngle(newMarker.yaw)
           mapMarkerArray.push(mapMarker)
 
+
           newMarker.path.push(
             new LinearOPath(
               L.latLng(e.latlng.lat, e.latlng.lng),
-              L.latLng(e.latlng.lat + 1, e.latlng.lng + 1)
+              L.latLng(e.latlng.lat + 10, e.latlng.lng + 10)
             )
           )
           
