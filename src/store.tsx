@@ -285,45 +285,6 @@ export const selectCameraAtom = atom(
 
 
 // Marker Properties
-type Path = {
-  src:{x:number,y:number},
-  dst:{x:number,y:number},
-  id: string,
-  name: string,
-  color: 'orange',
-
-}
-
-
-type BaseMarker = {
-  id: string;
-  ts: number;
-  name: string;
-
-  shape: "rect" | "circle" | "ring";
-  color: "red" | "orange" | "green" | "blue";
-  speed: number;
-  heading : number;
-  opacity: number;
-
-  scale: number;
-  scaleX: number;
-  scaleY: number;
-  rotation: number;
-
-  latlon: { x: number; y: number };
-
-  selected: boolean;
-  visible: boolean;
-  
-  path:Path[];
-
-  
-};
-
-
-export type Marker = BaseMarker & {} 
-
 import AutoAirCraft from './utils/classes/AutoAirCraf.js';
 import Scenario from './utils/classes/scenario.js';
 export const markersAtom = atomWithStorage<AutoAirCraft[]>("markers", []);
@@ -357,6 +318,19 @@ export const toggleMarkerSelectionAtom = atom(
   }
 );
 
+export const updateMarkerPostionAtom = atom(
+  null,
+  (get, set, new_lat:number,new_long:number,new_yaw:number) => {
+    set(markersAtom, (markers) =>
+      markers.map((m) => ({
+        ...m,
+        lat:new_lat,
+        long:new_long,
+        yaw:new_yaw,
+      }))
+    );
+  }
+);
 
 //map 
 export const showVHLineAtom = atom(false);

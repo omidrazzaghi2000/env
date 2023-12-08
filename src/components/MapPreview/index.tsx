@@ -178,6 +178,9 @@ function MyComponent () {
             )
           )
 
+          //save map marker in leaflet map into aircraftjs sturcture
+          newMarker.mapMarker = mapMarker;
+
           
           //update marker path in markers array in store
           let currentIndex = markers.length;
