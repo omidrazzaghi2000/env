@@ -122,11 +122,11 @@ export function calculateDistance(lpath:any){
     return Math.sqrt(Math.pow(x0-x1,2)+Math.pow(y0-y1,2)); 
 }
 
-export const getLatLng = function(this:LinearOPath,time: number): any {
-    let x0 = this.src.lat;
-    let y0 = this.src.lng;
-    let x1 = this.dest.lat;
-    let y1 = this.dest.lng;
+export function getLatLng (lpath:LinearOPath,time: number): any {
+    let x0 = lpath.src.lat;
+    let y0 = lpath.src.lng;
+    let x1 = lpath.dest.lat;
+    let y1 = lpath.dest.lng;
 
     // Vy divided by Vx is equal to tangent of the line
     let tan_of_line = null
@@ -140,26 +140,26 @@ export const getLatLng = function(this:LinearOPath,time: number): any {
     // V_total = sqrt(Vx^2+Vy^2) so we can find Vx and Vy with these two terms.
     // V_total sign is important
     if (x0 > x1) {
-    this.speed = -1 * Math.abs(this.speed)
+    lpath.speed = -1 * Math.abs(lpath.speed)
     } else {
-    this.speed = Math.abs(this.speed)
+    lpath.speed = Math.abs(lpath.speed)
     }
     let Vx = null;
     let Vy = null;
     if(tan_of_line === 'inf')
     {
-    //this is when we have infinite tangent
+    //lpath is when we have infinite tangent
     Vx = 0;
     if(y0 > y1){
-        Vy = -1*this.speed;
+        Vy = -1*lpath.speed;
     }else{
-        Vy = this.speed;
+        Vy = lpath.speed;
     }
     
     }
     else
     {
-    Vx = this.speed / Math.sqrt(Math.pow(tan_of_line, 2) + 1)
+    Vx = lpath.speed / Math.sqrt(Math.pow(tan_of_line, 2) + 1)
     Vy = Vx * tan_of_line;
     }
 
@@ -168,9 +168,9 @@ export const getLatLng = function(this:LinearOPath,time: number): any {
     let marker_yaw = bearing_degree-45;//45 degree is because of image of auto aircraft
     //TODO: 45 degree in above line is hard code.
 
-    console.log("Tangent" , tan_of_line)
-    console.log("Vx" , Vx)
-    console.log("Vy" , Vy)
+    // console.log("Tangent" , tan_of_line)
+    // console.log("Vx" , Vx)
+    // console.log("Vy" , Vy)
 
     //update marker position
     let new_lat_long = [parseFloat((Vx * time + x0).toFixed(3)),

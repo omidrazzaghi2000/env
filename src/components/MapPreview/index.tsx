@@ -119,7 +119,7 @@ function MyComponent () {
         selectedMapMarker.setRotationAngle(curMarker.yaw);
       }
     },
-    [markers]
+    [markers.map((marker)=>marker.selected)]
   )
 
   useEffect(

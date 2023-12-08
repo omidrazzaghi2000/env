@@ -3,7 +3,7 @@ import {
   TimelineEffect,
   TimelineRow
 } from '@xzdarcy/react-timeline-editor'
-import { useAtomValue, useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom, useAtom} from 'jotai'
 import { useEffect } from 'react'
 import { markerAtomsAtom, markersAtom, toggleMarkerSelectionAtom } from '../../store'
 import AutoAirCraft from '../../utils/classes/AutoAirCraft.js'
@@ -62,6 +62,7 @@ function calculateTime(lpath:any){
 
 
 const getEditorData = function (markers: any): TimelineRow[] {
+  console.log(markers)
   return markers.map(function (marker: any) {
     // const marker:AutoAirCraft = useAtomValue(markerAtom);
     return {
@@ -79,6 +80,7 @@ const getEditorData = function (markers: any): TimelineRow[] {
 
       // ]
       actions: marker.path.map(function (path: any) {
+        console.log("HASSAN")
         return {
           id: path.id,
           start: 0,
@@ -93,9 +95,44 @@ const getEditorData = function (markers: any): TimelineRow[] {
 }
 
 export const TimelinePreview = () => {
-  const markerAtoms = useAtomValue(markersAtom)
+  console.log("OMID")
+  const markerAtoms = useAtomValue(markersAtom);
+  const setMarkerAtoms = useSetAtom(markersAtom);
+  // console.log("OMID")
+  // // const markerAtoms = useAtomValue(markerAtomsAtom);
+  // const setAllMarkerAtom=useAtomValue(markerAtomsAtom).map(
+  //   function(markerAtom){
+  //     return useSetAtom(markerAtom);
+  //   }
+  // )
+  // console.log("OMID")
+  // const setMarkers = useSetAtom(markersAtom)
+  // console.log("OMID")
   const toggleSelection = useSetAtom(toggleMarkerSelectionAtom)
+  // console.log("OMID")
+  const updateMarker = function(markerIndex:number,time:number){
+    let marker = markerAtoms[markerIndex];
+    let new_position_new_yaw = getLatLng(marker.path[0],time)
+    let new_position = new_position_new_yaw[0];
+    let new_yaw = new_position_new_yaw[1];
+    marker.lat = new_position[0]
+    marker.long = new_position[1];
+    console.log("OMID")
+    setMarkerAtoms([...markerAtoms.slice(0,markerIndex),marker,...markerAtoms.slice(markerIndex+1)])
+  }
 
+  // const updateMarkerPosition = function(marker:AutoAirCraft,time:number)
+  // {
+  //   let new_position_new_yaw = getLatLng(marker.path[0],time)
+  //   let new_position = new_position_new_yaw[0];
+  //   let new_yaw = new_position_new_yaw[1];
+  //   marker.lat = new_position[0];
+  //   marker.long = new_position[1];
+
+  //   // console.log(getLatLng(marker.path[0],time));
+  // }
+
+  // console.log("OMID")
   return (
     <Timeline
       style={{ width: '100%'  }}
@@ -109,6 +146,13 @@ export const TimelinePreview = () => {
         console.log(e)
       }}
       autoScroll={true}
+      onCursorDrag={
+        function (e) {
+          // updateMarker(0,e);
+          // updateMarker(1,e);
+
+        }
+      }
     />
   )
 }
