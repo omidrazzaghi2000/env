@@ -177,8 +177,12 @@ function MyComponent () {
               L.latLng(e.latlng.lat + 10, e.latlng.lng + 10)
             )
           )
-          
 
+          
+          //update marker path in markers array in store
+          let currentIndex = markers.length;
+          setMarker([...markers.slice(0,currentIndex),newMarker,...markers.slice(currentIndex+1)])
+          
           console.log(newMarker)
 
           //remove box
