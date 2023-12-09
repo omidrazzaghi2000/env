@@ -15,7 +15,7 @@ import L, { latLng } from 'leaflet'
 import { useEffect, useRef, useState } from 'react'
 import './index.css'
 import AutoAirCraft from '../../utils/classes/AutoAirCraft.js'
-import { LinearOPath } from './map_marker/path'
+import { LinearOPath, OPath } from './map_marker/path'
 const center = new L.LatLng(34.641955754083504, 50.878976024718725)
 const AutoAirCraftIcon = L.icon({
   iconUrl: '/textures/arrow-aircraft.png',
@@ -42,9 +42,22 @@ function MyComponent () {
   const toggleSelection = useSetAtom(toggleMarkerSelectionAtom)
 
   const [scenario, setScenario] = useAtom(mainScenario)
-
+  const findIndex=function(arr:any[],element:any){
+    for(let i = 0 ; i <= arr.length ; i++){
+      if(element === arr[i]){
+        return i;
+      }
+    }
+    return undefined;
+    
+  }
   const addMarker = (marker: AutoAirCraft) =>
     setMarker(markers => [...markers, marker])
+  // const addPath = function(marker:AutoAirCraft,path:OPath){
+  //   marker.path.push(path)
+  //   findIndex(markers,marker)
+  //   setMarker([])
+  // }
   map.attributionControl.setPrefix(false)
 
   useEffect(function () {
@@ -161,9 +174,6 @@ function MyComponent () {
             AutoAirCraftIcon
           )
 
-          addMarker(newMarker)
-          toggleSelection(newMarker.id)
-
           let mapMarker = L.marker([newMarker.lat, newMarker.long], {
                     icon: newMarker.icon
                   }).addTo(map)
@@ -176,15 +186,11 @@ function MyComponent () {
               L.latLng(e.latlng.lat, e.latlng.lng),
               L.latLng(e.latlng.lat + 10, e.latlng.lng + 10)
             )
-          )
+          )  
 
-          //save map marker in leaflet map into aircraftjs sturcture
-          newMarker.mapMarker = mapMarker;
-
-          
           //update marker path in markers array in store
-          let currentIndex = markers.length;
-          setMarker([...markers.slice(0,currentIndex),newMarker,...markers.slice(currentIndex+1)])
+          addMarker(newMarker)
+          toggleSelection(newMarker.id)
           
           console.log(newMarker)
 
