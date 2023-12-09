@@ -141,6 +141,15 @@ export const TimelinePreview = () => {
 
         }
       }
+      onClickTimeArea={
+        function(time,e){
+          for(let i = 0 ; i < markerAtoms.length ; i++){
+            updateMarker(i,time);
+          }
+          return true;
+        }
+      }
+      
     />
   )
 }
