@@ -20,7 +20,7 @@ export abstract class OPath{
 }
 
 export class LinearOPath extends OPath{
-    speed:number = 0.1;// default speed
+    speed:number = 0.01;// default speed
     isFinished:boolean = false;
     constructor(_src:L.LatLng,_dest:L.LatLng){
         super(_src,_dest);
@@ -104,12 +104,18 @@ export class LinearOPath extends OPath{
 
 
 
+export function calculateDistance(lpath:any){
+    let x0 = lpath.src.lat;
+    let y0 = lpath.src.lng;
+    let x1 = lpath.dest.lat;
+    let y1 = lpath.dest.lng;
+    return Math.sqrt(Math.pow(x0-x1,2)+Math.pow(y0-y1,2)); 
+  }
+  
 export function calculateTime(lpath:any){
-    console.log(lpath);
     let distance = calculateDistance(lpath);
-    return distance/lpath.speed;
+    return Math.abs(distance/lpath.speed);
 }
-
 
 export function calDis(src:number[],dest:number[]){
     let x0 = src[0];
@@ -119,13 +125,6 @@ export function calDis(src:number[],dest:number[]){
     return Math.sqrt(Math.pow(x0-x1,2)+Math.pow(y0-y1,2)); 
 }
 
-export function calculateDistance(lpath:any){
-    let x0 = lpath.src.lat;
-    let y0 = lpath.src.lng;
-    let x1 = lpath.dest.lat;
-    let y1 = lpath.dest.lng;
-    return Math.sqrt(Math.pow(x0-x1,2)+Math.pow(y0-y1,2)); 
-}
 
 export function getLatLng (lpath:LinearOPath,time: number): any {
     let x0 = lpath.src.lat;

@@ -7,7 +7,7 @@ import { useAtomValue, useSetAtom, useAtom} from 'jotai'
 import { useEffect } from 'react'
 import { markerAtomsAtom, markersAtom, toggleMarkerSelectionAtom,timelineCursorLastPostionAtom } from '../../store'
 import AutoAirCraft from '../../utils/classes/AutoAirCraft.js'
-import {getLatLng} from '../MapPreview/map_marker/path';
+import {getLatLng,calculateDistance,calculateTime} from '../MapPreview/map_marker/path';
 // MUST Delete last line in onScroll.js in utils folder in react-virtualized node modules
 
 const mockData: TimelineRow[] = [
@@ -47,18 +47,7 @@ const mockEffect: Record<string, TimelineEffect> = {
 }
 
 
-function calculateDistance(lpath:any){
-  let x0 = lpath.src.lat;
-  let y0 = lpath.src.lng;
-  let x1 = lpath.dest.lat;
-  let y1 = lpath.dest.lng;
-  return Math.sqrt(Math.pow(x0-x1,2)+Math.pow(y0-y1,2)); 
-}
 
-function calculateTime(lpath:any){
-  let distance = calculateDistance(lpath);
-  return Math.abs(distance/lpath.speed);
-}
 
 
 const getEditorData = function (markers: any): TimelineRow[] {
