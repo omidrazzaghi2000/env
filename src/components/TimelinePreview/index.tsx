@@ -5,7 +5,7 @@ import {
 } from '@xzdarcy/react-timeline-editor'
 import { useAtomValue, useSetAtom, useAtom} from 'jotai'
 import { useEffect } from 'react'
-import { markerAtomsAtom, markersAtom, toggleMarkerSelectionAtom } from '../../store'
+import { markerAtomsAtom, markersAtom, toggleMarkerSelectionAtom,timelineCursorLastPostionAtom } from '../../store'
 import AutoAirCraft from '../../utils/classes/AutoAirCraft.js'
 import {getLatLng} from '../MapPreview/map_marker/path';
 // MUST Delete last line in onScroll.js in utils folder in react-virtualized node modules
@@ -57,12 +57,11 @@ function calculateDistance(lpath:any){
 
 function calculateTime(lpath:any){
   let distance = calculateDistance(lpath);
-  return distance/lpath.speed;
+  return Math.abs(distance/lpath.speed);
 }
 
 
 const getEditorData = function (markers: any): TimelineRow[] {
-  console.log(markers)
   return markers.map(function (marker: any) {
     // const marker:AutoAirCraft = useAtomValue(markerAtom);
     return {
@@ -80,7 +79,6 @@ const getEditorData = function (markers: any): TimelineRow[] {
 
       // ]
       actions: marker.path.map(function (path: any) {
-        console.log("HASSAN")
         return {
           id: path.id,
           start: 0,
@@ -95,9 +93,9 @@ const getEditorData = function (markers: any): TimelineRow[] {
 }
 
 export const TimelinePreview = () => {
-  console.log("OMID")
   const markerAtoms = useAtomValue(markersAtom);
   const setMarkerAtoms = useSetAtom(markersAtom);
+  const [cursorPostion,setCursorPostion] = useAtom(timelineCursorLastPostionAtom);
   // console.log("OMID")
   // // const markerAtoms = useAtomValue(markerAtomsAtom);
   // const setAllMarkerAtom=useAtomValue(markerAtomsAtom).map(
@@ -115,9 +113,7 @@ export const TimelinePreview = () => {
     let new_position_new_yaw = getLatLng(marker.path[0],time)
     let new_position = new_position_new_yaw[0];
     let new_yaw = new_position_new_yaw[1];
-    marker.lat = new_position[0]
-    marker.long = new_position[1];
-    console.log("OMID")
+    marker.latlng = new_position
     setMarkerAtoms([...markerAtoms.slice(0,markerIndex),marker,...markerAtoms.slice(markerIndex+1)])
   }
 
@@ -148,7 +144,10 @@ export const TimelinePreview = () => {
       autoScroll={true}
       onCursorDrag={
         function (e) {
-          // updateMarker(0,e);
+          for(let i = 0 ; i < markerAtoms.length ; i++){
+            updateMarker(i,e);
+          }
+          
           // updateMarker(1,e);
 
         }

@@ -336,3 +336,7 @@ export const updateMarkerPostionAtom = atom(
 export const showVHLineAtom = atom(false);
 export const currentMouseLatAtom = atom(null);
 export const currentMouseLongAtom = atom(null);
+
+
+//timeline
+export const timelineCursorLastPostionAtom = atom(0);

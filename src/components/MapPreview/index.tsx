@@ -11,11 +11,11 @@ import {
   showVHLineAtom,
   toggleMarkerSelectionAtom
 } from '../../store'
-import L, { latLng } from 'leaflet'
+import L, { latLng, marker } from 'leaflet'
 import { useEffect, useRef, useState } from 'react'
 import './index.css'
 import AutoAirCraft from '../../utils/classes/AutoAirCraft.js'
-import { LinearOPath, OPath } from './map_marker/path'
+import { LinearOPath, OPath , toRadians } from './map_marker/path'
 const center = new L.LatLng(34.641955754083504, 50.878976024718725)
 const AutoAirCraftIcon = L.icon({
   iconUrl: '/textures/arrow-aircraft.png',
@@ -36,9 +36,11 @@ function MyComponent () {
   let currentMouseLat = null
   let currentMouseLong = null
 
+  const [isCreatedMarker,setIsCreatedMarker] = useState(false);
   const markers = useAtomValue(markersAtom)
   const setMarker = useSetAtom(markersAtom)
-  const [mapMarkerArray ,setMarkerArray] = useState([])
+  const [mapMarkerArray ,setMarkerArray] = useState<any[]>([])
+  const [mapCheckpointArray,setMapCheckpointArray] = useState<any[][]>([])
   const toggleSelection = useSetAtom(toggleMarkerSelectionAtom)
 
   const [scenario, setScenario] = useAtom(mainScenario)
@@ -53,22 +55,19 @@ function MyComponent () {
   }
   const addMarker = (marker: AutoAirCraft) =>
     setMarker(markers => [...markers, marker])
-  // const addPath = function(marker:AutoAirCraft,path:OPath){
-  //   marker.path.push(path)
-  //   findIndex(markers,marker)
-  //   setMarker([])
-  // }
+  
+  
   map.attributionControl.setPrefix(false)
 
   useEffect(function () {
-    
-
-    for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+    if(!isCreatedMarker){
+      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
         let curMarker = markers[markerIndex]
         let mapMarker = L.marker([curMarker.lat, curMarker.long], {
           // It is because it has error when i use curMarker.icon
           icon: L.icon(curMarker.icon.options)
         }).addTo(map)
+
 
         mapMarker.setRotationAngle(curMarker.yaw)
         mapMarkerArray.push(mapMarker)
@@ -78,6 +77,22 @@ function MyComponent () {
           toggleSelection(curMarker.id)
         })
 
+        //reset latlng I used lat and long for first postion of marker and 
+        //change latlng array for movement
+        curMarker.latlng = [curMarker.lat,curMarker.long]
+
+        //show checkpoint for each path and save it in mapCheckpoint array
+        for(let pathIndex = 0 ; pathIndex < curMarker.path.length; pathIndex++){
+          let currPath = curMarker.path[pathIndex];
+
+          //add a checkpoint marker to map and save it as state to show every time refresh the page
+          const checkPointMarker = L.marker(([currPath.dest.lat, currPath.dest.lng]),{}).addTo(map);
+
+          //add an empty array to mapCheckpoint and fill it with path specified for this new marker
+          mapCheckpointArray.push([]);
+          mapCheckpointArray[markerIndex].push(checkPointMarker); 
+          
+        }
 
         if(curMarker.selected){
           //just for first time concentrate to center of the map
@@ -86,11 +101,16 @@ function MyComponent () {
             map.flyTo([curMarker.lat,curMarker.long], 14)
           }, 200)
         }
+
+        //rise a flag to prevent again rendering markers in map
+        setIsCreatedMarker(true);
       }
 
       setTimeout(function () {
         map.invalidateSize(true)
       }, 200)
+    }
+    
   }, [])
 
   //update positions
@@ -112,7 +132,6 @@ function MyComponent () {
         let curMarker = markers[markerIndex]
         let selectedMapMarker = mapMarkerArray[markerIndex]
         if (curMarker.selected) {
-          
 
           //map center changing
           map.invalidateSize(true)
@@ -184,9 +203,24 @@ function MyComponent () {
           newMarker.path.push(
             new LinearOPath(
               L.latLng(e.latlng.lat, e.latlng.lng),
-              L.latLng(e.latlng.lat + 10, e.latlng.lng + 10)
+              //-90 is come from icons of marker
+              L.latLng(e.latlng.lat + 0.01*Math.cos(toRadians(newMarker.yaw)), e.latlng.lng + 0.01*Math.sin(toRadians(newMarker.yaw)))
             )
-          )  
+          )
+
+          //add a checkpoint marker to map and save it as state to show every time refresh the page
+          const checkPointMarker = L.marker([e.latlng.lat + 0.01*Math.cos(toRadians(newMarker.yaw)), e.latlng.lng + 0.01*Math.sin(toRadians(newMarker.yaw))],{}).addTo(map);
+
+          //add an empty array to mapCheckpoint and fill it with path specified for this new marker
+          mapCheckpointArray.push([]);
+          mapCheckpointArray[markers.length].push(checkPointMarker); 
+
+          //add event listener to map marker
+          mapMarker.on("click",function()
+          {
+            toggleSelection(newMarker.id);
+          })
+    
 
           //update marker path in markers array in store
           addMarker(newMarker)
@@ -217,6 +251,18 @@ function MyComponent () {
       map?.addEventListener('contextmenu', rightClickAddMarker, true)
     },
     [showVHLine]
+  )
+
+
+  //update marker position
+  useEffect(
+    function(){
+      for(let i = 0 ; i < markers.length ; i++)
+      {
+        mapMarkerArray.at(i).setLatLng( new L.LatLng(markers.at(i).latlng[0],markers.at(i).latlng[1]));
+      }
+    }
+    ,[markers.map((marker)=>marker.latlng)]
   )
 
   return null
