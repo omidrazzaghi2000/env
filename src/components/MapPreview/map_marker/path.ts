@@ -49,6 +49,7 @@ export class LinearOPath extends OPath{
         let y0 = this.src.lng;
         let x1 = this.dest.lat;
         let y1 = this.dest.lng;
+        
 
         // Vy divided by Vx is equal to tangent of the line
         let tan_of_line = null
@@ -97,6 +98,9 @@ export class LinearOPath extends OPath{
         //update marker position
         let new_lat_long = [parseFloat((Vx * time + x0).toFixed(3)),
                             parseFloat((Vy * time + y0).toFixed(3))]
+        
+        console.log("new Latlng" , new_lat_long)
+
         return [new_lat_long,marker_yaw];
 
     }
@@ -171,7 +175,7 @@ export function getLatLng (lpath:LinearOPath,time: number): any {
 
     //bearing
     let bearing_degree = Math.atan2(Vy,Vx)*180/Math.PI;
-    let marker_yaw = 45-bearing_degree;
+    let marker_yaw = bearing_degree;
 
 
     // console.log("Tangent" , tan_of_line)
@@ -181,7 +185,7 @@ export function getLatLng (lpath:LinearOPath,time: number): any {
 
     //check that path is finished or not
     if(calDis([x0,y0],[Vx * time + x0,Vy * time + y0]) >= calDis([x1,y1],[x0,y0])){
-        console.log("OMID");
+        // console.log("OMID");
         return [[x1,y1],marker_yaw]
     }
 

@@ -14,8 +14,10 @@ import {
 import L, { latLng, marker } from 'leaflet'
 import { useEffect, useRef, useState } from 'react'
 import './index.css'
+
 import AutoAirCraft from '../../utils/classes/AutoAirCraft.js'
 import { LinearOPath, OPath , toRadians } from './map_marker/path'
+
 const center = new L.LatLng(34.641955754083504, 50.878976024718725)
 const AutoAirCraftIcon = L.icon({
   iconUrl: '/textures/arrow-aircraft.png',
@@ -113,17 +115,6 @@ function MyComponent () {
     
   }, [])
 
-  //update positions
-  useEffect(
-    function () {
-     setInterval(
-      function(){
-        
-      },1000
-     ) 
-    },
-    []
-  )
 
   //for centering selected marker
   useEffect(
@@ -134,11 +125,11 @@ function MyComponent () {
         if (curMarker.selected) {
 
           //map center changing
-          map.invalidateSize(true)
-          map.flyTo(
-            [selectedMapMarker._latlng.lat, selectedMapMarker._latlng.lng],
-            14
-          )
+          // map.invalidateSize(true)
+          // map.flyTo(
+          //   [selectedMapMarker._latlng.lat, selectedMapMarker._latlng.lng],
+          //   map.getZoom()
+          // )
 
           //change icon
           // map.removeLayer(sele)
@@ -203,13 +194,12 @@ function MyComponent () {
           newMarker.path.push(
             new LinearOPath(
               L.latLng(e.latlng.lat, e.latlng.lng),
-              //-90 is come from icons of marker
-              L.latLng(e.latlng.lat + 0.01*Math.cos(toRadians(newMarker.yaw)), e.latlng.lng + 0.01*Math.sin(toRadians(newMarker.yaw)))
+              L.latLng(e.latlng.lat + 0.05*Math.cos(toRadians(newMarker.yaw)), e.latlng.lng + 0.05*Math.sin(toRadians(newMarker.yaw)))
             )
           )
 
           //add a checkpoint marker to map and save it as state to show every time refresh the page
-          const checkPointMarker = L.marker([e.latlng.lat + 0.01*Math.cos(toRadians(newMarker.yaw)), e.latlng.lng + 0.01*Math.sin(toRadians(newMarker.yaw))],{}).addTo(map);
+          const checkPointMarker = L.marker([e.latlng.lat + 0.05*Math.cos(toRadians(newMarker.yaw)), e.latlng.lng + 0.05*Math.sin(toRadians(newMarker.yaw))],{}).addTo(map);
 
           //add an empty array to mapCheckpoint and fill it with path specified for this new marker
           mapCheckpointArray.push([]);

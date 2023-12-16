@@ -1,98 +1,98 @@
-import * as THREE from "three";
-import { atom } from "jotai";
-import { splitAtom, atomWithStorage } from "jotai/utils";
+import * as THREE from 'three'
+import { atom } from 'jotai'
+import { splitAtom, atomWithStorage } from 'jotai/utils'
 
 export type Camera = {
-  id: string;
-  name: string;
-  selected: boolean;
-  position: [number, number, number];
-  rotation: [number, number, number];
-};
+  id: string
+  name: string
+  selected: boolean
+  position: [number, number, number]
+  rotation: [number, number, number]
+}
 
 type BaseLight = {
-  id: string;
-  ts: number;
-  name: string;
+  id: string
+  ts: number
+  name: string
 
-  shape: "rect" | "circle" | "ring";
-  intensity: number;
-  opacity: number;
+  shape: 'rect' | 'circle' | 'ring'
+  intensity: number
+  opacity: number
 
-  scale: number;
-  scaleX: number;
-  scaleY: number;
-  rotation: number;
+  scale: number
+  scaleX: number
+  scaleY: number
+  rotation: number
 
-  latlon: { x: number; y: number };
-  target: { x: number; y: number; z: number };
+  latlon: { x: number; y: number }
+  target: { x: number; y: number; z: number }
 
-  selected: boolean;
-  visible: boolean;
-  solo: boolean;
+  selected: boolean
+  visible: boolean
+  solo: boolean
 
-  animate: boolean;
-  animationSpeed?: number;
-  animationRotationIntensity?: number;
-  animationFloatIntensity?: number;
-  animationFloatingRange?: [number, number];
-};
+  animate: boolean
+  animationSpeed?: number
+  animationRotationIntensity?: number
+  animationFloatIntensity?: number
+  animationFloatingRange?: [number, number]
+}
 
 export type TextureLight = BaseLight & {
-  type: "texture";
-  color: string;
-  map: string;
-};
+  type: 'texture'
+  color: string
+  map: string
+}
 
 export type ProceduralScrimLight = BaseLight & {
-  type: "procedural_scrim";
-  color: string;
-  lightPosition: { x: number; y: number };
-  lightDistance: number;
-};
+  type: 'procedural_scrim'
+  color: string
+  lightPosition: { x: number; y: number }
+  lightDistance: number
+}
 
 export type ProceduralUmbrellaLight = BaseLight & {
-  type: "procedural_umbrella";
-  color: string;
-  lightSides: number;
-};
+  type: 'procedural_umbrella'
+  color: string
+  lightSides: number
+}
 
 export type SkyGradientLight = BaseLight & {
-  type: "sky_gradient";
-  color: string;
-  color2: string;
-};
+  type: 'sky_gradient'
+  color: string
+  color2: string
+}
 
 export type Light =
   | TextureLight
   | ProceduralScrimLight
   | ProceduralUmbrellaLight
-  | SkyGradientLight;
+  | SkyGradientLight
 
-export const debugAtom = atom(false);
+export const debugAtom = atom(false)
 
-export const modeAtom = atomWithStorage("mode", {
+export const modeAtom = atomWithStorage('mode', {
   map: true,
-  timeline: false,
-});
+  timeline: false
+})
 
-export const activeModesAtom = atom((get) => {
-  const mode = get(modeAtom);
-  return Object.keys(mode).filter((key) => mode[key as keyof typeof mode]);
-});
+export const activeModesAtom = atom(get => {
+  const mode = get(modeAtom)
+  return Object.keys(mode).filter(key => mode[key as keyof typeof mode])
+})
 
-export const isLightPaintingAtom = atom(false);
+export const isLightPaintingAtom = atom(false)
 
-export const modelUrlAtom = atom("/911-transformed.glb");
+export const modelUrlAtom = atom('/911-transformed.glb')
 
-export const isCommandPaletteOpenAtom = atom(false);
+export const isCommandPaletteOpenAtom = atom(false)
 
 export const pointerAtom = atom({
   point: new THREE.Vector3(),
-  normal: new THREE.Vector3(),
-});
+  normal: new THREE.Vector3()
+})
 
-export const lightsAtom = atomWithStorage<Light[]>("lights", [
+export const lightsAtom = atomWithStorage<Light[]>('lights', [
   // {
   //   name: `Light A`,
   //   id: THREE.MathUtils.generateUUID(),
@@ -115,228 +115,244 @@ export const lightsAtom = atomWithStorage<Light[]>("lights", [
   //   lightDistance: 0.3,
   //   lightPosition: { x: 0, y: 0 },
   // },
-]);
+])
 
-export const lightIdsAtom = atom((get) => get(lightsAtom).map((l) => l.id));
+export const lightIdsAtom = atom(get => get(lightsAtom).map(l => l.id))
 
-export const lightAtomsAtom = splitAtom(lightsAtom);
+export const lightAtomsAtom = splitAtom(lightsAtom)
 
-export const isSoloAtom = atom((get) => {
-  const lights = get(lightsAtom);
-  return lights.length > 0 && lights.some((l) => l.solo);
-});
+export const isSoloAtom = atom(get => {
+  const lights = get(lightsAtom)
+  return lights.length > 0 && lights.some(l => l.solo)
+})
 
-export const isLightSelectedAtom = atom((get) => {
-  const lights = get(lightsAtom);
-  return lights.length > 0 && lights.some((l) => l.selected);
-});
+export const isLightSelectedAtom = atom(get => {
+  const lights = get(lightsAtom)
+  return lights.length > 0 && lights.some(l => l.selected)
+})
 
-export const selectLightAtom = atom(null, (get, set, lightId: Light["id"]) => {
-  set(lightsAtom, (lights) =>
-    lights.map((l) => ({
+export const selectLightAtom = atom(null, (get, set, lightId: Light['id']) => {
+  set(lightsAtom, lights =>
+    lights.map(l => ({
       ...l,
-      selected: l.id === lightId,
+      selected: l.id === lightId
     }))
-  );
-});
+  )
+})
 
 export const deselectLightsAtom = atom(null, (get, set) => {
-  set(lightsAtom, (lights) =>
-    lights.map((l) => ({
+  set(lightsAtom, lights =>
+    lights.map(l => ({
       ...l,
-      selected: false,
+      selected: false
     }))
-  );
-});
+  )
+})
 
-export const toggleSoloAtom = atom(null, (get, set, lightId: Light["id"]) => {
-  const lights = get(lightsAtom);
-  const light = lights.find((l) => l.id === lightId)!;
-  const isSolo = get(isSoloAtom);
+export const toggleSoloAtom = atom(null, (get, set, lightId: Light['id']) => {
+  const lights = get(lightsAtom)
+  const light = lights.find(l => l.id === lightId)!
+  const isSolo = get(isSoloAtom)
 
   if (isSolo && light.solo) {
     set(
       lightsAtom,
-      lights.map((l) => ({
+      lights.map(l => ({
         ...l,
         solo: false,
-        visible: true,
+        visible: true
       }))
-    );
+    )
   } else {
     set(
       lightsAtom,
-      lights.map((l) => ({
+      lights.map(l => ({
         ...l,
         solo: l.id === lightId,
         visible: l.id === lightId,
-        selected: l.id === lightId,
+        selected: l.id === lightId
       }))
-    );
+    )
   }
-});
+})
 
 export const toggleLightSelectionAtom = atom(
   null,
-  (get, set, lightId: Light["id"]) => {
-    set(lightsAtom, (lights) =>
-      lights.map((l) => ({
+  (get, set, lightId: Light['id']) => {
+    set(lightsAtom, lights =>
+      lights.map(l => ({
         ...l,
-        selected: l.id === lightId ? !l.selected : false,
+        selected: l.id === lightId ? !l.selected : false
       }))
-    );
+    )
   }
-);
+)
 
 export const duplicateLightAtom = atom(
   null,
-  (get, set, lightId: Light["id"]) => {
-    const lights = get(lightsAtom);
-    const light = lights.find((l) => l.id === lightId)!;
-    const isSolo = get(isSoloAtom);
+  (get, set, lightId: Light['id']) => {
+    const lights = get(lightsAtom)
+    const light = lights.find(l => l.id === lightId)!
+    const isSolo = get(isSoloAtom)
     const newLight = {
       ...structuredClone(light),
       visible: isSolo ? false : light.visible,
       solo: false,
       selected: false,
       id: THREE.MathUtils.generateUUID(),
-      name: `${light.name} (copy)`,
-    };
-    set(lightsAtom, [...lights, newLight]);
+      name: `${light.name} (copy)`
+    }
+    set(lightsAtom, [...lights, newLight])
   }
-);
+)
 
-export const deleteLightAtom = atom(null, (get, set, lightId: Light["id"]) => {
-  const lights = get(lightsAtom);
-  const light = lights.find((l) => l.id === lightId)!;
-  const isSolo = get(isSoloAtom);
+export const deleteLightAtom = atom(null, (get, set, lightId: Light['id']) => {
+  const lights = get(lightsAtom)
+  const light = lights.find(l => l.id === lightId)!
+  const isSolo = get(isSoloAtom)
 
-  const newLights = lights.filter((l) => l.id !== lightId);
+  const newLights = lights.filter(l => l.id !== lightId)
 
   if (isSolo && light.solo) {
     set(
       lightsAtom,
-      newLights.map((l) => ({
+      newLights.map(l => ({
         ...l,
         solo: false,
-        visible: true,
+        visible: true
       }))
-    );
+    )
   } else {
-    set(lightsAtom, newLights);
+    set(lightsAtom, newLights)
   }
-});
+})
 
-export const camerasAtom = atomWithStorage<Camera[]>("cameras", [
+export const camerasAtom = atomWithStorage<Camera[]>('cameras', [
   {
-    id: "default",
-    name: "Default",
+    id: 'default',
+    name: 'Default',
     selected: true,
     position: [0, 0, 5],
-    rotation: [0, 0, 0],
-  },
-]);
+    rotation: [0, 0, 0]
+  }
+])
 
-export const cameraAtomsAtom = splitAtom(camerasAtom);
+export const cameraAtomsAtom = splitAtom(camerasAtom)
 
 export const selectedCameraAtom = atom(
-  (get) => {
-    const cameras = get(camerasAtom);
-    return cameras.find((c) => c.selected)!;
+  get => {
+    const cameras = get(camerasAtom)
+    return cameras.find(c => c.selected)!
   },
   (get, set, value: Partial<Camera>) => {
-    const cameras = get(camerasAtom);
-    const selectedCamera = cameras.find((c) => c.selected)!;
+    const cameras = get(camerasAtom)
+    const selectedCamera = cameras.find(c => c.selected)!
     set(
       camerasAtom,
-      cameras.map((c) => (c.id === selectedCamera.id ? { ...c, ...value } : c))
-    );
+      cameras.map(c => (c.id === selectedCamera.id ? { ...c, ...value } : c))
+    )
   }
-);
+)
 
-export const isCameraSelectedAtom = atom((get) => {
-  const cameras = get(camerasAtom);
-  return cameras.length > 0 && cameras.some((c) => c.selected);
-});
+export const isCameraSelectedAtom = atom(get => {
+  const cameras = get(camerasAtom)
+  return cameras.length > 0 && cameras.some(c => c.selected)
+})
 
 export const toggleCameraSelectionAtom = atom(
   null,
-  (get, set, cameraId: Camera["id"]) => {
-    set(camerasAtom, (cameras) =>
-      cameras.map((c) => ({
+  (get, set, cameraId: Camera['id']) => {
+    set(camerasAtom, cameras =>
+      cameras.map(c => ({
         ...c,
-        selected: c.id === cameraId ? !c.selected : false,
+        selected: c.id === cameraId ? !c.selected : false
       }))
-    );
+    )
   }
-);
+)
 
 export const selectCameraAtom = atom(
   null,
-  (get, set, cameraId: Camera["id"]) => {
-    set(camerasAtom, (cameras) =>
-      cameras.map((c) => ({
+  (get, set, cameraId: Camera['id']) => {
+    set(camerasAtom, cameras =>
+      cameras.map(c => ({
         ...c,
-        selected: c.id === cameraId,
+        selected: c.id === cameraId
       }))
-    );
+    )
   }
-);
-
+)
 
 // Marker Properties
-import AutoAirCraft from './utils/classes/AutoAirCraf.js';
-import Scenario from './utils/classes/scenario.js';
-export const markersAtom = atomWithStorage<AutoAirCraft[]>("markers", []);
-export const markerAtomsAtom = splitAtom(markersAtom);
-export const mainScenario = atomWithStorage<Scenario>("main_scenario",new Scenario('MainScenario'));
-export const selectMarkerAtom = atom(null, (get, set, markerId: AutoAirCraft["id"]) => {
-  set(markersAtom, (markers) =>
-    markers.map((m) => ({
-      ...m,
-      selected: m.id === markerId,
-    }))
-  );
-});
+import AutoAirCraft from './utils/classes/AutoAirCraf.js'
+import Scenario from './utils/classes/scenario.js'
+export const markersAtom = atomWithStorage<AutoAirCraft[]>('markers', [])
+export const markerAtomsAtom = splitAtom(markersAtom)
+export const mainScenario = atomWithStorage<Scenario>(
+  'main_scenario',
+  new Scenario('MainScenario')
+)
+export const selectMarkerAtom = atom(
+  null,
+  (get, set, markerId: AutoAirCraft['id']) => {
+    set(markersAtom, markers =>
+      markers.map(m => ({
+        ...m,
+        selected: m.id === markerId
+      }))
+    )
+  }
+)
 export const deselectMarkersAtom = atom(null, (get, set) => {
-  set(markersAtom, (markers) =>
-    markers.map((m) => ({
+  set(markersAtom, markers =>
+    markers.map(m => ({
       ...m,
-      selected: false,
+      selected: false
     }))
-  );
-});
+  )
+})
 export const toggleMarkerSelectionAtom = atom(
   null,
-  (get, set, markerId: AutoAirCraft["id"]) => {
-    set(markersAtom, (markers) =>
-      markers.map((m) => ({
+  (get, set, markerId: AutoAirCraft['id']) => {
+    set(markersAtom, markers =>
+      markers.map(m => ({
         ...m,
-        selected: m.id === markerId ? !m.selected : false,
+        selected: m.id === markerId ? !m.selected : false
       }))
-    );
+    )
   }
-);
+)
 
 export const updateMarkerPostionAtom = atom(
   null,
-  (get, set, new_lat:number,new_long:number,new_yaw:number) => {
-    set(markersAtom, (markers) =>
-      markers.map((m) => ({
-        ...m,
-        lat:new_lat,
-        long:new_long,
-        yaw:new_yaw,
-      }))
-    );
+  (
+    get,
+    set,
+    markerIndex: number,
+    new_lat: number,
+    new_long: number,
+    new_yaw: number
+  ) => {
+    set(markersAtom, markers =>
+      markers.map(function (m, i) {
+        if (markerIndex === i) {
+          return {
+            ...m,
+            latlng: [new_lat , new_long],
+            yaw: new_yaw
+          }
+        } else {
+          return { ...m }
+        }
+      })
+    )
   }
-);
+)
 
-//map 
-export const showVHLineAtom = atom(false);
-export const currentMouseLatAtom = atom(null);
-export const currentMouseLongAtom = atom(null);
-
+//map
+export const showVHLineAtom = atom(false)
+export const currentMouseLatAtom = atom(null)
+export const currentMouseLongAtom = atom(null)
 
 //timeline
-export const timelineCursorLastPostionAtom = atom(0);
+export const timelineCursorLastPostionAtom = atom(0)
