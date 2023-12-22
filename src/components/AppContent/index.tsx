@@ -6,10 +6,11 @@ import { Properties } from "../Properties";
 import { MapPreview } from "../MapPreview";
 import { TimelinePreview } from "../TimelinePreview";
 import { useAtomValue } from "jotai";
-import { modeAtom } from "../../store";
+import { markersAtom, modeAtom } from "../../store";
 
 export function AppContent() {
-
+  console.log("App Content Created.")
+  // const timelineState = useRef<TimelineState>()
   const mode = useAtomValue(modeAtom);
 
   return (

@@ -24,7 +24,7 @@
     "@react-three/postprocessing": "^2.15.1",
     "@use-gesture/react": "^10.3.0",
     "@xzdarcy/react-timeline-editor": "^0.1.9",
-    "antd": "^5.12.2",
+    "antd": "^5.12.4",
     "clsx": "^1.2.1",
     "cmdk": "^0.2.0",
     "howler": "^2.2.4",

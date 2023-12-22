@@ -5,6 +5,7 @@ import { AppToolbar } from "./components/AppToolbar";
 import { CommandPalette } from "./components/CommandPalette";
 
 export default function App() {
+  console.log("App created");
   return (
     <>
       <Toaster theme="dark" richColors position="bottom-center" />

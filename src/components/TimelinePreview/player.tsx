@@ -3,30 +3,38 @@ import { TimelineState } from '@xzdarcy/react-timeline-editor';
 import { Select } from 'antd';
 import React, { FC, useEffect, useState } from 'react';
 import { scale, scaleWidth, startLeft } from './mock';
+import {
+  markerAtomsAtom,
+  markersAtom,
+  toggleMarkerSelectionAtom,
+  timelineCursorLastPostionAtom,
+  updateMarkerPostionAtom,
+  mapRefAtom,
+  timeAtom
+} from '../../store'
 import './index.css'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 
 const { Option } = Select;
 export const Rates = [0.2, 0.5, 1.0, 1.5, 2.0];
 
 const TimelinePlayer: FC<{
-  timelineState: React.MutableRefObject<TimelineState>;
+  timelineState: any;
   autoScrollWhenPlay: React.MutableRefObject<boolean>;
-  updateMarker: any;
-}> = ({ timelineState, autoScrollWhenPlay , updateMarker}) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [time, setTime] = useState(0);
+}> = ({ timelineState, autoScrollWhenPlay }) => {
 
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [time, setTime] = useAtom(timeAtom);
 
   useEffect(() => {
     if (!timelineState.current) return;
     const engine = timelineState.current;
     engine.listener.on('play', () => setIsPlaying(true));
-    engine.listener.on('paused', () => setIsPlaying(false));
-    engine.listener.on('afterSetTime', ({ time }) => setTime(time));
+    engine.listener.on('paused',function () { setIsPlaying(false);console.log('pause')});
+    engine.listener.on('afterSetTime', function({ time }) {setTime(time);console.log('after set time')});
     engine.listener.on('setTimeByTick', ({ time }) => {
       // console.log("OIMD");
-      updateMarker(time);
-      // console.log("Navid");
+      
       setTime(time);
 
       if (autoScrollWhenPlay.current) {
@@ -35,9 +43,13 @@ const TimelinePlayer: FC<{
         
         timelineState.current.setScrollLeft(left)
       }
+
+      // updateMarkerPosition(0,34,50,Math.random()*360-180)
+
     });
 
     return () => {
+      
       if (!engine) return;
       engine.pause();
       engine.listener.offAll();
@@ -46,7 +58,9 @@ const TimelinePlayer: FC<{
 
   // 开始或暂停
   const handlePlayOrPause = () => {
-    if (!timelineState.current) return;
+    if (!timelineState.current){
+      return;
+    } 
     if (timelineState.current.isPlaying) {
       timelineState.current.pause();
     } else {
