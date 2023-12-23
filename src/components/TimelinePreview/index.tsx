@@ -5,7 +5,7 @@ import {
   TimelineState
 } from '@xzdarcy/react-timeline-editor'
 import { useAtomValue, useSetAtom, useAtom } from 'jotai'
-import { useCallback, useEffect, useRef } from 'react'
+import {useCallback, useEffect, useRef, useState} from 'react'
 import {
   markerAtomsAtom,
   markersAtom,
@@ -15,7 +15,6 @@ import {
   timeAtom,
   timelineStateAtom
 } from '../../store'
-import AutoAirCraft from '../../utils/classes/AutoAirCraft.js'
 import {
   getLatLng,
   calculateDistance,

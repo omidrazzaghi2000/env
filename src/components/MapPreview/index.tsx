@@ -12,7 +12,7 @@ import {
   toggleMarkerSelectionAtom,
   mapRefAtom,
   timeAtom,
-  timelineStateAtom
+  timelineStateAtom, updateMarkerPostionAtom
 } from '../../store'
 import L, { latLng, marker } from 'leaflet'
 import { useEffect, useRef, useState } from 'react'
@@ -53,6 +53,7 @@ function MyComponent () {
   const timelinestate = useAtomValue(timelineStateAtom);
   const time = useAtomValue(timeAtom);
   const [scenario, setScenario] = useAtom(mainScenario)
+  const updateMarkerPostion = useSetAtom(updateMarkerPostionAtom);
   const findIndex=function(arr:any[],element:any){
     for(let i = 0 ; i <= arr.length ; i++){
       if(element === arr[i]){
@@ -265,7 +266,8 @@ function MyComponent () {
           let new_position_new_yaw = getLatLng(marker.path[0], time)
           let new_position = new_position_new_yaw[0]
           let new_yaw = new_position_new_yaw[1]
-        mapMarkerArray.at(i).setLatLng( new L.LatLng(new_position[0],new_position[1]));   
+
+        mapMarkerArray.at(i).setLatLng( new L.LatLng(new_position[0],new_position[1]));
       }
     }
     ,[time]
