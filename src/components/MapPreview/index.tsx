@@ -12,7 +12,7 @@ import {
   toggleMarkerSelectionAtom,
   mapRefAtom,
   timeAtom,
-  timelineStateAtom, updateMarkerPostionAtom
+  timelineStateAtom, updateMarkerPostionAtom, mapMarkerArrayAtom, checkpointMarkerArrayAtom
 } from '../../store'
 import L, { latLng, marker } from 'leaflet'
 import { useEffect, useRef, useState } from 'react'
@@ -47,8 +47,8 @@ function MyComponent () {
   const [isCreatedMarker,setIsCreatedMarker] = useState(false);
   const markers = useAtomValue(markersAtom)
   const setMarker = useSetAtom(markersAtom)
-  const [mapMarkerArray ,setMarkerArray] = useState<any[]>([])
-  const [mapCheckpointArray,setMapCheckpointArray] = useState<any[][]>([])
+  const [mapMarkerArray ,setMarkerArray] = useAtom<any[]>(mapMarkerArrayAtom)
+  const [mapCheckpointArray,setMapCheckpointArray] = useAtom<any[][]>(checkpointMarkerArrayAtom)
   const toggleSelection = useSetAtom(toggleMarkerSelectionAtom)
   const timelinestate = useAtomValue(timelineStateAtom);
   const time = useAtomValue(timeAtom);
@@ -135,6 +135,8 @@ function MyComponent () {
         let curMarker = markers[markerIndex]
         let selectedMapMarker = mapMarkerArray[markerIndex]
         if (curMarker.selected) {
+          
+          console.log(selectedMapMarker)
 
           //map center changing
           map.invalidateSize(true)

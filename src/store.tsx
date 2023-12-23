@@ -353,6 +353,20 @@ export const deleteMarkerAtom = atom(null, (get, set, markerId: AutoAirCraft['id
     const markers = get(markersAtom)
     const marker = markers.find(m => m.id === markerId)!
     const mapRef = get(mapRefAtom);
+    const mapMarkerArray = get(mapMarkerArrayAtom);
+    const checkPointMarkerArray = get(checkpointMarkerArrayAtom)
+    console.log(mapMarkerArray);
+    console.log(checkPointMarkerArray);
+
+    /** because two indexes in mapMarkerArray and checkpointMarkerArray is similar so on findIndex is enough. */
+    const index = mapMarkerArray.findIndex((m)=> m.options.id === markerId );
+    if (index > -1) { // only splice array when item is found
+      mapMarkerArray.splice(index, 1); // 2nd parameter means remove one item only
+      checkPointMarkerArray.splice(index,1);
+    } 
+
+
+
     if(mapRef?.current !== null){
 
         mapRef?.current.eachLayer(function (layer:any) {
@@ -369,10 +383,12 @@ export const deleteMarkerAtom = atom(null, (get, set, markerId: AutoAirCraft['id
 })
 
 //map
-export const showVHLineAtom = atom(false)
-export const currentMouseLatAtom = atom(null)
-export const currentMouseLongAtom = atom(null)
-export const mapRefAtom = atom(null)
+export const showVHLineAtom = atom(false);
+export const currentMouseLatAtom = atom(null);
+export const currentMouseLongAtom = atom(null);
+export const mapRefAtom = atom(null);
+export const mapMarkerArrayAtom = atom([]);
+export const checkpointMarkerArrayAtom = atom([]);
 
 //timeline
 export const timelineCursorLastPostionAtom = atom(0)
