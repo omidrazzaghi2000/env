@@ -38,7 +38,6 @@ const mockEffect: Record<string, TimelineEffect> = {
 }
 
 
-
 export const TimelinePreview = (props:any) => {
     const setTime = useSetAtom(timeAtom);
     const getEditorData = useCallback(function (): TimelineRow[] {
@@ -114,7 +113,6 @@ export const TimelinePreview = (props:any) => {
       <TimelinePlayer
         timelineState={timelineState}
         autoScrollWhenPlay={autoScrollWhenPlay}
-
       />
       <Timeline
         ref={timelineState}

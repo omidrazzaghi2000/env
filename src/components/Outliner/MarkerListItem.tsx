@@ -18,7 +18,7 @@ import {
   toggleLightSelectionAtom,
   deleteLightAtom,
   duplicateLightAtom,
-  toggleMarkerSelectionAtom
+  toggleMarkerSelectionAtom, deleteMarkerAtom, mapRefAtom
 } from '../../store'
 import { PropertiesPanelTunnel } from '../Properties'
 import { PrimitiveAtom, useAtom, useAtomValue, useSetAtom } from 'jotai'
@@ -56,7 +56,8 @@ export function MarkerListItem ({
   markerAtom: PrimitiveAtom<AtuoAirCraft>
 }) {
   const [marker, setMarker] = useAtom(markerAtom)
-  const toggleSelection = useSetAtom(toggleMarkerSelectionAtom)
+  const deleteMarker = useSetAtom(deleteMarkerAtom);
+  const toggleSelection = useSetAtom(toggleMarkerSelectionAtom);
   return (
     <>
       <ContextMenu.Root>
@@ -89,15 +90,14 @@ export function MarkerListItem ({
         </ContextMenu.Trigger>
         <ContextMenu.Portal>
           <ContextMenu.Content className='flex flex-col gap-1 bg-neutral-800 text-neutral-50 font-light p-1.5 rounded-md shadow-xl'>
-            <ContextMenu.Item
-              className='outline-none select-none rounded px-2 py-0.5 highlighted:bg-white highlighted:text-neutral-900 text-sm'
-              onSelect={() => console.log('Duplicate')}
-            >
-              Duplicate
-            </ContextMenu.Item>
+
             <ContextMenu.Item
               className='outline-none select-none rounded px-2 py-0.5 text-white highlighted:bg-red-500 highlighted:text-white text-sm'
-              onSelect={() => console.log('Delete')}
+              onSelect={function(){
+                deleteMarker(marker.id);
+
+
+              }}
             >
               Delete
             </ContextMenu.Item>

@@ -66,7 +66,6 @@ function MyComponent () {
   const addMarker = (marker: AutoAirCraft) =>
     setMarker(markers => [...markers, marker])
   
-  
   map.attributionControl.setPrefix(false)
 
   useEffect(function () {
@@ -75,7 +74,8 @@ function MyComponent () {
         let curMarker = markers[markerIndex]
         let mapMarker = L.marker([curMarker.lat, curMarker.long], {
           // It is because it has error when i use curMarker.icon
-          icon: L.icon(curMarker.icon.options)
+          icon: L.icon(curMarker.icon.options),
+          id:curMarker.id /**for deleting**/
         }).addTo(map)
 
 
@@ -96,7 +96,7 @@ function MyComponent () {
           let currPath = curMarker.path[pathIndex];
 
           //add a checkpoint marker to map and save it as state to show every time refresh the page
-          const checkPointMarker = L.marker(([currPath.dest.lat, currPath.dest.lng]),{}).addTo(map);
+          const checkPointMarker = L.marker(([currPath.dest.lat, currPath.dest.lng]),{id:curMarker.id/**for deleting**/}).addTo(map);
 
           //add an empty array to mapCheckpoint and fill it with path specified for this new marker
           mapCheckpointArray.push([]);
@@ -197,7 +197,7 @@ function MyComponent () {
           )
 
           let mapMarker = L.marker([newMarker.lat, newMarker.long], {
-                    icon: newMarker.icon,name:'auto_air_craft'
+                    icon: newMarker.icon,id:newMarker.id,
                   }).addTo(map)
           mapMarker.setRotationAngle(newMarker.yaw)
           mapMarkerArray.push(mapMarker)
@@ -211,7 +211,7 @@ function MyComponent () {
           )
 
           //add a checkpoint marker to map and save it as state to show every time refresh the page
-          const checkPointMarker = L.marker([e.latlng.lat + 0.05*Math.cos(toRadians(newMarker.yaw)), e.latlng.lng + 0.05*Math.sin(toRadians(newMarker.yaw))],{}).addTo(map);
+          const checkPointMarker = L.marker([e.latlng.lat + 0.05*Math.cos(toRadians(newMarker.yaw)), e.latlng.lng + 0.05*Math.sin(toRadians(newMarker.yaw))],{id:newMarker.id/**for deleting**/}).addTo(map);
 
           //add an empty array to mapCheckpoint and fill it with path specified for this new marker
           mapCheckpointArray.push([]);
@@ -272,6 +272,8 @@ function MyComponent () {
     }
     ,[time]
   )
+
+
 
   return null
 }

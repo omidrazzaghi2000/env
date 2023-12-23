@@ -349,6 +349,25 @@ export const updateMarkerPostionAtom = atom(
   }
 )
 
+export const deleteMarkerAtom = atom(null, (get, set, markerId: AutoAirCraft['id']) => {
+    const markers = get(markersAtom)
+    const marker = markers.find(m => m.id === markerId)!
+    const mapRef = get(mapRefAtom);
+    if(mapRef?.current !== null){
+
+        mapRef?.current.eachLayer(function (layer:any) {
+            if (layer.options.id === markerId) {
+                mapRef?.current.removeLayer(layer);
+            }
+        });
+    }
+
+    const newMarkers = markers.filter(m => m.id !== markerId)
+    console.log(newMarkers)
+    set(markersAtom, newMarkers)
+
+})
+
 //map
 export const showVHLineAtom = atom(false)
 export const currentMouseLatAtom = atom(null)
