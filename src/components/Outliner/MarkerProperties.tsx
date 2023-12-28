@@ -5,7 +5,7 @@ import {useCallback, useEffect, useRef, useState} from "react";
 import { toast } from "sonner";
 import { ButtonApi, Pane } from "tweakpane";
 import AutoAirCraft from '../../utils/classes/AutoAirCraf.js';
-import {getLatLng} from "../MapPreview/map_marker/path";
+import {calculateTime, getLatLng} from "../MapPreview/map_marker/path";
 export function MarkerProperties({
   markerAtom,
 }: {
@@ -51,25 +51,71 @@ export function MarkerProperties({
   },[time,marker.selected])
 
 
+
   useEffect(() => {
     if (!ref.current) {
       return;
     }
+    
     pane.current = new Pane({ container: ref.current, expanded: true });
 
+    
     pane.current.addBinding(marker, "name").on("change", handleChange);
 
     pane.current.addBlade({ view: "separator" });
     
-    pane.current.addBinding(positionParams, 'lat',{readonly: true,format: (v:number) => v.toFixed(8),})
-    pane.current.addBinding(positionParams, 'lng',{readonly: true,format: (v:number) => v.toFixed(8),})
-    pane.current.addBinding(positionParams, 'yaw',{readonly: true,format: (v:number) => v.toFixed(8),})
+    pane.current.addBinding(positionParams, 'lat',{readonly: true,format: (v:number) => v.toFixed(5),})
+    pane.current.addBinding(positionParams, 'lng',{readonly: true,format: (v:number) => v.toFixed(5),})
+    pane.current.addBinding(positionParams, 'yaw',{readonly: true,format: (v:number) => v.toFixed(5),})
 
+    const f1 = pane.current.addFolder({
+      title: 'Path',
+    });
+
+    for(let pathIndex = 0 ; pathIndex < marker.path.length ; pathIndex++){
+      let currPath = marker.path[pathIndex]
+      console.log("[MarkerProperties] Path : ",currPath)
+      
+
+      const PARAMS = {
+        speed: currPath.speed,
+        src: {x: currPath.src.lat, y: currPath.src.lng,z:-1},
+        dest: {x: currPath.dest.lat, y: currPath.dest.lng,z:-1},
+        time: calculateTime(currPath),
+      };
+
+      const tempPathFolder = f1.addFolder({
+        title: `Path${pathIndex}`,
+      });
+
+        tempPathFolder.addBinding(PARAMS, 'speed', {
+          readonly: true,
+        });
+        tempPathFolder.addBinding(PARAMS,'src',{
+          x:{step:0.0001},
+          y:{step:0.0001},
+          z:{step:1}
+        })
+        tempPathFolder.addBinding(PARAMS,'dest',{
+          x:{step:0.0001,},
+          y:{step:0.0001},
+          z:{step:1,readonly:true}
+        })
+        tempPathFolder.addBinding(PARAMS, 'time', {
+          readonly: true,
+        });
+
+    }
+
+    
+
+    
+    
+    
     return () => {
       pane.current.dispose();
     };
-  }, [marker,positionParams]);
-
+  }, [marker.name,marker.path,positionParams]);
 
 
   return <div ref={ref} />;

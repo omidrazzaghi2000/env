@@ -9,7 +9,6 @@ overflow: scroll;
   .timeline-player {
     height: 32px;
     width: 100%;
-    max-width: 800px;
     padding: 0 10px;
     display: flex;
     flex-direction: row;
