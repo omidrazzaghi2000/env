@@ -22,7 +22,8 @@ import {
 } from '../MapPreview/map_marker/path'
 import TimelinePlayer from './player'
 import { scale, scaleWidth, startLeft } from './mock';
-import './index.css'
+import './index.css';
+import './index.less';
 // MUST Delete last line in onScroll.js in utils folder in react-virtualized node modules
 
 
@@ -109,7 +110,7 @@ export const TimelinePreview = (props:any) => {
 
   // console.log("OMID")
   return (
-    <div>
+    <div className='timeline-editor-example2'>
       <TimelinePlayer
         timelineState={timelineState}
         autoScrollWhenPlay={autoScrollWhenPlay}

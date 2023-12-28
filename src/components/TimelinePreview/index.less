@@ -1,0 +1,40 @@
+@color-audio: #cd9541;
+@color-text-basic: #fff;
+@fontsize-small: 10px;
+@border-radius: 4px;
+
+
+.timeline-editor-example2 {
+    height: 100%;
+    background-color: #191B1D;
+    .timeline-editor {
+        width: 100%;
+        height: 85%;
+
+
+        &-action {
+            height: 28px !important;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+        
+        /*for selected actions*/
+        .timeline-editor-action-movable{
+            background: linear-gradient(to top, #2868ED 0%, #2868ED 100%);;
+        }
+        
+    .timeline-editor-action .timeline-editor-action-left-stretch::after{
+        border-left: 7px solid #cd9541;
+    }
+
+    .timeline-editor-action .timeline-editor-action-right-stretch::after{
+        border-right: 7px solid #cd9541;
+    }
+
+
+
+
+
+    }
+}
