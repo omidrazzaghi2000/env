@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ButtonApi, Pane } from "tweakpane";
 import AutoAirCraft from '../../utils/classes/AutoAirCraf.js';
 import {calculateTime, getLatLng} from "../MapPreview/map_marker/path";
+import './index.css'
 export function MarkerProperties({
   markerAtom,
 }: {
