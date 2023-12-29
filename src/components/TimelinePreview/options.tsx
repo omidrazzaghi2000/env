@@ -2,6 +2,8 @@ import { Input,Row,Col } from "antd";
 import { FC } from "react";
 import './index.css'
 export type TimelineOptionType = {
+    isShowing:boolean,
+    setIsShowing: React.Dispatch<React.SetStateAction<boolean>>,
     scale: number,
     setScale: React.Dispatch<React.SetStateAction<number>>,
     scaleSplitCount: number,
@@ -16,8 +18,8 @@ export const TimelineOption: FC<{
     options: TimelineOptionType;
 }> = ({ options }) => {
 
-    return (
-        <div className="timeline-option-area">
+    return ( 
+        <div className={`timeline-option-area ${options.isShowing ? 'show' : 'hide'}`} >
             <Input.Group style={{ color:'#ddd' }} size="small">
                 <Row >
                     <Col span={4} style={{ display: 'flex',paddingInline:'8px' }}>

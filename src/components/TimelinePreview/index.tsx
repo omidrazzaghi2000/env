@@ -69,6 +69,8 @@ export const TimelinePreview = (props: any) => {
   const [scaleWidth, setScaleWidth] = useState(160);
   const [startLeft, setStartLeft] = useState(20);
   var timelineOptions = {
+    isShowing:isShowingOption,
+    setIsShowing:setIsShowingOption,
     scale: scale,
     setScale: setScale,
     scaleSplitCount: scaleSplitCount,

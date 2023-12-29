@@ -1,20 +1,17 @@
 import { CaretRightOutlined, PauseOutlined } from '@ant-design/icons';
 import { TimelineState } from '@xzdarcy/react-timeline-editor';
-import { Select } from 'antd';
+import { Button, Select } from 'antd';
+import { SettingOutlined } from '@ant-design/icons';
+
 import React, { FC, useEffect, useState } from 'react';
-import { scale, scaleWidth, startLeft } from './mock';
 import {
-  markerAtomsAtom,
-  markersAtom,
-  toggleMarkerSelectionAtom,
-  timelineCursorLastPostionAtom,
-  updateMarkerPostionAtom,
-  mapRefAtom,
+
   timeAtom
 } from '../../store'
 import './index.css'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { TimelineOptionType } from './options';
+
 
 const { Option } = Select;
 export const Rates = [0.2, 0.5, 1.0, 1.5, 2.0];
@@ -44,14 +41,15 @@ const TimelinePlayer: FC<{
 
   useEffect(() => {
     if (!timelineState.current) return;
+
     const engine = timelineState.current;
+
     engine.listener.on('play', () => setIsPlaying(true));
     engine.listener.on('paused', function () { setIsPlaying(false); console.log('pause') });
     engine.listener.on('afterSetTime', function ({ time }) { setTime(time); console.log('after set time') });
     engine.listener.on('setTimeByTick', updateTime);
-    console.log(engine)
+    
     return () => {
-
       if (!engine) return;
       engine.pause();
       engine.listener.offAll();
@@ -62,14 +60,15 @@ const TimelinePlayer: FC<{
     if (!timelineState.current) return;
 
     const engine = timelineState.current;
+    
     /** remove listener */
     const fIndex = engine.listener.events.setTimeByTick.findIndex((el)=>el.name === "updatseTime")
     if(fIndex !== -1){
       engine.listener.events.setTimeByTick.splice(fIndex,1)
     }
+
     /** Again add new listener */
     engine.listener.on('setTimeByTick', updateTime);
-    console.log(engine)
     
   }, [options])
 
@@ -111,6 +110,9 @@ const TimelinePlayer: FC<{
             <Option key={rate} value={rate}>{`x${rate.toFixed(1)}`}</Option>
           ))}
         </Select>
+      </div>
+      <div className="rate-control">
+        <Button type="primary" onClick={()=>options.setIsShowing(!options.isShowing)} shape="circle" icon={<SettingOutlined />} size={'small'} />
       </div>
     </div>
   );
