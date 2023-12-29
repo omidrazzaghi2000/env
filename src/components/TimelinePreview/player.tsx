@@ -14,53 +14,70 @@ import {
 } from '../../store'
 import './index.css'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { TimelineOptionType } from './options';
 
 const { Option } = Select;
 export const Rates = [0.2, 0.5, 1.0, 1.5, 2.0];
 
 const TimelinePlayer: FC<{
-  timelineState: any;
+  timelineState: React.RefObject<TimelineState>;
   autoScrollWhenPlay: React.MutableRefObject<boolean>;
-}> = ({ timelineState, autoScrollWhenPlay }) => {
-
+  options: TimelineOptionType;
+}> = ({ timelineState, autoScrollWhenPlay, options }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [time, setTime] = useAtom(timeAtom);
+  const [scale, setScale] = useState(options.scale);
+  const [scaleWidth, setScaleWidth] = useState(options.scaleWidth);
+  const [scaleSplitCount, setScaleSplitCount] = useState(options.scaleSplitCount);
+  const [startLeft, setScaleStartLeft] = useState(options.startLeft);
+  
+  var updateTime = ({ time }) => {
+    setTime(time);
+
+    if (autoScrollWhenPlay.current) {
+      const autoScrollFrom = 500;
+      const left = time * (options.scaleWidth / options.scale) + options.startLeft - autoScrollFrom;
+      timelineState.current.setScrollLeft(left)
+    }
+  }
+
 
   useEffect(() => {
     if (!timelineState.current) return;
     const engine = timelineState.current;
     engine.listener.on('play', () => setIsPlaying(true));
-    engine.listener.on('paused',function () { setIsPlaying(false);console.log('pause')});
-    engine.listener.on('afterSetTime', function({ time }) {setTime(time);console.log('after set time')});
-    engine.listener.on('setTimeByTick', ({ time }) => {
-      // console.log("OIMD");
-      
-      setTime(time);
-
-      if (autoScrollWhenPlay.current) {
-        const autoScrollFrom = 500;
-        const left = time * (scaleWidth / scale) + startLeft - autoScrollFrom;
-        
-        timelineState.current.setScrollLeft(left)
-      }
-
-      // updateMarkerPosition(0,34,50,Math.random()*360-180)
-
-    });
-
+    engine.listener.on('paused', function () { setIsPlaying(false); console.log('pause') });
+    engine.listener.on('afterSetTime', function ({ time }) { setTime(time); console.log('after set time') });
+    engine.listener.on('setTimeByTick', updateTime);
+    console.log(engine)
     return () => {
-      
+
       if (!engine) return;
       engine.pause();
       engine.listener.offAll();
     };
   }, []);
 
+  useEffect(() => {
+    if (!timelineState.current) return;
+
+    const engine = timelineState.current;
+    /** remove listener */
+    const fIndex = engine.listener.events.setTimeByTick.findIndex((el)=>el.name === "updatseTime")
+    if(fIndex !== -1){
+      engine.listener.events.setTimeByTick.splice(fIndex,1)
+    }
+    /** Again add new listener */
+    engine.listener.on('setTimeByTick', updateTime);
+    console.log(engine)
+    
+  }, [options])
+
   // 开始或暂停
   const handlePlayOrPause = () => {
-    if (!timelineState.current){
+    if (!timelineState.current) {
       return;
-    } 
+    }
     if (timelineState.current.isPlaying) {
       timelineState.current.pause();
     } else {

@@ -5,7 +5,7 @@ import {
   TimelineState
 } from '@xzdarcy/react-timeline-editor'
 import { useAtomValue, useSetAtom, useAtom } from 'jotai'
-import {useCallback, useEffect, useRef, useState} from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   markerAtomsAtom,
   markersAtom,
@@ -24,6 +24,7 @@ import TimelinePlayer from './player'
 import { scale, scaleWidth, startLeft } from './mock';
 import './index.css';
 import './index.less';
+import { TimelineOption } from './options'
 // MUST Delete last line in onScroll.js in utils folder in react-virtualized node modules
 
 
@@ -39,9 +40,9 @@ const mockEffect: Record<string, TimelineEffect> = {
 }
 
 
-export const TimelinePreview = (props:any) => {
-    const setTime = useSetAtom(timeAtom);
-    const getEditorData = useCallback(function (): TimelineRow[] {
+export const TimelinePreview = (props: any) => {
+  const setTime = useSetAtom(timeAtom);
+  const getEditorData = useCallback(function (): TimelineRow[] {
     const markers = useAtomValue(markersAtom);
     return markers.map(function (marker: any) {
       return {
@@ -58,55 +59,28 @@ export const TimelinePreview = (props:any) => {
         })
       }
     })
-  },[])
-  console.log("TimelinePreveiw Created.");
-  // const markerAtoms = props.markers;
-
+  }, [])
 
   const autoScrollWhenPlay = useRef<boolean>(true);
-  
-  const timelineState = useRef<TimelineState>(null)
- 
-  console.log(timelineState)
-  // // const markerAtoms = useAtomValue(markerAtomsAtom);
-  // const setAllMarkerAtom=useAtomValue(markerAtomsAtom).map(
-  //   function(markerAtom){
-  //     return useSetAtom(markerAtom);
-  //   }
-  // )
-  // console.log("OMID")
-  // const setMarkers = useSetAtom(markersAtom)
-  // console.log("OMID")
+  const [isShowingOption,setIsShowingOption] = useState(false);
+  const timelineState = useRef<TimelineState>(null);
+  const [scale, setScale] = useState(5);
+  const [scaleSplitCount, setScaleSplitCount] = useState(10);
+  const [scaleWidth, setScaleWidth] = useState(160);
+  const [startLeft, setStartLeft] = useState(20);
+  var timelineOptions = {
+    scale: scale,
+    setScale: setScale,
+    scaleSplitCount: scaleSplitCount,
+    setScaleSplitCount: setScaleSplitCount,
+    scaleWidth: scaleWidth,
+    setScaleWidth: setScaleWidth,
+    startLeft: startLeft,
+    setStartLeft: setStartLeft,
+  };
+
+
   const toggleSelection = useSetAtom(toggleMarkerSelectionAtom)
-  // console.log("OMID")
-  // const updateMarker = useCallback( function (markerIndex: number, time: number) {
-  //   let marker = markerAtoms[markerIndex]
-  //   let new_position_new_yaw = getLatLng(marker.path[0], time)
-  //   let new_position = new_position_new_yaw[0]
-  //   let new_yaw = new_position_new_yaw[1]
-  //   updatePosition(markerIndex, new_position[0], new_position[1], new_yaw)
-  //   // setMarkerAtoms([...markerAtoms.slice(0,markerIndex),marker,...markerAtoms.slice(markerIndex+1)])
-  // },[])
-  // const updateAllMarkerPostion = useCallback(function(time:number){
-  //   console.log("Update All Makrer Position inside timeline preview");
-  //   for (let i = 0; i < markerAtoms.length; i++) {
-  //     updateMarker(i, time);
-  //   }
-  // },[])
-
-
-
-  // const updateMarkerPosition = function(marker:AutoAirCraft,time:number)
-  // {
-  //   let new_position_new_yaw = getLatLng(marker.path[0],time)
-  //   let new_position = new_position_new_yaw[0];
-  //   let new_yaw = new_position_new_yaw[1];
-  //   marker.lat = new_position[0];
-  //   marker.long = new_position[1];
-
-  //   // console.log(getLatLng(marker.path[0],time));
-  // }
-
 
   // console.log("OMID")
   return (
@@ -114,13 +88,23 @@ export const TimelinePreview = (props:any) => {
       <TimelinePlayer
         timelineState={timelineState}
         autoScrollWhenPlay={autoScrollWhenPlay}
+        options={timelineOptions}
       />
+
+      {
+        <TimelineOption options={timelineOptions
+      } >
+
+      </TimelineOption>
+      } 
+      
       <Timeline
         ref={timelineState}
         scale={scale}
         scaleWidth={scaleWidth}
         startLeft={startLeft}
-        style={{ width: '100%'  }}
+        scaleSplitCount={scaleSplitCount}
+        style={{ width: '100%' }}
         gridSnap={true}
         editorData={getEditorData()}
         effects={mockEffect}

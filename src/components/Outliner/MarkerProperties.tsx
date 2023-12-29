@@ -42,11 +42,13 @@ export function MarkerProperties({
     let new_yaw = new_position_new_yaw[1]
 
     setPositionParams(
-        {
+        function(){
+        return {
           yaw: new_yaw,
           lat:new_position[0],
           lng:new_position[1]
         }
+      }
     )
 
   },[time,marker.selected])
@@ -75,7 +77,6 @@ export function MarkerProperties({
 
     for(let pathIndex = 0 ; pathIndex < marker.path.length ; pathIndex++){
       let currPath = marker.path[pathIndex]
-      console.log("[MarkerProperties] Path : ",currPath)
       
 
       const PARAMS = {
