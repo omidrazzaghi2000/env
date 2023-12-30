@@ -77,12 +77,7 @@ export function MarkerProperties({
     const f1 = pane.current.addFolder({
       title: 'Path',
     });
-    f1.addButton({
-      title: 'Add New Path',
-      label: '',   // optional
-    }).on("click", function () {
-      setPathPaletteOpen(true);
-    });
+    
 
     /** Add path button */
     f1.addButton({

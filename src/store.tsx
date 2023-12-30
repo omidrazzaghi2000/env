@@ -421,6 +421,3 @@ export const isPathPaletteOpenAtom = atom(false);
 export const timelineCursorLastPostionAtom = atom(0);
 export const timelineStateAtom = atom(null);
 export const timeAtom = atom(0);
-
-//marker properties
-export const isPathPaletteOpenAtom = atom(false) 
