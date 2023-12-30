@@ -1,6 +1,6 @@
 import { CursorArrowRippleIcon } from "@heroicons/react/24/outline";
-import {Light, isLightPaintingAtom, timeAtom} from "../../store";
-import {PrimitiveAtom, useAtom, useAtomValue} from "jotai";
+import {Light, isLightPaintingAtom, timeAtom, isPathPaletteOpenAtom} from "../../store";
+import {PrimitiveAtom, useAtom, useAtomValue, useSetAtom} from "jotai";
 import {useCallback, useEffect, useRef, useState} from "react";
 import { toast } from "sonner";
 import { ButtonApi, Pane } from "tweakpane";
@@ -13,6 +13,7 @@ export function MarkerProperties({
   markerAtom: PrimitiveAtom<AutoAirCraft>;
 }) {
   const [marker, setMarker] = useAtom(markerAtom);
+  const setPathPalleteShow = useSetAtom(isPathPaletteOpenAtom);
   const ref = useRef<HTMLDivElement>(null!);
   const pane = useRef<Pane>(null!);
   const time = useAtomValue(timeAtom);
@@ -74,6 +75,17 @@ export function MarkerProperties({
     const f1 = pane.current.addFolder({
       title: 'Path',
     });
+
+    /** Add path button */
+    f1.addButton({
+      title: 'Add new Path',
+      label: '',   // optional
+    }).on("click",
+        function (){
+        setPathPalleteShow(true);
+      })
+
+
 
     for(let pathIndex = 0 ; pathIndex < marker.path.length ; pathIndex++){
       let currPath = marker.path[pathIndex]

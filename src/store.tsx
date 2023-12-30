@@ -390,7 +390,10 @@ export const mapRefAtom = atom(null);
 export const mapMarkerArrayAtom = atom([]);
 export const checkpointMarkerArrayAtom = atom([]);
 
+//marker properties
+export const isPathPaletteOpenAtom = atom(false);
+
 //timeline
-export const timelineCursorLastPostionAtom = atom(0)
+export const timelineCursorLastPostionAtom = atom(0);
 export const timelineStateAtom = atom(null);
 export const timeAtom = atom(0);
