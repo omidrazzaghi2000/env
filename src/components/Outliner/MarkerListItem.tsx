@@ -95,8 +95,6 @@ export function MarkerListItem ({
               className='outline-none select-none rounded px-2 py-0.5 text-white highlighted:bg-red-500 highlighted:text-white text-sm'
               onSelect={function(){
                 deleteMarker(marker.id);
-
-
               }}
             >
               Delete
