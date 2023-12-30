@@ -44,14 +44,17 @@ export const TimelinePreview = (props: any) => {
   const setTime = useSetAtom(timeAtom);
   const getEditorData = useCallback(function (): TimelineRow[] {
     const markers = useAtomValue(markersAtom);
+
     return markers.map(function (marker: any) {
+      var temp_time = 0;
       return {
         id: marker.id,
         actions: marker.path.map(function (path: any) {
+
           return {
             id: path.id,
-            start: 0,
-            end: calculateTime(path),
+            start: temp_time,
+            end: temp_time+=calculateTime(path),
             effectId: 'effect1',
             flexible: marker.selected,
             movable: marker.selected

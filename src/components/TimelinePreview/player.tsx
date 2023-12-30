@@ -46,7 +46,7 @@ const TimelinePlayer: FC<{
 
     engine.listener.on('play', () => setIsPlaying(true));
     engine.listener.on('paused', function () { setIsPlaying(false); console.log('pause') });
-    engine.listener.on('afterSetTime', function ({ time }) { setTime(time); console.log('after set time') });
+    engine.listener.on('afterSetTime', function ({ time }) { setTime(time); });
     engine.listener.on('setTimeByTick', updateTime);
     
     return () => {

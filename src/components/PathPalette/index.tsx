@@ -6,11 +6,27 @@ import {
     MagnifyingGlassIcon,
     PhotoIcon,
 } from "@heroicons/react/24/outline";
+<<<<<<< HEAD
 import { LinearPathIcon } from "./icons";
 import clsx from "clsx";
 import { useAtom, useSetAtom } from "jotai";
 import { Light, isPathPaletteOpenAtom, lightsAtom, showVHLineAtom } from "../../store";
 import * as THREE from "three";
+=======
+import { LinearPath } from "./icons/LinearPath";
+import clsx from "clsx";
+import { useAtom, useSetAtom } from "jotai";
+import {
+    Light,
+    isCommandPaletteOpenAtom,
+    lightsAtom,
+    showVHLineAtom,
+    isPathPaletteOpenAtom,
+    showAddPathLineAtom, pathTypeAtom
+} from "../../store";
+import * as THREE from "three";
+
+>>>>>>> 1eac22e6d0c73206ad7a07c24fbfb30f63c0bdd4
 export function PathPalette() {
     const [open, setOpen] = useAtom(isPathPaletteOpenAtom);
     const [value, setValue] = useState("softbox");
@@ -18,7 +34,11 @@ export function PathPalette() {
 
     useEffect(() => {
         const down = (e: KeyboardEvent) => {
+<<<<<<< HEAD
             if (e.key === "p" && (e.metaKey || e.ctrlKey)) {
+=======
+            if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+>>>>>>> 1eac22e6d0c73206ad7a07c24fbfb30f63c0bdd4
                 e.preventDefault();
                 setOpen(true);
             }
@@ -41,7 +61,11 @@ export function PathPalette() {
                 <MagnifyingGlassIcon className="text-neutral-600 w-5 h-5 translate-y-[1px]" />
                 <Command.Input
                     autoFocus
+<<<<<<< HEAD
                     placeholder="Add lights, backgrounds, and flags..."
+=======
+                    placeholder="Add linear, circular, and ... path"
+>>>>>>> 1eac22e6d0c73206ad7a07c24fbfb30f63c0bdd4
                     className="border-none bg-transparent flex-1 outline-none text-neutral-100 placeholder:text-neutral-600"
                 />
             </div>
@@ -58,7 +82,11 @@ export function PathPalette() {
                         <Command.Group
                             heading={
                                 <h3 className="text-neutral-400 text-xs font-light select-none px-2 my-2">
+<<<<<<< HEAD
                                     Path
+=======
+                                    Markers
+>>>>>>> 1eac22e6d0c73206ad7a07c24fbfb30f63c0bdd4
                                 </h3>
                             }
                         >
@@ -68,12 +96,19 @@ export function PathPalette() {
                                 subtitle="Linear path with constant speed"
                                 colorTheme="orange"
                             >
+<<<<<<< HEAD
                                 <LinearPathIcon />
+=======
+                                <LinearPath />
+>>>>>>> 1eac22e6d0c73206ad7a07c24fbfb30f63c0bdd4
                             </Item>
 
                         </Command.Group>
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1eac22e6d0c73206ad7a07c24fbfb30f63c0bdd4
                     </div>
 
                     <div className="w-px h-auto block border-none bg-neutral-800" />
@@ -82,8 +117,18 @@ export function PathPalette() {
                         {value && (
                             <div className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 absolute w-16 h-16 rounded-full bg-white blur-3xl" />
                         )}
+<<<<<<< HEAD
                         {value === "linear_path" && <MapLinearImage />}
                         
+=======
+                        {value === "parrot_bebop_2" && <ParrotBebop2 />}
+                        {value === "procedural_scrim" && <Scrim />}
+                        {value === "umbrella" && <Umbrella />}
+                        {value === "procedural_umbrella" && <Umbrella />}
+                        {value === "flash_head" && <FlashHead />}
+                        {value === "sky" && <Sky />}
+                        {value === "sky_gradient" && <Gradient />}
+>>>>>>> 1eac22e6d0c73206ad7a07c24fbfb30f63c0bdd4
                     </div>
                 </div>
             </Command.List>
@@ -92,12 +137,21 @@ export function PathPalette() {
 }
 
 function Item({
+<<<<<<< HEAD
     children,
     value,
     label = value,
     subtitle,
     colorTheme = "orange",
 }: {
+=======
+                  children,
+                  value,
+                  label = value,
+                  subtitle,
+                  colorTheme = "orange",
+              }: {
+>>>>>>> 1eac22e6d0c73206ad7a07c24fbfb30f63c0bdd4
     children: React.ReactNode;
     label?: string;
     value: string;
@@ -105,7 +159,8 @@ function Item({
     colorTheme?: "orange" | "blue" | "green" | "red" | "purple";
 }) {
     const setOpen = useSetAtom(isPathPaletteOpenAtom);
-    const setShowVHLineAtom = useSetAtom(showVHLineAtom);
+    const setShowPathLine = useSetAtom(showAddPathLineAtom);
+    const setPathType = useSetAtom(pathTypeAtom);
     const [lights, setLights] = useAtom(lightsAtom);
     const addLight = (light: Light) => setLights((lights) => [...lights, light]);
 
@@ -129,6 +184,7 @@ function Item({
             animate: false,
         };
 
+<<<<<<< HEAD
         if (value === "softbox") {
             addLight({
                 ...commonProps,
@@ -178,6 +234,18 @@ function Item({
             console.log("OMID")
         }
 
+=======
+        if (value === "linear_path") {
+            /* Show helper line for user */
+            setShowPathLine(true);
+        }
+        else if(value === ""){
+
+        }
+
+
+        setPathType(value);
+>>>>>>> 1eac22e6d0c73206ad7a07c24fbfb30f63c0bdd4
         setOpen(false);
     }
 
@@ -203,17 +271,29 @@ function Item({
             <div className="flex flex-col">
                 <span>{label}</span>
                 <span className="text-xs font-normal text-neutral-500 group-data-[selected='true']:text-white md:inline hidden">
+<<<<<<< HEAD
                     {subtitle}
                 </span>
+=======
+          {subtitle}
+        </span>
+>>>>>>> 1eac22e6d0c73206ad7a07c24fbfb30f63c0bdd4
             </div>
         </Command.Item>
     );
 }
 
+<<<<<<< HEAD
 function MapLinearImage() {
     return (
         <img
             src="/textures/path_palette/map_linear_path.png"
+=======
+function ParrotBebop2() {
+    return (
+        <img
+            src="/textures/ParrotBebop.jpg"
+>>>>>>> 1eac22e6d0c73206ad7a07c24fbfb30f63c0bdd4
             alt="Parrot Bebop 2"
             className=" h-48"
             loading="lazy"
@@ -221,3 +301,71 @@ function MapLinearImage() {
     );
 }
 
+<<<<<<< HEAD
+=======
+function Softbox() {
+    return (
+        <img
+            src="/textures/softbox-octagon.png"
+            alt="Softbox"
+            className="w-48 h-48"
+            loading="lazy"
+        />
+    );
+}
+
+function Scrim() {
+    return (
+        <img
+            src="/textures/scrim.png"
+            alt="Scrim"
+            className="w-48 h-48"
+            loading="lazy"
+        />
+    );
+}
+
+function FlashHead() {
+    return (
+        <img
+            src="/textures/flash-head.png"
+            alt="Softbox"
+            className="w-48 h-48"
+            loading="lazy"
+        />
+    );
+}
+
+function Umbrella() {
+    return (
+        <img
+            src="/textures/umbrella.png"
+            alt="Umbrella"
+            className="w-48 h-48"
+            loading="lazy"
+        />
+    );
+}
+
+function Sky() {
+    return (
+        <img
+            src="https://tr.rbxcdn.com/c6742afbb50ca048d1fa07b532ecffb5/420/420/Hat/Png"
+            alt="Sky"
+            className="w-48 h-48"
+            loading="lazy"
+        />
+    );
+}
+
+function Gradient() {
+    return (
+        <img
+            src="https://t4.ftcdn.net/jpg/05/24/17/45/360_F_524174530_5vVjWkJ4AHkWNUKt07DVd61ImlITjoi1.png"
+            alt="Gradient"
+            className="w-48 h-48"
+            loading="lazy"
+        />
+    );
+}
+>>>>>>> 1eac22e6d0c73206ad7a07c24fbfb30f63c0bdd4

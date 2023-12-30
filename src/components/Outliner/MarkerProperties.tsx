@@ -1,7 +1,7 @@
 import { CursorArrowRippleIcon } from "@heroicons/react/24/outline";
-import { Light, isLightPaintingAtom, isPathPaletteOpenAtom, timeAtom } from "../../store";
-import { PrimitiveAtom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {Light, isLightPaintingAtom, timeAtom, isPathPaletteOpenAtom} from "../../store";
+import {PrimitiveAtom, useAtom, useAtomValue, useSetAtom} from "jotai";
+import {useCallback, useEffect, useRef, useState} from "react";
 import { toast } from "sonner";
 import { ButtonApi, Pane } from "tweakpane";
 import AutoAirCraft from '../../utils/classes/AutoAirCraft.js';
@@ -13,7 +13,7 @@ export function MarkerProperties({
   markerAtom: PrimitiveAtom<AutoAirCraft>;
 }) {
   const [marker, setMarker] = useAtom(markerAtom);
-  const setPathPaletteOpen = useSetAtom(isPathPaletteOpenAtom);
+  const setPathPalleteShow = useSetAtom(isPathPaletteOpenAtom);
   const ref = useRef<HTMLDivElement>(null!);
   const pane = useRef<Pane>(null!);
   const time = useAtomValue(timeAtom);
@@ -37,6 +37,8 @@ export function MarkerProperties({
     pane.current?.refresh();
   }, [marker.ts]);
   useEffect(function () {
+
+
 
     let new_position_new_yaw = getLatLng(marker.path[0], time)
     let new_position = new_position_new_yaw[0]
@@ -82,7 +84,18 @@ export function MarkerProperties({
       setPathPaletteOpen(true);
     });
 
-    for (let pathIndex = 0; pathIndex < marker.path.length; pathIndex++) {
+    /** Add path button */
+    f1.addButton({
+      title: 'Add new Path',
+      label: '',   // optional
+    }).on("click",
+        function (){
+        setPathPalleteShow(true);
+      })
+
+
+
+    for(let pathIndex = 0 ; pathIndex < marker.path.length ; pathIndex++){
       let currPath = marker.path[pathIndex]
 
 

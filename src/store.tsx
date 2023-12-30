@@ -286,6 +286,7 @@ export const selectCameraAtom = atom(
 // Marker Properties
 import AutoAirCraft from './utils/classes/AutoAirCraf.js'
 import Scenario from './utils/classes/scenario.js'
+import {OPath} from "./components/MapPreview/map_marker/path";
 export const markersAtom = atomWithStorage<AutoAirCraft[]>('markers', [])
 export const markerAtomsAtom = splitAtom(markersAtom)
 export const mainScenario = atomWithStorage<Scenario>(
@@ -349,6 +350,27 @@ export const updateMarkerPostionAtom = atom(
   }
 )
 
+export const addPathToMarkerAtom = atom(
+    null,
+    (
+        get,
+        set,
+        markerIndex: number,
+        newPath: OPath,
+    ) => {
+        set(markersAtom, markers =>
+            markers.map(function (m, i) {
+                if (markerIndex === i) {
+                    m.path.push(newPath);
+                }
+                return { ...m }
+            })
+        )
+    }
+)
+
+
+
 export const deleteMarkerAtom = atom(null, (get, set, markerId: AutoAirCraft['id']) => {
     const markers = get(markersAtom)
     const marker = markers.find(m => m.id === markerId)!
@@ -384,15 +406,19 @@ export const deleteMarkerAtom = atom(null, (get, set, markerId: AutoAirCraft['id
 
 //map
 export const showVHLineAtom = atom(false);
+export const showAddPathLineAtom = atom(false);
+export const pathTypeAtom = atom("");
 export const currentMouseLatAtom = atom(null);
 export const currentMouseLongAtom = atom(null);
 export const mapRefAtom = atom(null);
 export const mapMarkerArrayAtom = atom([]);
 export const checkpointMarkerArrayAtom = atom([]);
 
+//marker properties
+export const isPathPaletteOpenAtom = atom(false);
 
 //timeline
-export const timelineCursorLastPostionAtom = atom(0)
+export const timelineCursorLastPostionAtom = atom(0);
 export const timelineStateAtom = atom(null);
 export const timeAtom = atom(0);
 
