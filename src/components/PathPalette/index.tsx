@@ -9,7 +9,14 @@ import {
 import { LinearPath } from "./icons/LinearPath";
 import clsx from "clsx";
 import { useAtom, useSetAtom } from "jotai";
-import {Light, isCommandPaletteOpenAtom, lightsAtom, showVHLineAtom, isPathPaletteOpenAtom} from "../../store";
+import {
+    Light,
+    isCommandPaletteOpenAtom,
+    lightsAtom,
+    showVHLineAtom,
+    isPathPaletteOpenAtom,
+    showAddPathLineAtom, pathTypeAtom
+} from "../../store";
 import * as THREE from "three";
 
 export function PathPalette() {
@@ -110,7 +117,8 @@ function Item({
     colorTheme?: "orange" | "blue" | "green" | "red" | "purple";
 }) {
     const setOpen = useSetAtom(isPathPaletteOpenAtom);
-    const setShowVHLineAtom = useSetAtom(showVHLineAtom);
+    const setShowPathLine = useSetAtom(showAddPathLineAtom);
+    const setPathType = useSetAtom(pathTypeAtom);
     const [lights, setLights] = useAtom(lightsAtom);
     const addLight = (light: Light) => setLights((lights) => [...lights, light]);
 
@@ -135,12 +143,15 @@ function Item({
         };
 
         if (value === "linear_path") {
-
+            /* Show helper line for user */
+            setShowPathLine(true);
         }
         else if(value === ""){
 
         }
 
+
+        setPathType(value);
         setOpen(false);
     }
 

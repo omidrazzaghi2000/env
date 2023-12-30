@@ -38,6 +38,8 @@ export function MarkerProperties({
   }, [marker.ts]);
   useEffect(function(){
 
+
+
     let new_position_new_yaw = getLatLng(marker.path[0], time)
     let new_position = new_position_new_yaw[0]
     let new_yaw = new_position_new_yaw[1]
