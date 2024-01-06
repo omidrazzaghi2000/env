@@ -6,19 +6,11 @@ import {
     MagnifyingGlassIcon,
     PhotoIcon,
 } from "@heroicons/react/24/outline";
-import { LinearPath } from "./icons/LinearPath";
+import { LinearPathIcon } from "./icons";
 import clsx from "clsx";
 import { useAtom, useSetAtom } from "jotai";
-import {
-    Light,
-    isCommandPaletteOpenAtom,
-    lightsAtom,
-    showVHLineAtom,
-    isPathPaletteOpenAtom,
-    showAddPathLineAtom, pathTypeAtom
-} from "../../store";
+import { Light, isPathPaletteOpenAtom, lightsAtom, pathTypeAtom, showAddPathLineAtom, showVHLineAtom } from "../../store";
 import * as THREE from "three";
-
 export function PathPalette() {
     const [open, setOpen] = useAtom(isPathPaletteOpenAtom);
     const [value, setValue] = useState("softbox");
@@ -26,7 +18,7 @@ export function PathPalette() {
 
     useEffect(() => {
         const down = (e: KeyboardEvent) => {
-            if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+            if (e.key === "p" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
                 setOpen(true);
             }
@@ -66,7 +58,7 @@ export function PathPalette() {
                         <Command.Group
                             heading={
                                 <h3 className="text-neutral-400 text-xs font-light select-none px-2 my-2">
-                                    Markers
+                                    Path
                                 </h3>
                             }
                         >
@@ -76,7 +68,7 @@ export function PathPalette() {
                                 subtitle="Linear path with constant speed"
                                 colorTheme="orange"
                             >
-                                <LinearPath />
+                                <LinearPathIcon />
                             </Item>
 
                         </Command.Group>
@@ -89,13 +81,8 @@ export function PathPalette() {
                         {value && (
                             <div className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 absolute w-16 h-16 rounded-full bg-white blur-3xl" />
                         )}
-                        {value === "parrot_bebop_2" && <ParrotBebop2 />}
-                        {value === "procedural_scrim" && <Scrim />}
-                        {value === "umbrella" && <Umbrella />}
-                        {value === "procedural_umbrella" && <Umbrella />}
-                        {value === "flash_head" && <FlashHead />}
-                        {value === "sky" && <Sky />}
-                        {value === "sky_gradient" && <Gradient />}
+                        {value === "linear_path" && <MapLinearImage />}
+                        
                     </div>
                 </div>
             </Command.List>
@@ -104,12 +91,12 @@ export function PathPalette() {
 }
 
 function Item({
-                  children,
-                  value,
-                  label = value,
-                  subtitle,
-                  colorTheme = "orange",
-              }: {
+    children,
+    value,
+    label = value,
+    subtitle,
+    colorTheme = "orange",
+}: {
     children: React.ReactNode;
     label?: string;
     value: string;
@@ -182,6 +169,16 @@ function Item({
             </div>
         </Command.Item>
     );
+}
+
+function MapLinearImage() {
+    return (
+        <img
+            src="/textures/path_palette/map_linear_path.png"
+            alt="Parrot Bebop 2"
+            className=" h-48"
+            loading="lazy"/>
+    )
 }
 
 function ParrotBebop2() {
