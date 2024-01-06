@@ -32,7 +32,7 @@ import {
   toRadians,
   calculateTime,
   generateSplinePath,
-  interpolateAndGetLatLng
+  interpolateAndGetLatLng, CurvePath, calculateTracePointsAndTimesArray
 } from './map_marker/path'
 
 const center = new L.LatLng(34.641955754083504, 50.878976024718725)
@@ -68,9 +68,9 @@ function MyComponent () {
   const toggleSelection = useSetAtom(toggleMarkerSelectionAtom)
   const time = useAtomValue(timeAtom);
   const [currentMarkerSelected,setCurrentMarkerSelected] = useState<AutoAirCraft>(null);
-  const findIndex=function(arr:any[],element:any){
+  const findIndex=function(arr:AutoAirCraft[],element:AutoAirCraft){
     for(let i = 0 ; i <= arr.length ; i++){
-      if(element === arr[i]){
+      if(element.id === arr[i].id){
         return i;
       }
     }
@@ -140,6 +140,10 @@ function MyComponent () {
 
 
         mapSplineArray.push(newSpline)
+
+        /* Upadte curved path options for markers */
+        // curMarker
+        // calculateTracePointsAndTimesArray(newSpline, 277.77 )
 
 
 
@@ -385,6 +389,7 @@ function MyComponent () {
 
 
       let currentSelectedMarkerIndex = findIndex(markers, currentMarkerSelected);
+      console.log(currentMarkerSelected)
       if (currentSelectedMarkerIndex !== undefined) {
         /* add path to store of current selected marker */
         addPathToMarker(
@@ -394,8 +399,20 @@ function MyComponent () {
                 pointB
             )
         )
-        console.log(currentMarkerSelected)
-        console.log(currentSelectedMarkerIndex)
+
+        /* update new spline and calculate options of curved path like trace point and times array */
+        let currentMarkerSpline = mapSplineArray.at(currentSelectedMarkerIndex);
+        currentMarkerSpline?.addLatLng(pointB).addTo(map)
+
+        currentMarkerSelected.curvedPath = new CurvePath(
+            currentMarkerSpline!,100
+        )
+        calculateTracePointsAndTimesArray(currentMarkerSelected.curvedPath,currentMarkerSelected.path[currentMarkerSelected.path.length-1].speed)
+
+
+
+
+
 
         /* add a checkpoint marker to map and save it as state to show every time refresh the page */
         const checkPointMarker = L.marker(pointB, {id: currentMarkerSelected.id/**for deleting**/}).addTo(map);
@@ -420,6 +437,9 @@ function MyComponent () {
 
       /* update show path line helper flag */
       setShowAddPathLine(false);
+
+      /* update selected marker */
+      setCurrentMarkerSelected(currentMarkerSelected);
 
       /* restore cursor*/
       const element = document.getElementById('mainMapContainer');
@@ -451,66 +471,33 @@ function MyComponent () {
 
       for(let i = 0 ; i < markers.length ; i++)
       {
-        let marker = markers[i]
 
-        /* find current path with time*/
-        let temp_time = 0;
-        let currentPathIndex = 0;
 
-        for(let pathIndex = 0 ; pathIndex < marker.path.length; pathIndex++){
-          const currPath = marker.path[pathIndex];
-          temp_time+=calculateTime(currPath);
-          if(temp_time > time){
-            currentPathIndex =  pathIndex;
-            break;
-          }else{
-            /* last one */
-            if(pathIndex == marker.path.length-1){
-              currentPathIndex = pathIndex;
-            }
-          }
-        }
-
-        let positions:[number,number][] = []
-        for(let i = 0 ; i < marker.path.length ; i++)
-        {
-          let curPath:OPath = marker.path[i]
-          positions.push([curPath.src.lat,curPath.src.lng]);
-
-          /* last one */
-          if(i === marker.path.length-1){
-            positions.push([curPath.dest.lat,curPath.dest.lng])
-          }
-        }
-        console.log(mapSplineArray)
         let currSpline:L.Spline = mapSplineArray.at(i);
         if(currSpline!== undefined){
 
-          let number_of_point = 30
+          let number_of_point = 60
           let disPoint = Array(number_of_point).fill().map((x,i)=>i/number_of_point);
-          console.log(disPoint)
           let timesArray:number[] = []
           let curveDistance = 0;
           for (let i = 0 ; i <  currSpline.trace(disPoint).length-1 ; i++){
             const currPoint = currSpline.trace(disPoint)[i]
             const nextPoint = currSpline.trace(disPoint)[i+1]
             if(!isCreatedMarker){
-              const checkPointMarker = L.marker(([currPoint.lat, currPoint.lng]),{id:marker.id/**for deleting**/,icon:L.icon({
-                  iconUrl:'/textures/pointIcon.png',
-                  iconSize:[20,20],
-                })}).addTo(map);
+              // const checkPointMarker = L.marker(([currPoint.lat, currPoint.lng]),{id:marker.id/**for deleting**/,icon:L.icon({
+              //     iconUrl:'/textures/pointIcon.png',
+              //     iconSize:[20,20],
+              //   })}).addTo(map);
+
             }
 
             curveDistance += currPoint.distanceTo(nextPoint)
-            // console.log(marker.path[currentPathIndex].speed)
-            // console.log(currPoint.distanceTo(nextPoint))
             if(timesArray.length !== 0){
               timesArray.push(currPoint.distanceTo(nextPoint)/277.77+timesArray[timesArray.length-1])
             }else{
               timesArray.push(currPoint.distanceTo(nextPoint)/277.77)
             }
           }
-          console.log(curveDistance,timesArray)
           //remove zeros from the first of time array
           timesArray.splice(0,number_of_point-1);
           let currentSubPathIndex = 0;
@@ -523,14 +510,14 @@ function MyComponent () {
               currentSubPathIndex = timesArray.length-2
             }
           }
-
+          let tracePoints = currSpline.trace(disPoint);
+          tracePoints.splice(0,number_of_point)
           let new_position_new_yaw = interpolateAndGetLatLng(
-              currSpline.trace(disPoint)[currentSubPathIndex],currSpline.trace(disPoint)[currentSubPathIndex+1], time-timesArray[currentSubPathIndex],
-              0.01)
+              tracePoints[currentSubPathIndex],tracePoints[currentSubPathIndex+1], time-timesArray[currentSubPathIndex],
+              277.77)
           let new_position = new_position_new_yaw[0]
           let new_yaw = new_position_new_yaw[1]
 
-          console.log(new_position_new_yaw)
           mapMarkerArray.at(i).setLatLng( new L.LatLng(new_position[0],new_position[1]));
           mapMarkerArray.at(i).setRotationAngle(new_yaw)
         }

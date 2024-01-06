@@ -20,88 +20,12 @@ export abstract class OPath {
 }
 
 export class LinearOPath extends OPath {
-    speed: number = 0.01;// default speed
+    speed: number = 277.77;// default speed
     isFinished: boolean = false;
     constructor(_src: L.LatLng, _dest: L.LatLng) {
         super(_src, _dest);
     }
 
-    calculateDistance() {
-        let x0 = this.src.lat;
-        let y0 = this.src.lng;
-        let x1 = this.dest.lat;
-        let y1 = this.dest.lng;
-        return Math.sqrt(Math.pow(x0 - x1, 2) + Math.pow(y0 - y1, 2));
-    }
-
-    calculateTime() {
-        let distance = this.calculateDistance();
-        return distance / this.speed;
-    }
-
-    calculateSpeed(time: number) {
-        let distance = this.calculateDistance();
-        return distance / time;
-    }
-
-    getLatLng(time: number): any {
-        let x0 = this.src.lat;
-        let y0 = this.src.lng;
-        let x1 = this.dest.lat;
-        let y1 = this.dest.lng;
-
-
-        // Vy divided by Vx is equal to tangent of the line
-        let tan_of_line = null
-        if (x1 - x0 !== 0) {
-            tan_of_line = (y1 - y0) / (x1 - x0)
-        } else {
-            tan_of_line = 'inf'
-        }
-
-
-        // V_total = sqrt(Vx^2+Vy^2) so we can find Vx and Vy with these two terms.
-        // V_total sign is important
-        if (x0 > x1) {
-            this.speed = -1 * Math.abs(this.speed)
-        } else {
-            this.speed = Math.abs(this.speed)
-        }
-        let Vx = null;
-        let Vy = null;
-        if (tan_of_line === 'inf') {
-            //this is when we have infinite tangent
-            Vx = 0;
-            if (y0 > y1) {
-                Vy = -1 * this.speed;
-            } else {
-                Vy = this.speed;
-            }
-
-        }
-        else {
-            Vx = this.speed / Math.sqrt(Math.pow(tan_of_line, 2) + 1)
-            Vy = Vx * tan_of_line;
-        }
-
-        //bearing
-        let bearing_degree = Math.atan2(Vy, Vx) * 180 / Math.PI;
-        let marker_yaw = bearing_degree - 45;//45 degree is because of image of auto aircraft
-        //TODO: 45 degree in above line is hard code.
-
-        console.log("Tangent", tan_of_line)
-        console.log("Vx", Vx)
-        console.log("Vy", Vy)
-
-        //update marker position
-        let new_lat_long = [parseFloat((Vx * time + x0).toFixed(3)),
-        parseFloat((Vy * time + y0).toFixed(3))]
-
-        console.log("new Latlng", new_lat_long)
-
-        return [new_lat_long, marker_yaw];
-
-    }
 }
 
 
@@ -111,7 +35,8 @@ export function calculateDistance(lpath: any) {
     let y0 = lpath.src.lng;
     let x1 = lpath.dest.lat;
     let y1 = lpath.dest.lng;
-    return Math.sqrt(Math.pow(x0 - x1, 2) + Math.pow(y0 - y1, 2));
+    // return Math.sqrt(Math.pow(x0 - x1, 2) + Math.pow(y0 - y1, 2));
+    return L.latLng([x0,y0]).distanceTo(L.latLng([x1,y1]));
 }
 
 export function calculateTime(lpath: any) {
@@ -124,7 +49,8 @@ export function calDis(src: number[], dest: number[]) {
     let y0 = src[1];
     let x1 = dest[0];
     let y1 = dest[1];
-    return Math.sqrt(Math.pow(x0 - x1, 2) + Math.pow(y0 - y1, 2));
+    // return Math.sqrt(Math.pow(x0 - x1, 2) + Math.pow(y0 - y1, 2));
+    return L.latLng([x0,y0]).distanceTo(L.latLng([x1,y1]));
 }
 
 export function interpolateAndGetLatLng(src:L.LatLng,dest:L.LatLng,time:number,speed:number){
@@ -164,6 +90,9 @@ export function interpolateAndGetLatLng(src:L.LatLng,dest:L.LatLng,time:number,s
 
     }
     else {
+        /* convert speed from meter to lat and long degree */
+        //based on https://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
+        speed = speed/111111;
         Vx = speed / Math.sqrt(Math.pow(tan_of_line, 2) + 1)
         Vy = Vx * tan_of_line;
     }
@@ -178,11 +107,11 @@ export function interpolateAndGetLatLng(src:L.LatLng,dest:L.LatLng,time:number,s
     console.log("Vx" , Vx)
     console.log("Vy" , Vy)
 
-    // //check that path is finished or not
-    // if (calDis([x0, y0], [Vx * time + x0, Vy * time + y0]) >= calDis([x1, y1], [x0, y0])) {
-    //     // console.log("OMID");
-    //     return [[x1, y1], marker_yaw]
-    // }
+    //check that path is finished or not
+    if (calDis([x0, y0], [Vx * time + x0, Vy * time + y0]) >= calDis([x1, y1], [x0, y0])) {
+        // console.log("OMID");
+        return [[x1, y1], marker_yaw]
+    }
 
     //update marker position
     let new_lat_long = [parseFloat((Vx * time + x0).toFixed(8)),
@@ -271,6 +200,50 @@ export function generateSplinePath(positions:{x:number,y:number}[],time:number) 
         ys.push(positions[i].y);
     }
 
+
+}
+
+
+export class CurvePath{
+    _timesArray:number[] = [];
+    _tracePoints:L.LatLng[] = [];
+    _numberOfPoints:number;
+    _splinePath:L.Spline;
+    constructor(splinePath_:L.Spline,number_of_points:number){
+       this._splinePath = splinePath_;
+        this._numberOfPoints = number_of_points;
+    }
+}
+
+export function calculateTracePointsAndTimesArray(curvePath:CurvePath,currentPathSpeed:number){
+    let number_of_point = curvePath._numberOfPoints;
+    let disPoint = Array(number_of_point).fill().map((x,i)=>i/number_of_point);
+    let curveDistance = 0;
+    let currSpline:L.Spline = curvePath._splinePath;
+
+
+    /*********************************************/
+    /*              Times Array                  */
+    /*********************************************/
+    for (let i = 0 ; i  <  currSpline.trace(disPoint).length-1 ; i++){
+        const currPoint = currSpline.trace(disPoint)[i]
+        const nextPoint = currSpline.trace(disPoint)[i+1]
+
+        curveDistance += currPoint.distanceTo(nextPoint)
+        if(curvePath._timesArray.length !== 0){
+            curvePath._timesArray.push(currPoint.distanceTo(nextPoint)/currentPathSpeed+curvePath._timesArray[curvePath._timesArray.length-1])
+        }else{
+            curvePath._timesArray.push(currPoint.distanceTo(nextPoint)/currentPathSpeed)
+        }
+    }
+    //remove zeros from the first of time array
+    curvePath._timesArray.splice(0,number_of_point-1);
+
+    /*********************************************/
+    /*              Trace Points                 */
+    /*********************************************/
+    curvePath._tracePoints = currSpline.trace(disPoint);
+    curvePath._tracePoints.splice(0,number_of_point);
 
 }
 
