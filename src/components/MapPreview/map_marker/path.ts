@@ -127,6 +127,69 @@ export function calDis(src: number[], dest: number[]) {
     return Math.sqrt(Math.pow(x0 - x1, 2) + Math.pow(y0 - y1, 2));
 }
 
+export function interpolateAndGetLatLng(src:L.LatLng,dest:L.LatLng,time:number,speed:number){
+    let x0 = src.lat;
+    let y0 = src.lng;
+    let x1 = dest.lat;
+    let y1 = dest.lng;
+
+
+
+    // Vy divided by Vx is equal to tangent of the line
+    let tan_of_line = null
+    if (x1 - x0 !== 0) {
+        tan_of_line = (y1 - y0) / (x1 - x0)
+    } else {
+        tan_of_line = 'inf'
+    }
+
+
+    // V_total = sqrt(Vx^2+Vy^2) so we can find Vx and Vy with these two terms.
+    // V_total sign is important
+    if (x0 > x1) {
+        speed = -1 * Math.abs(speed)
+    } else {
+        speed = Math.abs(speed)
+    }
+    let Vx = null;
+    let Vy = null;
+    if (tan_of_line === 'inf') {
+        //lpath is when we have infinite tangent
+        Vx = 0;
+        if (y0 > y1) {
+            Vy = -1 * speed;
+        } else {
+            Vy = speed;
+        }
+
+    }
+    else {
+        Vx = speed / Math.sqrt(Math.pow(tan_of_line, 2) + 1)
+        Vy = Vx * tan_of_line;
+    }
+
+    //bearing
+    let bearing_degree = Math.atan2(Vy, Vx) * 180 / Math.PI;
+    let marker_yaw = bearing_degree;
+
+
+    console.log("Tangent" , tan_of_line)
+    console.log("Yaw" , marker_yaw)
+    console.log("Vx" , Vx)
+    console.log("Vy" , Vy)
+
+    // //check that path is finished or not
+    // if (calDis([x0, y0], [Vx * time + x0, Vy * time + y0]) >= calDis([x1, y1], [x0, y0])) {
+    //     // console.log("OMID");
+    //     return [[x1, y1], marker_yaw]
+    // }
+
+    //update marker position
+    let new_lat_long = [parseFloat((Vx * time + x0).toFixed(8)),
+        parseFloat((Vy * time + y0).toFixed(8))]
+    return [new_lat_long, marker_yaw];
+}
+
 
 export function getLatLng(lpath: LinearOPath, time: number): any {
     let x0 = lpath.src.lat;
@@ -192,98 +255,23 @@ export function getLatLng(lpath: LinearOPath, time: number): any {
 
 }
 
+import Spline from 'typescript-cubic-spline';
 
-
-function generateSplinePath(positions) {
+export function generateSplinePath(positions:{x:number,y:number}[],time:number) {
     // Check if the number of positions is sufficient
     if (positions.length < 2) {
         console.error("At least 2 positions are required to generate a spline path.");
         return [];
     }
-
-    // Generate control points for the spline
-    var controlPoints = [];
-    for (var i = 0; i < positions.length; i++) {
-        var prevIdx = i > 0 ? i - 1 : 0;
-        var nextIdx = i < positions.length - 1 ? i + 1 : positions.length - 1;
-        var prevPos = positions[prevIdx];
-        var currPos = positions[i];
-        var nextPos = positions[nextIdx];
-
-        var controlPoint1 = {
-            x: (currPos.x + prevPos.x) / 2,
-            y: (currPos.y + prevPos.y) / 2
-        };
-
-        var controlPoint2 = {
-            x: (currPos.x + nextPos.x) / 2,
-            y: (currPos.y + nextPos.y) / 2
-        };
-
-        controlPoints.push(controlPoint1);
-        controlPoints.push(controlPoint2);
+    let xs:number[] = []
+    let ys:number[] =[]
+    for(let i = 0 ; i < positions.length ; i++)
+    {
+        xs.push(positions[i].x);
+        ys.push(positions[i].y);
     }
 
-    // Generate the spline path
-    var path = [];
-    for (var i = 0; i < positions.length - 1; i++) {
-        var pos = positions[i];
-        var nextPos = positions[i + 1];
-        var cp1 = controlPoints[i * 2];
-        var cp2 = controlPoints[i * 2 + 1];
 
-        var segments = 10; // Number of segments per spline
-        var tDelta = 1 / segments;
-
-        for (var t = 0; t < 1; t += tDelta) {
-            var x =
-                (2 * t * t * t - 3 * t * t + 1) * pos.x +
-                (t * t * t - 2 * t * t + t) * cp1.x +
-                (-2 * t * t * t + 3 * t * t) * nextPos.x +
-                (t * t * t - t * t) * cp2.x;
-
-            var y =
-                (2 * t * t * t - 3 * t * t + 1) * pos.y +
-                (t * t * t - 2 * t * t + t) * cp1.y +
-                (-2 * t * t * t + 3 * t * t) * nextPos.y +
-                (t * t * t - t * t) * cp2.y;
-
-            path.push({ x: x, y: y });
-        }
-    }
-
-    // Add the last position to the path
-    path.push(positions[positions.length - 1]);
-
-    // Calculate angle at each point on the path
-    var pathWithAngle = [];
-    for (var i = 0; i < path.length - 1; i++) {
-        var currPos = path[i];
-        var nextPos = path[i + 1];
-
-        // Calculate direction vector
-        var direction = {
-            x: nextPos.x - currPos.x,
-            y: nextPos.y - currPos.y
-        };
-
-        // Calculate angle in radians
-        var angle = Math.atan2(direction.y, direction.x);
-
-        // Convert angle to degrees
-        var angleInDegrees = (angle * 180) / Math.PI;
-
-        pathWithAngle.push({ x: currPos.x, y: currPos.y, angle: angleInDegrees });
-    }
-
-    // Add the last position with angle to the path
-    pathWithAngle.push({
-        x: path[path.length - 1].x,
-        y: path[path.length - 1].y,
-        angle: pathWithAngle[pathWithAngle.length - 1].angle
-    });
-
-    return pathWithAngle;
 }
 
 /* Example usage  */

@@ -20,11 +20,20 @@ import {
   pathTypeAtom,  addPathToMarkerAtom
 } from '../../store'
 import L, {LatLng, latLng, marker} from 'leaflet'
+import "leaflet-spline";
 import {useCallback, useEffect, useRef, useState} from 'react'
 import './index.css'
 
 import AutoAirCraft from '../../utils/classes/AutoAirCraft.js'
-import {LinearOPath, OPath, getLatLng, toRadians, calculateTime} from './map_marker/path'
+import {
+  LinearOPath,
+  OPath,
+  getLatLng,
+  toRadians,
+  calculateTime,
+  generateSplinePath,
+  interpolateAndGetLatLng
+} from './map_marker/path'
 
 const center = new L.LatLng(34.641955754083504, 50.878976024718725)
 const AutoAirCraftIcon = L.icon({
@@ -55,6 +64,7 @@ function MyComponent () {
   const setMarker = useSetAtom(markersAtom)
   const [mapMarkerArray ,setMarkerArray] = useAtom<any[]>(mapMarkerArrayAtom)
   const [mapCheckpointArray,setMapCheckpointArray] = useAtom<any[][]>(checkpointMarkerArrayAtom)
+  const [mapSplineArray, setMapSplineArray] = useState<L.Spline[]>([])
   const toggleSelection = useSetAtom(toggleMarkerSelectionAtom)
   const time = useAtomValue(timeAtom);
   const [currentMarkerSelected,setCurrentMarkerSelected] = useState<AutoAirCraft>(null);
@@ -96,18 +106,42 @@ function MyComponent () {
         //change latlng array for movement
         curMarker.latlng = [curMarker.lat,curMarker.long]
 
+        let positions:[number, number][] = []
+
         //show checkpoint for each path and save it in mapCheckpoint array
         for(let pathIndex = 0 ; pathIndex < curMarker.path.length; pathIndex++){
           let currPath = curMarker.path[pathIndex];
 
           //add a checkpoint marker to map and save it as state to show every time refresh the page
-          const checkPointMarker = L.marker(([currPath.dest.lat, currPath.dest.lng]),{id:curMarker.id/**for deleting**/}).addTo(map);
+          const checkPointMarker = L.marker(([currPath.dest.lat, currPath.dest.lng]),{id:curMarker.id/**for deleting**/,icon:L.icon({
+              iconUrl:'/textures/pointIcon.png',
+              iconSize:[20,20],
+            })}).addTo(map);
 
           //add an empty array to mapCheckpoint and fill it with path specified for this new marker
           mapCheckpointArray.push([]);
           mapCheckpointArray[markerIndex].push(checkPointMarker);
 
+          //save positions for spline interpolation
+          positions.push([currPath.src.lat, currPath.src.lng])
+          ////last position
+          if(pathIndex === curMarker.path.length-1){
+            positions.push([currPath.dest.lat, currPath.dest.lng])
+          }
         }
+        const newSpline = L.spline(positions,{
+          color: "#222",
+          opacity:0.2,
+          weight: 2,
+          dashArray: '5, 5', dashOffset: '0',
+          smoothing: 0.08,
+          id:curMarker.id//for deleting
+        }).addTo(map)
+
+
+        mapSplineArray.push(newSpline)
+
+
 
         if(curMarker.selected){
           //just for first time concentrate to center of the map
@@ -223,6 +257,7 @@ function MyComponent () {
 
           //add a checkpoint marker to map and save it as state to show every time refresh the page
           const checkPointMarker = L.marker([e.latlng.lat + 0.05*Math.cos(toRadians(newMarker.yaw)), e.latlng.lng + 0.05*Math.sin(toRadians(newMarker.yaw))],{id:newMarker.id/**for deleting**/}).addTo(map);
+
 
           //add an empty array to mapCheckpoint and fill it with path specified for this new marker
           mapCheckpointArray.push([]);
@@ -436,18 +471,82 @@ function MyComponent () {
           }
         }
 
+        let positions:[number,number][] = []
+        for(let i = 0 ; i < marker.path.length ; i++)
+        {
+          let curPath:OPath = marker.path[i]
+          positions.push([curPath.src.lat,curPath.src.lng]);
+
+          /* last one */
+          if(i === marker.path.length-1){
+            positions.push([curPath.dest.lat,curPath.dest.lng])
+          }
+        }
+        console.log(mapSplineArray)
+        let currSpline:L.Spline = mapSplineArray.at(i);
+        if(currSpline!== undefined){
+
+          let number_of_point = 30
+          let disPoint = Array(number_of_point).fill().map((x,i)=>i/number_of_point);
+          console.log(disPoint)
+          let timesArray:number[] = []
+          let curveDistance = 0;
+          for (let i = 0 ; i <  currSpline.trace(disPoint).length-1 ; i++){
+            const currPoint = currSpline.trace(disPoint)[i]
+            const nextPoint = currSpline.trace(disPoint)[i+1]
+            if(!isCreatedMarker){
+              const checkPointMarker = L.marker(([currPoint.lat, currPoint.lng]),{id:marker.id/**for deleting**/,icon:L.icon({
+                  iconUrl:'/textures/pointIcon.png',
+                  iconSize:[20,20],
+                })}).addTo(map);
+            }
+
+            curveDistance += currPoint.distanceTo(nextPoint)
+            // console.log(marker.path[currentPathIndex].speed)
+            // console.log(currPoint.distanceTo(nextPoint))
+            if(timesArray.length !== 0){
+              timesArray.push(currPoint.distanceTo(nextPoint)/277.77+timesArray[timesArray.length-1])
+            }else{
+              timesArray.push(currPoint.distanceTo(nextPoint)/277.77)
+            }
+          }
+          console.log(curveDistance,timesArray)
+          //remove zeros from the first of time array
+          timesArray.splice(0,number_of_point-1);
+          let currentSubPathIndex = 0;
+          for(let t = 0 ; t < timesArray.length-1 ; t++){
+            if(time >= timesArray[t] && time <= timesArray[t+1]){
+              currentSubPathIndex = t;
+              break
+            }
+            else if(t == timesArray.length-2){
+              currentSubPathIndex = timesArray.length-2
+            }
+          }
+
+          let new_position_new_yaw = interpolateAndGetLatLng(
+              currSpline.trace(disPoint)[currentSubPathIndex],currSpline.trace(disPoint)[currentSubPathIndex+1], time-timesArray[currentSubPathIndex],
+              0.01)
+          let new_position = new_position_new_yaw[0]
+          let new_yaw = new_position_new_yaw[1]
+
+          console.log(new_position_new_yaw)
+          mapMarkerArray.at(i).setLatLng( new L.LatLng(new_position[0],new_position[1]));
+          mapMarkerArray.at(i).setRotationAngle(new_yaw)
+        }
+
 
         // |-----5------|-----'---10--------|---------------------20-------------------|
         //              |relative time'
 
-        let relative_time = calculateTime(marker.path[currentPathIndex])-(temp_time-time)
-
-        let new_position_new_yaw = getLatLng(marker.path[currentPathIndex], relative_time)
-        let new_position = new_position_new_yaw[0]
-        let new_yaw = new_position_new_yaw[1]
-
-        mapMarkerArray.at(i).setLatLng( new L.LatLng(new_position[0],new_position[1]));
-        mapMarkerArray.at(i).setRotationAngle(new_yaw)
+        // let relative_time = calculateTime(marker.path[currentPathIndex])-(temp_time-time)
+        //
+        // let new_position_new_yaw = getLatLng(marker.path[currentPathIndex], relative_time)
+        // let new_position = new_position_new_yaw[0]
+        // let new_yaw = new_position_new_yaw[1]
+        //
+        // mapMarkerArray.at(i).setLatLng( new L.LatLng(new_position[0],new_position[1]));
+        // mapMarkerArray.at(i).setRotationAngle(new_yaw)
       }
     }
     ,[time]
