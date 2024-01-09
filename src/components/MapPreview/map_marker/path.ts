@@ -102,10 +102,10 @@ export function interpolateAndGetLatLng(src:L.LatLng,dest:L.LatLng,time:number,s
     let marker_yaw = bearing_degree;
 
 
-    console.log("Tangent" , tan_of_line)
-    console.log("Yaw" , marker_yaw)
-    console.log("Vx" , Vx)
-    console.log("Vy" , Vy)
+    // console.log("Tangent" , tan_of_line)
+    // console.log("Yaw" , marker_yaw)
+    // console.log("Vx" , Vx)
+    // console.log("Vy" , Vy)
 
     //check that path is finished or not
     if (calDis([x0, y0], [Vx * time + x0, Vy * time + y0]) >= calDis([x1, y1], [x0, y0])) {

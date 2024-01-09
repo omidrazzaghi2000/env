@@ -389,7 +389,6 @@ function MyComponent () {
 
 
       let currentSelectedMarkerIndex = findIndex(markers, currentMarkerSelected);
-      console.log(currentMarkerSelected)
       if (currentSelectedMarkerIndex !== undefined) {
         /* add path to store of current selected marker */
         addPathToMarker(
@@ -400,14 +399,36 @@ function MyComponent () {
             )
         )
 
-        /* update new spline and calculate options of curved path like trace point and times array */
-        let currentMarkerSpline = mapSplineArray.at(currentSelectedMarkerIndex);
-        currentMarkerSpline?.addLatLng(pointB).addTo(map)
+        /* Calculate positions */
+        let positions = []
+        for(let i = 0 ; i < currentMarkerSelected.path.length; i++){
+          positions.push([currentMarkerSelected.path[i].src.lat,currentMarkerSelected.path[i].src.lng]);
+          /* Last one */
+          if(i == currentMarkerSelected.path.length-1){
+            positions.push([currentMarkerSelected.path[i].dest.lat,currentMarkerSelected.path[i].dest.lng]);
+          }
+        }
 
-        currentMarkerSelected.curvedPath = new CurvePath(
-            currentMarkerSpline!,100
-        )
-        calculateTracePointsAndTimesArray(currentMarkerSelected.curvedPath,currentMarkerSelected.path[currentMarkerSelected.path.length-1].speed)
+        /* Delete its spline and then replace it with new spline */
+        map.removeLayer(mapSplineArray[currentSelectedMarkerIndex]);
+        mapSplineArray[currentSelectedMarkerIndex] = L.spline(positions,{
+          color: "#222",
+          opacity:0.2,
+          weight: 2,
+          dashArray: '5, 5', dashOffset: '0',
+          smoothing: 0.08,
+          id:currentMarkerSelected.id//for deleting
+        })
+        mapSplineArray[currentSelectedMarkerIndex].addTo(map)
+        
+        /* update new spline and calculate options of curved path like trace point and times array */
+        // let currentMarkerSpline = mapSplineArray.at(currentSelectedMarkerIndex);
+        // currentMarkerSpline?.addLatLng(pointB).addTo(map)
+
+        // currentMarkerSelected.curvedPath = new CurvePath(
+        //     currentMarkerSpline!,100
+        // )
+        // calculateTracePointsAndTimesArray(currentMarkerSelected.curvedPath,currentMarkerSelected.path[currentMarkerSelected.path.length-1].speed)
 
 
 
@@ -415,7 +436,12 @@ function MyComponent () {
 
 
         /* add a checkpoint marker to map and save it as state to show every time refresh the page */
-        const checkPointMarker = L.marker(pointB, {id: currentMarkerSelected.id/**for deleting**/}).addTo(map);
+        const checkPointMarker = L.marker(pointB, {
+          icon:L.icon({
+            iconUrl:'/textures/pointIcon.png',
+            iconSize:[20,20],
+          }),
+          id: currentMarkerSelected.id/**for deleting**/}).addTo(map);
 
         /* save this marker to mapCheckpointArray */
         mapCheckpointArray[currentSelectedMarkerIndex].push(checkPointMarker);
