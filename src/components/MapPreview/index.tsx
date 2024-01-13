@@ -181,7 +181,6 @@ function MyComponent () {
   //                             //
   //#############################//
   useEffect(function () {
-
         for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
           let curMarker = markers[markerIndex]
           let selectedMapMarker = mapMarkerArray[markerIndex]
@@ -311,7 +310,8 @@ function MyComponent () {
 
             //update marker path in markers array in store
             addMarker(newMarker)
-            toggleSelection(newMarker.id)
+            setTimeout(()=>toggleSelection(newMarker.id),100)
+
 
             //remove box
             var LatLongShower = element?.querySelector('.lat-long-shower')

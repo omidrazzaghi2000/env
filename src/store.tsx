@@ -318,7 +318,7 @@ export const toggleMarkerSelectionAtom = atom(
     set(markersAtom, markers =>
       markers.map(m => ({
         ...m,
-        selected: m.id === markerId ? !m.selected : false
+        selected: m.id === markerId
       }))
     )
   }
