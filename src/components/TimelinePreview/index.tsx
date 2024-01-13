@@ -67,7 +67,7 @@ export const TimelinePreview = (props: any) => {
   const autoScrollWhenPlay = useRef<boolean>(true);
   const [isShowingOption,setIsShowingOption] = useState(false);
   const timelineState = useRef<TimelineState>(null);
-  const [scale, setScale] = useState(5);
+  const [scale, setScale] = useState(20);
   const [scaleSplitCount, setScaleSplitCount] = useState(10);
   const [scaleWidth, setScaleWidth] = useState(160);
   const [startLeft, setStartLeft] = useState(20);
