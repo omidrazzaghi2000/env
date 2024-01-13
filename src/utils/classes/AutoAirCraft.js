@@ -14,7 +14,6 @@ export default class AutoAirCraft{
         this.path_number = 0 // this member is for showing the last path of marker
         this.isAllPathFinished = false;
         this.selected = false;
-        this.curvePath = undefined;
 
     }
     

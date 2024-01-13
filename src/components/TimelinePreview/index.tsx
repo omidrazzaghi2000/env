@@ -110,7 +110,7 @@ export const TimelinePreview = (props: any) => {
         startLeft={startLeft}
         scaleSplitCount={scaleSplitCount}
         style={{ width: '100%' }}
-        gridSnap={true}
+        gridSnap={false}
         editorData={getEditorData()}
         effects={mockEffect}
         onClickRow={function (e, params) {

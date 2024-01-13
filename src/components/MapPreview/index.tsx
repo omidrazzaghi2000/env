@@ -63,6 +63,7 @@ function MyComponent () {
   const markers = useAtomValue(markersAtom)
   const setMarker = useSetAtom(markersAtom)
   const [mapMarkerArray ,setMarkerArray] = useAtom<any[]>(mapMarkerArrayAtom)
+  const [markerCurvedPathArray, setMarkerCurvedPathArray] = useState<CurvePath[]>([])
   const [mapCheckpointArray,setMapCheckpointArray] = useAtom<any[][]>(checkpointMarkerArrayAtom)
   const [mapSplineArray, setMapSplineArray] = useState<L.Spline[]>([])
   const toggleSelection = useSetAtom(toggleMarkerSelectionAtom)
@@ -78,11 +79,15 @@ function MyComponent () {
 
   }
   const addMarker = (marker: AutoAirCraft) =>
-    setMarker(markers => [...markers, marker])
+      setMarker(markers => [...markers, marker])
 
   map.attributionControl.setPrefix(false)
 
-  //for creating marker and path inside th map for the first time
+  //#############################################################//
+  //                                                             //
+  //for creating marker and path inside th map for the first time//
+  //                                                             //
+  //#############################################################//
   useEffect(function () {
     if(!isCreatedMarker){
       for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
@@ -137,13 +142,12 @@ function MyComponent () {
           smoothing: 0.08,
           id:curMarker.id//for deleting
         }).addTo(map)
-
-
         mapSplineArray.push(newSpline)
 
-        /* Upadte curved path options for markers */
-        // curMarker
-        // calculateTracePointsAndTimesArray(newSpline, 277.77 )
+        /* update curve path characteristics */
+        let newCurvedPath = new CurvePath(newSpline,60)
+        calculateTracePointsAndTimesArray(newCurvedPath,277.77)
+        markerCurvedPathArray.push(newCurvedPath)
 
 
 
@@ -171,141 +175,175 @@ function MyComponent () {
 
 
 
-  //for centering selected marker
+  //#############################//
+  //                             //
+  //for centering selected marker//
+  //                             //
+  //#############################//
   useEffect(function () {
 
-      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-        let curMarker = markers[markerIndex]
-        let selectedMapMarker = mapMarkerArray[markerIndex]
-        if (curMarker.selected) {
+        for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+          let curMarker = markers[markerIndex]
+          let selectedMapMarker = mapMarkerArray[markerIndex]
+          if (curMarker.selected) {
 
-          //map center changing
-          map.invalidateSize(true)
-          map.flyTo(
-            [selectedMapMarker._latlng.lat, selectedMapMarker._latlng.lng],
-            map.getZoom()
-          )
-
-          //change icon
-          // map.removeLayer(selected)
-          selectedMapMarker.setIcon(AutoAirCraftSelectedIcon);
-
-          //update current marker selected in the state of the map
-          setCurrentMarkerSelected(curMarker)
-
-
-        }else{
-          selectedMapMarker.setIcon(AutoAirCraftIcon);
-        }
-        selectedMapMarker.setRotationAngle(curMarker.yaw);
-
-
-      }
-    },
-    markers.map((marker)=>marker.selected)
-  )
-
-  //for showing Lat long when a user wants to add marker to the map
-  useEffect(
-    function () {
-      //add listener for map to show lat long
-      var element = document.getElementById('mainMapContainer')
-      var drawShower = function (event: any) {
-        if (showVHLine) {
-          //change cursor
-          element?.classList.add('arrow-marker-cursor')
-
-          let offsetFromPointer = 0
-          var x = event.containerPoint.x + offsetFromPointer
-          var y = event.containerPoint.y - offsetFromPointer
-
-          var LatLongShower = element?.querySelector('.lat-long-shower')
-          var LatLongShowerTrans = 'translate(' + x + `px, ${y}px)`
-          if (!LatLongShower) {
-            LatLongShower = document.createElement('div')
-            LatLongShower.classList.add('lat-long-shower')
-
-            element?.appendChild(LatLongShower)
-          }
-
-          LatLongShower.innerHTML = `(${event.latlng.lat},${event.latlng.lng})`
-          LatLongShower.style.transform = LatLongShowerTrans
-        }
-      }
-
-      map.addEventListener('mousemove', drawShower, true)
-
-      let rightClickAddMarker = function (e: any) {
-        // e.preventDefault();
-        if (showVHLine) {
-          let newMarker = new AutoAirCraft(
-            'Aziz',
-            e.latlng.lat,
-            e.latlng.lng,
-            AutoAirCraftIcon
-          )
-
-          let mapMarker = L.marker([newMarker.lat, newMarker.long], {
-                    icon: newMarker.icon,id:newMarker.id,
-                  }).addTo(map)
-          mapMarker.setRotationAngle(newMarker.yaw)
-          mapMarkerArray.push(mapMarker)
-
-
-          newMarker.path.push(
-            new LinearOPath(
-              L.latLng(e.latlng.lat, e.latlng.lng),
-              L.latLng(e.latlng.lat + 0.05*Math.cos(toRadians(newMarker.yaw)), e.latlng.lng + 0.05*Math.sin(toRadians(newMarker.yaw)))
+            //map center changing
+            map.invalidateSize(true)
+            map.flyTo(
+                [selectedMapMarker._latlng.lat, selectedMapMarker._latlng.lng],
+                map.getZoom()
             )
-          )
 
-          //add a checkpoint marker to map and save it as state to show every time refresh the page
-          const checkPointMarker = L.marker([e.latlng.lat + 0.05*Math.cos(toRadians(newMarker.yaw)), e.latlng.lng + 0.05*Math.sin(toRadians(newMarker.yaw))],{id:newMarker.id/**for deleting**/}).addTo(map);
+            //change icon
+            // map.removeLayer(selected)
+            selectedMapMarker.setIcon(AutoAirCraftSelectedIcon);
 
-
-          //add an empty array to mapCheckpoint and fill it with path specified for this new marker
-          mapCheckpointArray.push([]);
-          mapCheckpointArray[markers.length].push(checkPointMarker);
-
-          //add event listener to map marker
-          mapMarker.on("click",function()
-          {
-            toggleSelection(newMarker.id);
-          })
+            //update current marker selected in the state of the map
+            setCurrentMarkerSelected(curMarker)
 
 
-          //update marker path in markers array in store
-          addMarker(newMarker)
-          toggleSelection(newMarker.id)
-
-          console.log(newMarker)
-
-          //remove box
-          var LatLongShower = element?.querySelector('.lat-long-shower')
-          if (LatLongShower) {
-            element?.removeChild(LatLongShower)
+          }else{
+            selectedMapMarker.setIcon(AutoAirCraftIcon);
           }
+          selectedMapMarker.setRotationAngle(curMarker.yaw);
 
-          setShowVHLine(false)
 
-          //restore cursor
-          element?.classList.remove('arrow-marker-cursor')
-
-          // remove box shower
-          map.removeEventListener('mousemove', drawShower, true)
-
-          // remove itself
-          map.removeEventListener('contextmenu', rightClickAddMarker, true)
         }
-      }
-
-      //add event listener for right click
-      map?.addEventListener('contextmenu', rightClickAddMarker, true)
-    },
-    [showVHLine]
+      },
+      markers.map((marker)=>marker.selected)
   )
 
-  //for showing line from last point for user to help him add a path to marker
+  //###############################################################//
+  //                                                               //
+  //for showing Lat long when a user wants to add marker to the map//
+  //                                                               //
+  //###############################################################//
+  useEffect(
+      function () {
+        //add listener for map to show lat long
+        var element = document.getElementById('mainMapContainer')
+        var drawShower = function (event: any) {
+          if (showVHLine) {
+            //change cursor
+            element?.classList.add('arrow-marker-cursor')
+
+            let offsetFromPointer = 0
+            var x = event.containerPoint.x + offsetFromPointer
+            var y = event.containerPoint.y - offsetFromPointer
+
+            var LatLongShower = element?.querySelector('.lat-long-shower')
+            var LatLongShowerTrans = 'translate(' + x + `px, ${y}px)`
+            if (!LatLongShower) {
+              LatLongShower = document.createElement('div')
+              LatLongShower.classList.add('lat-long-shower')
+
+              element?.appendChild(LatLongShower)
+            }
+
+            LatLongShower.innerHTML = `(${event.latlng.lat},${event.latlng.lng})`
+            LatLongShower.style.transform = LatLongShowerTrans
+          }
+        }
+
+        map.addEventListener('mousemove', drawShower, true)
+
+        let rightClickAddMarker = function (e: any) {
+          // e.preventDefault();
+          if (showVHLine) {
+            let newMarker = new AutoAirCraft(
+                'Aziz',
+                e.latlng.lat,
+                e.latlng.lng,
+                AutoAirCraftIcon
+            )
+
+            let mapMarker = L.marker([newMarker.lat, newMarker.long], {
+              icon: newMarker.icon,id:newMarker.id,
+            }).addTo(map)
+            mapMarker.setRotationAngle(newMarker.yaw)
+            mapMarkerArray.push(mapMarker)
+
+            newMarker.path.push(
+                new LinearOPath(
+                    L.latLng(e.latlng.lat, e.latlng.lng),
+                    L.latLng(e.latlng.lat + 0.05*Math.cos(toRadians(newMarker.yaw)), e.latlng.lng + 0.05*Math.sin(toRadians(newMarker.yaw)))
+                )
+            )
+
+            let positions = [newMarker.path[0].src,newMarker.path[0].dest]
+            const newSpline = L.spline(positions,{
+              color: "#222",
+              opacity:0.2,
+              weight: 2,
+              dashArray: '5, 5', dashOffset: '0',
+              smoothing: 0.08,
+              id:newMarker.id//for deleting
+            }).addTo(map)
+            mapSplineArray.push(newSpline)
+
+            /* update curve path characteristics */
+            let newCurvePath = new CurvePath(newSpline,60);
+            calculateTracePointsAndTimesArray(newCurvePath,277.77);
+            markerCurvedPathArray.push(newCurvePath)
+
+
+            //add a checkpoint marker to map and save it as state to show every time refresh the page
+            const checkPointMarker = L.marker([e.latlng.lat + 0.05*Math.cos(toRadians(newMarker.yaw)), e.latlng.lng + 0.05*Math.sin(toRadians(newMarker.yaw))],{
+              id:newMarker.id/**for deleting**/,
+              icon:L.icon({
+                iconUrl:'/textures/pointIcon.png',
+                iconSize:[20,20],
+              })
+
+            }).addTo(map);
+
+            //add an empty array to mapCheckpoint and fill it with path specified for this new marker
+            mapCheckpointArray.push([]);
+            mapCheckpointArray[markers.length].push(checkPointMarker);
+
+
+            //add event listener to map marker
+            mapMarker.on("click",function()
+            {
+              toggleSelection(newMarker.id);
+            })
+
+
+            //update marker path in markers array in store
+            addMarker(newMarker)
+            toggleSelection(newMarker.id)
+
+            //remove box
+            var LatLongShower = element?.querySelector('.lat-long-shower')
+            if (LatLongShower) {
+              element?.removeChild(LatLongShower)
+            }
+
+            setShowVHLine(false)
+
+            //restore cursor
+            element?.classList.remove('arrow-marker-cursor')
+
+            // remove box shower
+            map.removeEventListener('mousemove', drawShower, true)
+
+            // remove itself
+            map.removeEventListener('contextmenu', rightClickAddMarker, true)
+          }
+        }
+
+        //add event listener for right click
+        map?.addEventListener('contextmenu', rightClickAddMarker, true)
+      },
+      [showVHLine]
+  )
+
+  //######################################################################//
+  //                                                                      //
+  //showing line from last point for user to help him add a path to marker//
+  //                                                                      //
+  //######################################################################//
+
   useEffect(() => {
 
     function drawLineFromMouseToLastPath (event:any){
@@ -420,20 +458,11 @@ function MyComponent () {
           id:currentMarkerSelected.id//for deleting
         })
         mapSplineArray[currentSelectedMarkerIndex].addTo(map)
-        
-        /* update new spline and calculate options of curved path like trace point and times array */
-        // let currentMarkerSpline = mapSplineArray.at(currentSelectedMarkerIndex);
-        // currentMarkerSpline?.addLatLng(pointB).addTo(map)
 
-        // currentMarkerSelected.curvedPath = new CurvePath(
-        //     currentMarkerSpline!,100
-        // )
-        // calculateTracePointsAndTimesArray(currentMarkerSelected.curvedPath,currentMarkerSelected.path[currentMarkerSelected.path.length-1].speed)
-
-
-
-
-
+        /* update curve path characteristics */
+        let newCurvedPath = new CurvePath(mapSplineArray[currentSelectedMarkerIndex],60);
+        calculateTracePointsAndTimesArray(newCurvedPath,277.77);
+        markerCurvedPathArray[currentSelectedMarkerIndex] = newCurvedPath;
 
         /* add a checkpoint marker to map and save it as state to show every time refresh the page */
         const checkPointMarker = L.marker(pointB, {
@@ -491,41 +520,20 @@ function MyComponent () {
   }, [showAddPathLine]);
 
 
-  //update marker position
+  //###############################//
+  //                               //
+  //    update marker position     //
+  //                               //
+  //###############################//
   useEffect(
-    function(){
+      function(){
 
-      for(let i = 0 ; i < markers.length ; i++)
-      {
+        for(let i = 0 ; i < markers.length ; i++)
+        {
 
+          let timesArray = markerCurvedPathArray[i]._timesArray;
+          let tracePoints =  markerCurvedPathArray[i]._tracePoints;
 
-        let currSpline:L.Spline = mapSplineArray.at(i);
-        if(currSpline!== undefined){
-
-          let number_of_point = 60
-          let disPoint = Array(number_of_point).fill().map((x,i)=>i/number_of_point);
-          let timesArray:number[] = []
-          let curveDistance = 0;
-          for (let i = 0 ; i <  currSpline.trace(disPoint).length-1 ; i++){
-            const currPoint = currSpline.trace(disPoint)[i]
-            const nextPoint = currSpline.trace(disPoint)[i+1]
-            if(!isCreatedMarker){
-              // const checkPointMarker = L.marker(([currPoint.lat, currPoint.lng]),{id:marker.id/**for deleting**/,icon:L.icon({
-              //     iconUrl:'/textures/pointIcon.png',
-              //     iconSize:[20,20],
-              //   })}).addTo(map);
-
-            }
-
-            curveDistance += currPoint.distanceTo(nextPoint)
-            if(timesArray.length !== 0){
-              timesArray.push(currPoint.distanceTo(nextPoint)/277.77+timesArray[timesArray.length-1])
-            }else{
-              timesArray.push(currPoint.distanceTo(nextPoint)/277.77)
-            }
-          }
-          //remove zeros from the first of time array
-          timesArray.splice(0,number_of_point-1);
           let currentSubPathIndex = 0;
           for(let t = 0 ; t < timesArray.length-1 ; t++){
             if(time >= timesArray[t] && time <= timesArray[t+1]){
@@ -536,8 +544,7 @@ function MyComponent () {
               currentSubPathIndex = timesArray.length-2
             }
           }
-          let tracePoints = currSpline.trace(disPoint);
-          tracePoints.splice(0,number_of_point)
+
           let new_position_new_yaw = interpolateAndGetLatLng(
               tracePoints[currentSubPathIndex],tracePoints[currentSubPathIndex+1], time-timesArray[currentSubPathIndex],
               277.77)
@@ -546,23 +553,10 @@ function MyComponent () {
 
           mapMarkerArray.at(i).setLatLng( new L.LatLng(new_position[0],new_position[1]));
           mapMarkerArray.at(i).setRotationAngle(new_yaw)
+
         }
-
-
-        // |-----5------|-----'---10--------|---------------------20-------------------|
-        //              |relative time'
-
-        // let relative_time = calculateTime(marker.path[currentPathIndex])-(temp_time-time)
-        //
-        // let new_position_new_yaw = getLatLng(marker.path[currentPathIndex], relative_time)
-        // let new_position = new_position_new_yaw[0]
-        // let new_yaw = new_position_new_yaw[1]
-        //
-        // mapMarkerArray.at(i).setLatLng( new L.LatLng(new_position[0],new_position[1]));
-        // mapMarkerArray.at(i).setRotationAngle(new_yaw)
       }
-    }
-    ,[time]
+      ,[time]
   )
 
 
@@ -573,14 +567,14 @@ function MyComponent () {
 export function MapPreview () {
   console.log("Map Preview Created.")
   return (
-    <MapContainer
-      id='mainMapContainer'
-      center={center}
-      zoom={13}
-      style={{ height: '100%' }}
-    >
-      <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
-      <MyComponent />
-    </MapContainer>
+      <MapContainer
+          id='mainMapContainer'
+          center={center}
+          zoom={13}
+          style={{ height: '100%' }}
+      >
+        <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
+        <MyComponent />
+      </MapContainer>
   )
 }

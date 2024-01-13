@@ -40,19 +40,18 @@ export function MarkerProperties({
 
 
 
-    let new_position_new_yaw = getLatLng(marker.path[0], time)
-    let new_position = new_position_new_yaw[0]
-    let new_yaw = new_position_new_yaw[1]
-
-    setPositionParams(
-      function () {
-        return {
-          yaw: new_yaw,
-          lat: new_position[0],
-          lng: new_position[1]
-        }
-      }
-    )
+    // let new_position_new_yaw = getLatLng(marker.path[0], time)
+    // let new_position = new_position_new_yaw[0]
+    // let new_yaw = new_position_new_yaw[1]
+    //
+    // setPositionParams(
+    //   {
+    //       yaw: new_yaw,
+    //       lat: new_position[0],
+    //       lng: new_position[1]
+    //     }
+    //
+    // )
 
   }, [time, marker.selected])
 
@@ -69,6 +68,7 @@ export function MarkerProperties({
     pane.current.addBinding(marker, "name").on("change", handleChange);
 
     pane.current.addBlade({ view: "separator" });
+
 
     pane.current.addBinding(positionParams, 'lat', { readonly: true, format: (v: number) => v.toFixed(5), })
     pane.current.addBinding(positionParams, 'lng', { readonly: true, format: (v: number) => v.toFixed(5), })
