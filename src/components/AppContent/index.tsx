@@ -7,6 +7,7 @@ import { MapPreview } from "../MapPreview";
 import { TimelinePreview } from "../TimelinePreview";
 import { useAtomValue } from "jotai";
 import { markersAtom, modeAtom } from "../../store";
+import ThreeDMapViewer from "../ThreeDMapViewer/index.jsx";
 
 export function AppContent() {
   console.log("App Content Created.")
@@ -64,6 +65,23 @@ export function AppContent() {
                 <TimelinePreview/>
               </Panel>
             </>
+          )}
+          {mode.map_3d && (
+              <>
+                <PanelResizeHandle className="h-2 grid place-items-center transition-all hover:bg-white/40 rounded-sm my-1">
+                  <Bars2Icon className="h-4 -m-1 text-white/50" />
+                </PanelResizeHandle>
+
+                <Panel
+                    id="timeline"
+                    style={{backgroundColor:'#191B1D'}}
+                    order={3}
+                    collapsible
+                    className="isolate shadow-inner shadow-white/5 ring-offset-white/10 ring-offset-1 ring-1 ring-black/20 bg-neutral-900 bg-[conic-gradient(#202020_90deg,#313131_90deg_180deg,#202020_180deg_270deg,#313131_270deg)] bg-repeat bg-left-top bg-[length:20px_20px] rounded-lg"
+                >
+                  <ThreeDMapViewer  ></ThreeDMapViewer>
+                </Panel>
+              </>
           )}
         </PanelGroup>
       </Panel>

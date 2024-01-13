@@ -73,7 +73,8 @@ export const debugAtom = atom(false)
 
 export const modeAtom = atomWithStorage('mode', {
   map: true,
-  timeline: false
+  timeline: false,
+  map_3d : false
 })
 
 export const activeModesAtom = atom(get => {

@@ -3,6 +3,7 @@ import {
   CodeBracketIcon,
   PaintBrushIcon,
   MapIcon,
+   CubeIcon,
   PhotoIcon,
 } from "@heroicons/react/24/solid";
 import * as Toolbar from "@radix-ui/react-toolbar";
@@ -34,6 +35,7 @@ export function AppToolbar() {
             modes.reduce((acc, mode) => ({ ...acc, [mode]: true }), {
               map: false,
               timeline: false,
+              map_3d:false,
             })
           )
         }
@@ -48,6 +50,11 @@ export function AppToolbar() {
             value: "timeline",
             label: "Timeline",
             icon: CodeBracketIcon,
+          },
+          {
+            value: "map_3d",
+            label: "3D Map",
+            icon: CubeIcon,
           },
           
         ].map(({ value, label, icon: Icon }) => (
