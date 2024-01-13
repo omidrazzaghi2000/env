@@ -23,6 +23,7 @@ import L, {LatLng, latLng, marker} from 'leaflet'
 import "leaflet-spline";
 import {useCallback, useEffect, useRef, useState} from 'react'
 import './index.css'
+import Topography from 'leaflet-topography'
 
 import AutoAirCraft from '../../utils/classes/AutoAirCraft.js'
 import {
@@ -80,7 +81,9 @@ function MyComponent () {
   }
   const addMarker = (marker: AutoAirCraft) =>
       setMarker(markers => [...markers, marker])
-
+  const options = {
+    token: 'pk.eyJ1Ijoib21pZHJhenphZ2hpMjAwMCIsImEiOiJjbGo1YTFzdXgwYzh2M3BxeWN2Yzg5MzVhIn0.-Ju3wtd6vIMP7YL1VKh4XQ'
+  }
   map.attributionControl.setPrefix(false)
 
   //#############################################################//
@@ -90,6 +93,9 @@ function MyComponent () {
   //#############################################################//
   useEffect(function () {
     if(!isCreatedMarker){
+
+
+
       for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
         let curMarker = markers[markerIndex]
         let mapMarker = L.marker([curMarker.lat, curMarker.long], {
@@ -554,10 +560,15 @@ function MyComponent () {
           mapMarkerArray.at(i).setLatLng( new L.LatLng(new_position[0],new_position[1]));
           mapMarkerArray.at(i).setRotationAngle(new_yaw)
 
+
+
+
         }
       }
       ,[time]
   )
+
+
 
 
 

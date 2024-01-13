@@ -33,6 +33,7 @@
     "leaflet": "^1.9.4",
     "leaflet-rotatedmarker": "^0.2.0",
     "leaflet-spline": "^0.2.0",
+    "leaflet-topography": "^0.2.1",
     "lottie-web": "^5.12.2",
     "mapbox-gl": "^3.0.1",
     "maptalks": "^1.0.0-rc.29",
