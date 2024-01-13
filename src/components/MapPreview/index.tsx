@@ -17,7 +17,7 @@ import {
   mapMarkerArrayAtom,
   checkpointMarkerArrayAtom,
   showAddPathLineAtom,
-  pathTypeAtom,  addPathToMarkerAtom
+  pathTypeAtom, addPathToMarkerAtom, curvePathArrayAtom
 } from '../../store'
 import L, {LatLng, latLng, marker} from 'leaflet'
 import "leaflet-spline";
@@ -63,7 +63,7 @@ function MyComponent () {
   const markers = useAtomValue(markersAtom)
   const setMarker = useSetAtom(markersAtom)
   const [mapMarkerArray ,setMarkerArray] = useAtom<any[]>(mapMarkerArrayAtom)
-  const [markerCurvedPathArray, setMarkerCurvedPathArray] = useState<CurvePath[]>([])
+  const [markerCurvedPathArray, setMarkerCurvedPathArray] = useAtom(curvePathArrayAtom)
   const [mapCheckpointArray,setMapCheckpointArray] = useAtom<any[][]>(checkpointMarkerArrayAtom)
   const [mapSplineArray, setMapSplineArray] = useState<L.Spline[]>([])
   const toggleSelection = useSetAtom(toggleMarkerSelectionAtom)

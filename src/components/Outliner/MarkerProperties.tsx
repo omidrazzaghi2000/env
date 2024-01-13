@@ -1,12 +1,13 @@
 import { CursorArrowRippleIcon } from "@heroicons/react/24/outline";
-import {Light, isLightPaintingAtom, timeAtom, isPathPaletteOpenAtom} from "../../store";
+import {Light, isLightPaintingAtom, timeAtom, isPathPaletteOpenAtom, curvePathArrayAtom} from "../../store";
 import {PrimitiveAtom, useAtom, useAtomValue, useSetAtom} from "jotai";
 import {useCallback, useEffect, useRef, useState} from "react";
 import { toast } from "sonner";
 import { ButtonApi, Pane } from "tweakpane";
 import AutoAirCraft from '../../utils/classes/AutoAirCraft.js';
-import { calculateTime, getLatLng } from "../MapPreview/map_marker/path";
+import {calculateTime, getLatLng, interpolateAndGetLatLng} from "../MapPreview/map_marker/path";
 import './index.css'
+import L from "leaflet";
 export function MarkerProperties({
   markerAtom,
 }: {
@@ -17,6 +18,9 @@ export function MarkerProperties({
   const ref = useRef<HTMLDivElement>(null!);
   const pane = useRef<Pane>(null!);
   const time = useAtomValue(timeAtom);
+  const markerCurvedPathArray = useAtomValue(curvePathArrayAtom);
+  const currentCurvedPath = markerCurvedPathArray.find((cp) => cp._splinePath.options.id === marker.id)
+
   const [positionParams, setPositionParams] = useState({
     lat: marker.latlng[0],
     lng: marker.latlng[1],
@@ -40,18 +44,34 @@ export function MarkerProperties({
 
 
 
-    // let new_position_new_yaw = getLatLng(marker.path[0], time)
-    // let new_position = new_position_new_yaw[0]
-    // let new_yaw = new_position_new_yaw[1]
-    //
-    // setPositionParams(
-    //   {
-    //       yaw: new_yaw,
-    //       lat: new_position[0],
-    //       lng: new_position[1]
-    //     }
-    //
-    // )
+    let timesArray = currentCurvedPath._timesArray;
+    let tracePoints =  currentCurvedPath._tracePoints;
+
+    let currentSubPathIndex = 0;
+    for(let t = 0 ; t < timesArray.length-1 ; t++){
+      if(time >= timesArray[t] && time <= timesArray[t+1]){
+        currentSubPathIndex = t;
+        break
+      }
+      else if(t == timesArray.length-2){
+        currentSubPathIndex = timesArray.length-2
+      }
+    }
+
+    let new_position_new_yaw = interpolateAndGetLatLng(
+        tracePoints[currentSubPathIndex],tracePoints[currentSubPathIndex+1], time-timesArray[currentSubPathIndex],
+        277.77)
+    let new_position = new_position_new_yaw[0]
+    let new_yaw = new_position_new_yaw[1]
+
+    setPositionParams(
+      {
+          yaw: new_yaw,
+          lat: new_position[0],
+          lng: new_position[1]
+        }
+
+    )
 
   }, [time, marker.selected])
 

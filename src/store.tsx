@@ -416,7 +416,7 @@ export const checkpointMarkerArrayAtom = atom([]);
 
 //marker properties
 export const isPathPaletteOpenAtom = atom(false);
-
+export const curvePathArrayAtom = atom([])
 //timeline
 export const timelineCursorLastPostionAtom = atom(0);
 export const timelineStateAtom = atom(null);
