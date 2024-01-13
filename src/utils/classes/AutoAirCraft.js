@@ -8,6 +8,7 @@ export default class AutoAirCraft{
         this.lat = lat;
         this.long = long;
         this.alt = 0;
+        this.pitch = 0;
         this.latlng = [lat,long];
         this.icon=icon;
         this.yaw=Math.random() * 360 - 180;

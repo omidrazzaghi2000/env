@@ -24,7 +24,9 @@ export function MarkerProperties({
   const [positionParams, setPositionParams] = useState({
     lat: marker.latlng[0],
     lng: marker.latlng[1],
-    yaw: marker.yaw
+    yaw: marker.yaw,
+    alt: marker.alt,
+    pitch: marker.pitch
   });
   const handleChange = useCallback(
     (e: any) => {
@@ -68,7 +70,9 @@ export function MarkerProperties({
       {
           yaw: new_yaw,
           lat: new_position[0],
-          lng: new_position[1]
+          lng: new_position[1],
+          alt:0.0, //TODO: must get from interpolate and get position function
+          pitch:0.0, //TODO: must get from interpolate and get position function
         }
 
     )
@@ -92,7 +96,9 @@ export function MarkerProperties({
 
     pane.current.addBinding(positionParams, 'lat', { readonly: true, format: (v: number) => v.toFixed(5), })
     pane.current.addBinding(positionParams, 'lng', { readonly: true, format: (v: number) => v.toFixed(5), })
-    pane.current.addBinding(positionParams, 'yaw', { readonly: true, format: (v: number) => v.toFixed(5), })
+    pane.current.addBinding(positionParams, 'alt', { readonly: true, format: (v: number) => v.toFixed(2), })
+    pane.current.addBinding(positionParams, 'yaw', { readonly: true, format: (v: number) => v.toFixed(3), })
+    pane.current.addBinding(positionParams, 'pitch', { readonly: true, format: (v: number) => v.toFixed(3), })
 
     const f1 = pane.current.addFolder({
       title: 'Path',
