@@ -8,7 +8,7 @@ import { TimelinePreview } from "../TimelinePreview";
 import { useAtomValue } from "jotai";
 import { markersAtom, modeAtom } from "../../store";
 import ThreeDMapViewer from "../ThreeDMapViewer/index.jsx";
-import {readADSBFile} from "../ADSB/ADSBReader";
+import {readADSBFile} from "../ADSB/readFile.jsx";
 
 export function AppContent() {
   console.log("App Content Created.")
