@@ -288,6 +288,7 @@ export const selectCameraAtom = atom(
 import AutoAirCraft from './utils/classes/AutoAirCraf.js'
 import Scenario from './utils/classes/scenario.js'
 import {OPath} from "./components/MapPreview/map_marker/path";
+import L from "leaflet";
 export const markersAtom = atomWithStorage<AutoAirCraft[]>('markers', [])
 export const markerAtomsAtom = splitAtom(markersAtom)
 export const mainScenario = atomWithStorage<Scenario>(
@@ -427,3 +428,14 @@ export const timeAtom = atom(0);
 
 /////////////////////////////// ADSB ////////////////////////////////////////////
 export const currentMarkerSelectedAtom = atom(null);
+
+
+export type MarkerTableRow = {
+  markerId:number,
+  markerMap:L.Marker,
+  updated:boolean,
+  ttl:number,
+  selected:boolean,
+  createdTime?:number
+}
+export const MarkerTableAtom = atom<MarkerTableRow[]>([]);

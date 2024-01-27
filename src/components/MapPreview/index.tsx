@@ -17,7 +17,12 @@ import {
   mapMarkerArrayAtom,
   checkpointMarkerArrayAtom,
   showAddPathLineAtom,
-  pathTypeAtom, addPathToMarkerAtom, curvePathArrayAtom, currentMarkerSelected, currentMarkerSelectedAtom
+  pathTypeAtom,
+  addPathToMarkerAtom,
+  curvePathArrayAtom,
+  currentMarkerSelected,
+  currentMarkerSelectedAtom,
+  MarkerTableRow
 } from '../../store'
 import L, {LatLng, latLng, marker} from 'leaflet'
 import "leaflet-spline";
@@ -37,6 +42,7 @@ import {
 } from './map_marker/path'
 import {toast} from "sonner";
 import {BoltIcon} from "@heroicons/react/24/solid";
+import {or} from "three/examples/jsm/nodes/shadernode/ShaderNodeBaseElements";
 
 const center = new L.LatLng(34.641955754083504, 50.878976024718725)
 const AutoAirCraftIcon = L.icon({
@@ -597,12 +603,17 @@ export type ADSBRecord= {
 function ShowADSB () {
 
   let map = useMap()
-  const [markerTable,setMarkerTable] = useState<{markerId:number,markerMap:L.Marker,updated:boolean,ttl:number }[]>([])
+  const [markerTable,setMarkerTable] = useState<MarkerTableRow[]>([])
   const MAX_TIME_TO_LEAVE:number = 128
   const [currentMarkerSelected,setCurrentMarkerSelected]=useAtom(currentMarkerSelectedAtom)
 
   const filledIconMarker=L.icon({
     iconUrl: '/textures/airplane_vondy_orange.png',
+    iconSize: [40, 40],
+    iconAnchor: [16, 16]
+  })
+  const ordinaryIcon=L.icon({
+    iconUrl: '/textures/airplane_vondy_3.png',
     iconSize: [40, 40],
     iconAnchor: [16, 16]
   })
@@ -651,7 +662,7 @@ function ShowADSB () {
         let currMarker = L.marker([record.Lat,record.Lon],{
           id:record.ID,
           icon:L.icon({
-            iconUrl: '/textures/airplane_vondy_3.png',
+            iconUrl: '/textures/airplane_vondy_green.png',
             iconSize: [36, 36],
             iconAnchor: [16, 16]
           })
@@ -659,6 +670,7 @@ function ShowADSB () {
 
         markerTable.push(
             {
+              selected:false,
               markerId:record.ID,
               markerMap:currMarker,
               updated:true,
@@ -699,6 +711,7 @@ function ShowADSB () {
                     /** find a row in marker table to change its position */
                     let rowInTable = markerTable.find((m)=>m.markerId==record.ID)
                     if(rowInTable!==undefined){
+                      rowInTable.markerMap.setIcon(ordinaryIcon)
                       rowInTable.markerMap.setLatLng([record.Lat,record.Lon])
                       rowInTable.markerMap.setRotationAngle(record.Heading)
                       rowInTable.updated = true
