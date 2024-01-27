@@ -44,10 +44,13 @@ export function MarkerProperties({
   }, [marker.ts]);
   useEffect(function () {
 
-
+    if(!currentCurvedPath){
+      return;
+    }
 
     let timesArray = currentCurvedPath._timesArray;
     let tracePoints =  currentCurvedPath._tracePoints;
+
 
     let currentSubPathIndex = 0;
     for(let t = 0 ; t < timesArray.length-1 ; t++){
@@ -159,6 +162,9 @@ export function MarkerProperties({
       pane.current.dispose();
     };
   }, [marker.name, marker.path, positionParams]);
+
+
+
 
 
   return <div ref={ref} />;

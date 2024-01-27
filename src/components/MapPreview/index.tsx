@@ -17,7 +17,7 @@ import {
   mapMarkerArrayAtom,
   checkpointMarkerArrayAtom,
   showAddPathLineAtom,
-  pathTypeAtom, addPathToMarkerAtom, curvePathArrayAtom
+  pathTypeAtom, addPathToMarkerAtom, curvePathArrayAtom, currentMarkerSelected, currentMarkerSelectedAtom
 } from '../../store'
 import L, {LatLng, latLng, marker} from 'leaflet'
 import "leaflet-spline";
@@ -35,6 +35,8 @@ import {
   generateSplinePath,
   interpolateAndGetLatLng, CurvePath, calculateTracePointsAndTimesArray
 } from './map_marker/path'
+import {toast} from "sonner";
+import {BoltIcon} from "@heroicons/react/24/solid";
 
 const center = new L.LatLng(34.641955754083504, 50.878976024718725)
 const AutoAirCraftIcon = L.icon({
@@ -84,6 +86,8 @@ function MyComponent () {
   const options = {
     token: 'pk.eyJ1Ijoib21pZHJhenphZ2hpMjAwMCIsImEiOiJjbGo1YTFzdXgwYzh2M3BxeWN2Yzg5MzVhIn0.-Ju3wtd6vIMP7YL1VKh4XQ'
   }
+
+  if(map !== undefined)
   map.attributionControl.setPrefix(false)
 
   //#############################################################//
@@ -575,6 +579,177 @@ function MyComponent () {
   return null
 }
 
+
+export type ADSBRecord= {
+  DayOfYear:number,
+  Hour:number,
+  Minute:number,
+  HMSSecond:number,
+  ID:number,
+  Lat:number,
+  Lon:number,
+  Height:number,
+  Heading:number,
+  Speed:number,
+  VerticalSpeed:number
+}
+
+function ShowADSB () {
+
+  let map = useMap()
+  const [markerTable,setMarkerTable] = useState<{markerId:number,markerMap:L.Marker,updated:boolean,ttl:number }[]>([])
+  const MAX_TIME_TO_LEAVE:number = 128
+  const [currentMarkerSelected,setCurrentMarkerSelected]=useAtom(currentMarkerSelectedAtom)
+
+  const filledIconMarker=L.icon({
+    iconUrl: '/textures/airplane_vondy_orange.png',
+    iconSize: [40, 40],
+    iconAnchor: [16, 16]
+  })
+
+
+  useEffect(() => {
+    map.setZoom(5)
+    if(map !== undefined)
+      map.attributionControl.setPrefix(false)
+    setTimeout(function () {
+      map.invalidateSize(true)
+    }, 200)
+  }, []);
+
+
+  /*********************************
+   Get ADSB From NodeJs Server
+   *********************************/
+  const [page,setPage] = useState(1)
+  useEffect(() => {
+    fetch(`http://localhost:3000/api/adsb?page=${page}`).then(
+      function (res){
+        res.json().then(function(jsonRes){
+
+
+          jsonRes.forEach(
+              function(record:ADSBRecord){
+                  createNewMarker(record)
+              }
+          )
+        })
+      }
+    ).catch(function(error){
+
+      toast("Error Occured in fetching data from adsb", {
+        description:
+            error.toString(),
+        icon: <BoltIcon className="w-4 h-4" />,
+      });
+    })
+
+  }, []);
+
+  const createNewMarker =useCallback(
+      (record:ADSBRecord)=>{
+        let currMarker = L.marker([record.Lat,record.Lon],{
+          id:record.ID,
+          icon:L.icon({
+            iconUrl: '/textures/airplane_vondy_3.png',
+            iconSize: [36, 36],
+            iconAnchor: [16, 16]
+          })
+        }).addTo(map)
+
+        markerTable.push(
+            {
+              markerId:record.ID,
+              markerMap:currMarker,
+              updated:true,
+              ttl:MAX_TIME_TO_LEAVE
+            })
+        currMarker.setRotationAngle(record.Heading)
+
+        // show dialog next to marker
+        currMarker.addEventListener("click",function (params){
+          setCurrentMarkerSelected(params.sourceTarget)
+          params.sourceTarget.setIcon(filledIconMarker)
+        })
+
+  },[map, markerTable, setCurrentMarkerSelected]
+  )
+
+
+  /*********************************
+   Update Marker position with each page
+   *********************************/
+  useEffect(() => {
+
+    //move markers
+    if(page > 1){
+
+
+
+      fetch(`http://localhost:3000/api/adsb?page=${page}`).then(
+          function(rec){
+            rec.json().then(
+                function(jsonRes){
+
+                  //set the updated field to false
+                  markerTable.forEach((m)=>m.updated=false)
+
+                  jsonRes.forEach(function(record:ADSBRecord){
+
+                    /** find a row in marker table to change its position */
+                    let rowInTable = markerTable.find((m)=>m.markerId==record.ID)
+                    if(rowInTable!==undefined){
+                      rowInTable.markerMap.setLatLng([record.Lat,record.Lon])
+                      rowInTable.markerMap.setRotationAngle(record.Heading)
+                      rowInTable.updated = true
+                      rowInTable.ttl = MAX_TIME_TO_LEAVE
+                    }
+                    /** these marker is not in the table so create a new marker on the leaflet map */
+                    else{
+
+                      createNewMarker(record)
+                    }
+                  })
+
+                  /** check updated field in the marker table to hide markers that is not in the adsb record */
+                  markerTable.forEach((row,index)=>{
+
+                    if(!row.updated){
+                      row.ttl-=1
+                      if(row.ttl < 0){
+                        map.removeLayer(row.markerMap)
+                        markerTable.splice(index,1)
+                      }
+
+                    }
+
+                  })
+                }
+
+            )
+
+            setTimeout(()=>setPage(page+1),100)
+
+          }
+      )
+    }
+
+  }, [page]);
+
+  useEffect(() => {
+    setPage(page+1)
+  }, []);
+
+  return null;
+}
+
+
+
+
+
+
+
+
 export function MapPreview () {
   console.log("Map Preview Created.")
   return (
@@ -585,7 +760,8 @@ export function MapPreview () {
           style={{ height: '100%' }}
       >
         <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
-        <MyComponent />
+        {/*<MyComponent />*/}
+        <ShowADSB/>
       </MapContainer>
   )
 }

@@ -422,3 +422,8 @@ export const curvePathArrayAtom = atom([])
 export const timelineCursorLastPostionAtom = atom(0);
 export const timelineStateAtom = atom(null);
 export const timeAtom = atom(0);
+
+
+
+/////////////////////////////// ADSB ////////////////////////////////////////////
+export const currentMarkerSelectedAtom = atom(null);

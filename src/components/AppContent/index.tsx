@@ -13,8 +13,6 @@ import {readADSBFile} from "../ADSB/ADSBReader";
 export function AppContent() {
   console.log("App Content Created.")
 
-  readADSBFile();
-
   // const timelineState = useRef<TimelineState>()
   const mode = useAtomValue(modeAtom);
 
