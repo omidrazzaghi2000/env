@@ -2958,11 +2958,6 @@ react-style-singleton@^2.2.1:
     invariant "^2.2.4"
     tslib "^2.0.0"
 
-react-tweakpane@^0.8.1:
-  version "0.8.1"
-  resolved "https://registry.npmjs.org/react-tweakpane/-/react-tweakpane-0.8.1.tgz"
-  integrity sha512-CjTp/1TG4kgwRrLw6lrTj3DPI8z38YRL6wC5b2Fk4gZaZmZpwPstqNx12l+6w+9c9M2D5Y41PSo1zXvnGUfJ8Q==
-
 react-use-measure@^2.1.1:
   version "2.1.1"
   resolved "https://registry.npmjs.org/react-use-measure/-/react-use-measure-2.1.1.tgz"
@@ -3316,10 +3311,10 @@ tunnel-rat@^0.1.2:
   dependencies:
     zustand "^4.3.2"
 
-tweakpane@^3.1.9:
-  version "3.1.10"
-  resolved "https://registry.npmjs.org/tweakpane/-/tweakpane-3.1.10.tgz"
-  integrity sha512-rqwnl/pUa7+inhI2E9ayGTqqP0EPOOn/wVvSWjZsRbZUItzNShny7pzwL3hVlaN4m9t/aZhsP0aFQ9U5VVR2VQ==
+tweakpane@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.npmjs.org/tweakpane/-/tweakpane-4.0.3.tgz"
+  integrity sha512-BlcWOAe8oe4c+k9pmLBARGdWB6MVZMszayekkixQXTgkxTaYoTUpHpwVEp+3HkoamZkomodpbBf0CkguIHTgLg==
 
 typescript-cubic-spline@^1.0.1:
   version "1.0.1"

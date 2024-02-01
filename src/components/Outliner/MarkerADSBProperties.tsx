@@ -15,14 +15,11 @@ import AutoAirCraft from '../../utils/classes/AutoAirCraft.js';
 import {calculateTime, getLatLng, interpolateAndGetLatLng} from "../MapPreview/map_marker/path";
 import './index.css'
 import L from "leaflet";
-import {useTweakpane} from "react-tweakpane";
+
 
 export function MarkerADSBProperties({
-
 }: {
-
 }) {
-
 
   const ref = useRef<HTMLDivElement>(null!);
   const pane = useRef<Pane>(null!);
