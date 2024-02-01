@@ -427,8 +427,6 @@ export const timeAtom = atom(0);
 
 
 /////////////////////////////// ADSB ////////////////////////////////////////////
-export const currentMarkerSelectedAtom = atom(null);
-
 
 export type MarkerTableRow = {
   markerId:number,
@@ -436,6 +434,23 @@ export type MarkerTableRow = {
   updated:boolean,
   ttl:number,
   selected:boolean,
-  createdTime?:number
+  createdTime?:number,
+  height?:number,
+  speed?:number
 }
+export const currentMarkerSelectedAtom = atom<MarkerTableRow|undefined>(undefined);
+
+
 export const MarkerTableAtom = atom<MarkerTableRow[]>([]);
+
+export const toggleMarkerTableSelectionAtom = atom(
+    null,
+    (get, set, markerId: MarkerTableRow["markerId"]) => {
+      set(MarkerTableAtom, markers =>
+          markers.map(m => ({
+            ...m,
+            selected: m.markerId === markerId
+          }))
+      )
+    }
+)

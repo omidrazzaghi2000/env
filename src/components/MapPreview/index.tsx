@@ -22,7 +22,7 @@ import {
   curvePathArrayAtom,
   currentMarkerSelected,
   currentMarkerSelectedAtom,
-  MarkerTableRow
+  MarkerTableRow, MarkerTableAtom, toggleMarkerTableSelectionAtom
 } from '../../store'
 import L, {LatLng, latLng, marker} from 'leaflet'
 import "leaflet-spline";
@@ -43,6 +43,8 @@ import {
 import {toast} from "sonner";
 import {BoltIcon} from "@heroicons/react/24/solid";
 import {or} from "three/examples/jsm/nodes/shadernode/ShaderNodeBaseElements";
+import {PropertiesPanelTunnel} from "../Properties";
+import {MarkerADSBProperties} from "../Outliner/MarkerADSBProperties";
 
 const center = new L.LatLng(34.641955754083504, 50.878976024718725)
 const AutoAirCraftIcon = L.icon({
@@ -603,9 +605,10 @@ export type ADSBRecord= {
 function ShowADSB () {
 
   let map = useMap()
-  const [markerTable,setMarkerTable] = useState<MarkerTableRow[]>([])
+  const [markerTable,setMarkerTable] = useAtom(MarkerTableAtom)
   const MAX_TIME_TO_LEAVE:number = 128
   const [currentMarkerSelected,setCurrentMarkerSelected]=useAtom(currentMarkerSelectedAtom)
+  const selectMarker = useSetAtom(toggleMarkerTableSelectionAtom);
 
   const filledIconMarker=L.icon({
     iconUrl: '/textures/airplane_vondy_orange.png',
@@ -668,23 +671,29 @@ function ShowADSB () {
           })
         }).addTo(map)
 
+        var newRow={
+          selected:false,
+          markerId:record.ID,
+          markerMap:currMarker,
+          updated:true,
+          ttl:MAX_TIME_TO_LEAVE,
+          height:record.Height,
+          speed:record.Speed
+        }
         markerTable.push(
-            {
-              selected:false,
-              markerId:record.ID,
-              markerMap:currMarker,
-              updated:true,
-              ttl:MAX_TIME_TO_LEAVE
-            })
+            newRow
+            )
         currMarker.setRotationAngle(record.Heading)
 
         // show dialog next to marker
         currMarker.addEventListener("click",function (params){
-          setCurrentMarkerSelected(params.sourceTarget)
+          setCurrentMarkerSelected(newRow)
           params.sourceTarget.setIcon(filledIconMarker)
+          selectMarker(record.ID)
+
         })
 
-  },[map, markerTable, setCurrentMarkerSelected]
+  },[map, markerTable, setCurrentMarkerSelected, filledIconMarker, selectMarker]
   )
 
 
@@ -711,11 +720,37 @@ function ShowADSB () {
                     /** find a row in marker table to change its position */
                     let rowInTable = markerTable.find((m)=>m.markerId==record.ID)
                     if(rowInTable!==undefined){
-                      rowInTable.markerMap.setIcon(ordinaryIcon)
+
                       rowInTable.markerMap.setLatLng([record.Lat,record.Lon])
                       rowInTable.markerMap.setRotationAngle(record.Heading)
+
                       rowInTable.updated = true
                       rowInTable.ttl = MAX_TIME_TO_LEAVE
+                      rowInTable.height = record.Height
+                      rowInTable.speed = record.Speed
+
+
+                      if(!rowInTable.selected){//do not change icon to ordinary if that marker selected
+                        rowInTable.markerMap.setIcon(ordinaryIcon)
+
+
+                      }else{
+                        //trigger show properties to update properties
+                        //Below line set new selected marker options and then update the values
+                        //inside the properties panel
+                        setCurrentMarkerSelected(
+                            {
+                              height: record.Height,
+                              markerId: rowInTable.markerId,
+                              markerMap: rowInTable.markerMap,
+                              selected: rowInTable.selected,
+                              speed: record.Speed,
+                              ttl: rowInTable.ttl,
+                              updated: true
+                            }
+                        )
+                      }
+
                     }
                     /** these marker is not in the table so create a new marker on the leaflet map */
                     else{
@@ -757,14 +792,19 @@ function ShowADSB () {
 }
 
 
+function ShowProperties(props:any) {
 
 
+  return (
+      <PropertiesPanelTunnel.In>
 
-
-
+        <MarkerADSBProperties></MarkerADSBProperties>
+      </PropertiesPanelTunnel.In>
+  );
+}
 
 export function MapPreview () {
-  console.log("Map Preview Created.")
+
   return (
       <MapContainer
           id='mainMapContainer'
@@ -775,6 +815,7 @@ export function MapPreview () {
         <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
         {/*<MyComponent />*/}
         <ShowADSB/>
+        <ShowProperties></ShowProperties>
       </MapContainer>
   )
 }
