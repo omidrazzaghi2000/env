@@ -27,7 +27,7 @@ import {
   selectedCameraAtom,
 
   markersAtom,
-  markerAtomsAtom
+  markerAtomsAtom, isScenarioPaletteOpenAtom
 } from "../../store";
 import { LightListItem } from "./LightListItem";
 import { CameraListItem } from "./CameraListItem";
@@ -40,6 +40,7 @@ export function Outliner() {
   const lightIds = useAtomValue(lightIdsAtom);
   const setLights = useSetAtom(lightsAtom);
   const setIsCommandPaletteOpen = useSetAtom(isCommandPaletteOpenAtom);
+  const setIsScenarioPaletteOpen = useSetAtom(isScenarioPaletteOpenAtom);
   const lightAtoms = useAtomValue(lightAtomsAtom);
   const cameraAtoms = useAtomValue(cameraAtomsAtom);
   const setCameras = useSetAtom(camerasAtom);
@@ -79,13 +80,7 @@ export function Outliner() {
         <button
           className="rounded p-1 -m-1 hover:bg-white/20 transition-colors"
           onClick={() => {
-            toast("Not Implemented.")
-            // addCamera({
-            //   ...currentCamera,
-            //   selected: false,
-            //   name: `Camera ${String.fromCharCode(cameraAtoms.length + 65)}`,
-            //   id: THREE.MathUtils.generateUUID(),
-            // });
+            setIsScenarioPaletteOpen(true)
           }}
         >
           <PlusIcon className="w-4 h-4" />

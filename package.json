@@ -52,6 +52,7 @@
     "tunnel-rat": "^0.1.2",
     "tweakpane": "^4.0.3",
     "typescript-cubic-spline": "^1.0.1",
+    "use-file-picker": "^2.1.1",
     "vue-uuid": "^3.0.0"
   },
   "devDependencies": {

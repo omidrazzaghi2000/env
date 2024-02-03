@@ -70,7 +70,6 @@ export function MarkerADSBProperties({
     }
 
     return () => {
-      console.log("Dispose")
         if(pane.current !== null){
           pane.current.dispose();
         }
