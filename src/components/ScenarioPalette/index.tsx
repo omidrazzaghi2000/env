@@ -10,7 +10,7 @@ import clsx from "clsx";
 import { useAtom, useSetAtom } from "jotai";
 import {Light, lightsAtom, showVHLineAtom, isScenarioPaletteOpenAtom} from "../../store";
 import { useFilePicker } from 'use-file-picker';
-
+import { toast } from "sonner";
 export function ScenarioPaette() {
   const [open, setOpen] = useAtom(isScenarioPaletteOpenAtom);
 
@@ -112,6 +112,7 @@ function Item({
     onFilesSelected: async ({plainFiles, filesContent, errors}) => {
       // this callback is always called, even if there are errors
       console.log(filesContent)
+      toast.message("Not Implemented")
       // send file to server
       // const formData = new FormData();
       // formData.append('file', filesContent, filesContent.);

@@ -606,9 +606,14 @@ function ShowADSB () {
 
   let map = useMap()
   const [markerTable,setMarkerTable] = useAtom(MarkerTableAtom)
-  const MAX_TIME_TO_LEAVE:number = 128
+  const MAX_TIME_TO_LEAVE:number = 64
   const [currentMarkerSelected,setCurrentMarkerSelected]=useAtom(currentMarkerSelectedAtom)
   const selectMarker = useSetAtom(toggleMarkerTableSelectionAtom);
+
+  const MAXIMUM_BUFFER_SIZE_FOR_SAVING_HISTORY = 50
+  const BREAD_CRUMB_RADIUS = 10
+  const CIRCLE_COLOR = "#FFA259"
+
 
   const filledIconMarker=L.icon({
     iconUrl: '/textures/airplane_vondy_orange.png',
@@ -620,6 +625,8 @@ function ShowADSB () {
     iconSize: [40, 40],
     iconAnchor: [16, 16]
   })
+
+
 
 
   useEffect(() => {
@@ -678,20 +685,27 @@ function ShowADSB () {
           updated:true,
           ttl:MAX_TIME_TO_LEAVE,
           height:record.Height,
-          speed:record.Speed
+          speed:record.Speed,
+          history:{
+            Positions:[],
+            Speeds:[],
+            Heights:[]
+          }
         }
         markerTable.push(
             newRow
             )
         currMarker.setRotationAngle(record.Heading)
 
-        // show dialog next to marker
+        // show properties for selected marker
         currMarker.addEventListener("click",function (params){
           setCurrentMarkerSelected(newRow)
           params.sourceTarget.setIcon(filledIconMarker)
           selectMarker(record.ID)
 
         })
+
+
 
   },[map, markerTable, setCurrentMarkerSelected, filledIconMarker, selectMarker]
   )
@@ -721,6 +735,34 @@ function ShowADSB () {
                     let rowInTable = markerTable.find((m)=>m.markerId==record.ID)
                     if(rowInTable!==undefined){
 
+
+                      // save history
+                      if(rowInTable.history.Positions.length > MAXIMUM_BUFFER_SIZE_FOR_SAVING_HISTORY){
+                        //remove bread crumb in the map
+                        map.removeLayer(rowInTable.history.Positions[0])
+
+                        //remove first element
+                        rowInTable.history.Positions.splice(0,1)
+                      }
+                      rowInTable.history.Positions.push(new L.Circle(rowInTable.markerMap.getLatLng(),{radius:BREAD_CRUMB_RADIUS,color:CIRCLE_COLOR}).addTo(map))
+
+
+                      if(rowInTable.history.Heights.length > MAXIMUM_BUFFER_SIZE_FOR_SAVING_HISTORY){
+                        //remove first element
+                        rowInTable.history.Heights.splice(0,1)
+                      }
+                      rowInTable.history.Heights.push(rowInTable.height!)
+
+                      if(rowInTable.history.Speeds.length > MAXIMUM_BUFFER_SIZE_FOR_SAVING_HISTORY){
+                        //remove first element
+                        rowInTable.history.Speeds.splice(0,1)
+                      }
+                      rowInTable.history.Speeds.push(rowInTable.speed!)
+
+
+
+
+
                       rowInTable.markerMap.setLatLng([record.Lat,record.Lon])
                       rowInTable.markerMap.setRotationAngle(record.Heading)
 
@@ -746,9 +788,11 @@ function ShowADSB () {
                               selected: rowInTable.selected,
                               speed: record.Speed,
                               ttl: rowInTable.ttl,
-                              updated: true
+                              updated: true,
+                              history:rowInTable.history
                             }
                         )
+                        rowInTable.markerMap.setIcon(filledIconMarker)
                       }
 
                     }
@@ -764,7 +808,25 @@ function ShowADSB () {
 
                     if(!row.updated){
                       row.ttl-=1
+
+                      //if it is selected before and then another marker selected
+                      //update the icon
+                      if(!row.selected){
+                        row.markerMap.setIcon(ordinaryIcon)
+                      }
+
                       if(row.ttl < 0){
+                        //remove bread crumbs
+                        row.history.Positions.forEach(
+                            (circle)=>{
+                              map.removeLayer(circle)
+                            }
+                        )
+
+                        if(row.selected){
+                          setCurrentMarkerSelected(undefined)
+                        }
+
                         map.removeLayer(row.markerMap)
                         markerTable.splice(index,1)
                       }
@@ -799,6 +861,7 @@ function ShowProperties(props:any) {
       <PropertiesPanelTunnel.In>
 
         <MarkerADSBProperties></MarkerADSBProperties>
+
       </PropertiesPanelTunnel.In>
   );
 }

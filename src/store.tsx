@@ -430,6 +430,12 @@ export const timeAtom = atom(0);
 /////////////////////////////// ADSB ////////////////////////////////////////////
 export const isScenarioPaletteOpenAtom = atom(false)
 
+export type MarkerHistory = {
+  Positions:L.Circle[],
+  Speeds:number[],
+  Heights:number[],
+
+}
 
 export type MarkerTableRow = {
   markerId:number,
@@ -439,7 +445,8 @@ export type MarkerTableRow = {
   selected:boolean,
   createdTime?:number,
   height?:number,
-  speed?:number
+  speed?:number,
+  history:MarkerHistory,
 }
 export const currentMarkerSelectedAtom = atom<MarkerTableRow|undefined>(undefined);
 
@@ -457,3 +464,4 @@ export const toggleMarkerTableSelectionAtom = atom(
       )
     }
 )
+
