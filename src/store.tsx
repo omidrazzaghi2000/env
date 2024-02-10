@@ -290,6 +290,7 @@ import AutoAirCraft from './utils/classes/AutoAirCraf.js'
 import Scenario from './utils/classes/scenario.js'
 import {OPath} from "./components/MapPreview/map_marker/path";
 import L from "leaflet";
+import {useMap} from "react-leaflet";
 export const markersAtom = atomWithStorage<AutoAirCraft[]>('markers', [])
 export const markerAtomsAtom = splitAtom(markersAtom)
 export const mainScenario = atomWithStorage<Scenario>(
@@ -377,37 +378,42 @@ export const addPathToMarkerAtom = atom(
 export const deleteMarkerAtom = atom(null, (get, set, markerId: AutoAirCraft['id']) => {
     const markers = get(markersAtom)
     const marker = markers.find(m => m.id === markerId)!
-    const mapRef = get(mapRefAtom);
+    // const mapRef = get(mapRefAtom);
+
     const mapMarkerArray = get(mapMarkerArrayAtom);
-    const checkPointMarkerArray = get(checkpointMarkerArrayAtom)
-    console.log(mapMarkerArray);
-    console.log(checkPointMarkerArray);
+    const checkPointMarkerArray = get<L.Marker[][]>(checkpointMarkerArrayAtom);
+    const mapMarkerSplineArray = get(mapMarkerSplineArrayAtom);
+    const map = get<L.Map|null>(mainMapAtom);
 
     /** because two indexes in mapMarkerArray and checkpointMarkerArray is similar so on findIndex is enough. */
     const index = mapMarkerArray.findIndex((m)=> m.options.id === markerId );
+
+    if(map !== null){
+      //remove on the map elements
+      map.removeLayer(mapMarkerArray[index])
+      checkPointMarkerArray[index].forEach((checkpoint:L.Marker)=>{
+        console.log(checkpoint)
+        map.removeLayer(checkpoint)
+      })
+      map.removeLayer(mapMarkerSplineArray[index])
+    }
+
     if (index > -1) { // only splice array when item is found
       mapMarkerArray.splice(index, 1); // 2nd parameter means remove one item only
       checkPointMarkerArray.splice(index,1);
-    } 
-
-
-
-    if(mapRef?.current !== null){
-
-        mapRef?.current.eachLayer(function (layer:any) {
-            if (layer.options.id === markerId) {
-                mapRef?.current.removeLayer(layer);
-            }
-        });
     }
 
+
+
+
+
     const newMarkers = markers.filter(m => m.id !== markerId)
-    console.log(newMarkers)
     set(markersAtom, newMarkers)
 
 })
 
 //map
+export const mainMapAtom = atom(null)
 export const showVHLineAtom = atom(false);
 export const showAddPathLineAtom = atom(false);
 export const pathTypeAtom = atom("");
@@ -416,6 +422,7 @@ export const currentMouseLongAtom = atom(null);
 export const mapRefAtom = atom(null);
 export const mapMarkerArrayAtom = atom([]);
 export const checkpointMarkerArrayAtom = atom([]);
+export const mapMarkerSplineArrayAtom = atom<L.Spline[]>([])
 
 //marker properties
 export const isPathPaletteOpenAtom = atom(false);

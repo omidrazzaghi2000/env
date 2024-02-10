@@ -22,7 +22,7 @@ import {
   curvePathArrayAtom,
   currentMarkerSelected,
   currentMarkerSelectedAtom,
-  MarkerTableRow, MarkerTableAtom, toggleMarkerTableSelectionAtom
+  MarkerTableRow, MarkerTableAtom, toggleMarkerTableSelectionAtom, mainMapAtom, mapMarkerSplineArrayAtom
 } from '../../store'
 import L, {LatLng, latLng, marker} from 'leaflet'
 import "leaflet-spline";
@@ -61,9 +61,10 @@ const AutoAirCraftSelectedIcon = L.icon({
 
 function MyComponent () {
 
-  const [mapRef,setMapRef] = useAtom(mapRefAtom);
-  setMapRef(useRef(useMap()));
-  const map = mapRef?.current;
+
+  const map = useMap();
+  const setMainMap = useSetAtom(mainMapAtom)
+  setMainMap(map)
 
   let [showVHLine, setShowVHLine] = useAtom(showVHLineAtom)
   const [showAddPathLine, setShowAddPathLine] = useAtom(showAddPathLineAtom)
@@ -76,7 +77,7 @@ function MyComponent () {
   const [mapMarkerArray ,setMarkerArray] = useAtom<any[]>(mapMarkerArrayAtom)
   const [markerCurvedPathArray, setMarkerCurvedPathArray] = useAtom(curvePathArrayAtom)
   const [mapCheckpointArray,setMapCheckpointArray] = useAtom<any[][]>(checkpointMarkerArrayAtom)
-  const [mapSplineArray, setMapSplineArray] = useState<L.Spline[]>([])
+  const [mapSplineArray, setMapSplineArray] = useAtom<L.Spline[]>(mapMarkerSplineArrayAtom)
   const toggleSelection = useSetAtom(toggleMarkerSelectionAtom)
   const time = useAtomValue(timeAtom);
   const [currentMarkerSelected,setCurrentMarkerSelected] = useState<AutoAirCraft>(null);
@@ -603,7 +604,6 @@ export type ADSBRecord= {
 }
 
 function ShowADSB () {
-
   let map = useMap()
   const [markerTable,setMarkerTable] = useAtom(MarkerTableAtom)
   const MAX_TIME_TO_LEAVE:number = 64
@@ -876,7 +876,7 @@ export function MapPreview () {
           style={{ height: '100%' }}
       >
         <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
-        {/*<MyComponent />*/}
+        <MyComponent />
         <ShowADSB/>
         <ShowProperties></ShowProperties>
       </MapContainer>

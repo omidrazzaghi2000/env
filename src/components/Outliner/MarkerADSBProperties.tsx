@@ -15,7 +15,7 @@ import AutoAirCraft from '../../utils/classes/AutoAirCraft.js';
 import {calculateTime, getLatLng, interpolateAndGetLatLng} from "../MapPreview/map_marker/path";
 import './index.css'
 import L from "leaflet";
-import { Line,Column } from '@ant-design/charts';
+import { Line,Column } from '@ant-design/plots';
 
 
 
@@ -23,7 +23,7 @@ export const SpeedChart: React.FC = () => {
 
   const currentMarkerSelected = useAtomValue(currentMarkerSelectedAtom);
   const [data,setData] = useState<{index:number,speed:number}[]>([])
-  const DEFAULT_UPDATE_RATE = 10
+  const DEFAULT_UPDATE_RATE = 5
   const [updateRate,setUpdateRate] = useState(DEFAULT_UPDATE_RATE);
 
   useEffect(() => {
