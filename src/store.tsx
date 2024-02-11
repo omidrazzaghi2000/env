@@ -319,12 +319,21 @@ export const deselectMarkersAtom = atom(null, (get, set) => {
 export const toggleMarkerSelectionAtom = atom(
   null,
   (get, set, markerId: AutoAirCraft['id']) => {
+
+    set(MarkerTableAtom, markers =>
+        markers.map(m => ({
+          ...m,
+          selected: false
+        }))
+    )
+
     set(markersAtom, markers =>
       markers.map(m => ({
         ...m,
         selected: m.id === markerId
       }))
     )
+
   }
 )
 
@@ -392,7 +401,6 @@ export const deleteMarkerAtom = atom(null, (get, set, markerId: AutoAirCraft['id
       //remove on the map elements
       map.removeLayer(mapMarkerArray[index])
       checkPointMarkerArray[index].forEach((checkpoint:L.Marker)=>{
-        console.log(checkpoint)
         map.removeLayer(checkpoint)
       })
       map.removeLayer(mapMarkerSplineArray[index])
@@ -402,9 +410,6 @@ export const deleteMarkerAtom = atom(null, (get, set, markerId: AutoAirCraft['id
       mapMarkerArray.splice(index, 1); // 2nd parameter means remove one item only
       checkPointMarkerArray.splice(index,1);
     }
-
-
-
 
 
     const newMarkers = markers.filter(m => m.id !== markerId)
@@ -463,6 +468,15 @@ export const MarkerTableAtom = atom<MarkerTableRow[]>([]);
 export const toggleMarkerTableSelectionAtom = atom(
     null,
     (get, set, markerId: MarkerTableRow["markerId"]) => {
+
+      //deselect all markers
+      set(markersAtom, markers =>
+          markers.map(m => ({
+            ...m,
+            selected: false
+          }))
+      )
+
       set(MarkerTableAtom, markers =>
           markers.map(m => ({
             ...m,
