@@ -1,11 +1,18 @@
 import { CursorArrowRippleIcon } from "@heroicons/react/24/outline";
-import {Light, isLightPaintingAtom, timeAtom, isPathPaletteOpenAtom, curvePathArrayAtom} from "../../store";
+import {
+  Light,
+  isLightPaintingAtom,
+  timeAtom,
+  isPathPaletteOpenAtom,
+  curvePathArrayAtom,
+  updateCurvePathAtom
+} from "../../store";
 import {PrimitiveAtom, useAtom, useAtomValue, useSetAtom} from "jotai";
 import {useCallback, useEffect, useRef, useState} from "react";
 import { toast } from "sonner";
 import { ButtonApi, Pane } from "tweakpane";
 import AutoAirCraft from '../../utils/classes/AutoAirCraft.js';
-import {calculateTime, getLatLng, interpolateAndGetLatLng} from "../MapPreview/map_marker/path";
+import {calculateTime, CurvePath, getLatLng, interpolateAndGetLatLng} from "../MapPreview/map_marker/path";
 import './index.css'
 import L from "leaflet";
 export function MarkerProperties({
@@ -19,14 +26,15 @@ export function MarkerProperties({
   const pane = useRef<Pane>(null!);
   const time = useAtomValue(timeAtom);
   const markerCurvedPathArray = useAtomValue(curvePathArrayAtom);
-  const currentCurvedPath = markerCurvedPathArray.find((cp) => cp._splinePath.options.id === marker.id)
-
+  const currentCurvedPath:CurvePath|undefined = markerCurvedPathArray.find((cp:CurvePath) => cp._splinePath.options.id === marker.id)
+  const updateCurvePathArray = useSetAtom(updateCurvePathAtom)
   const [positionParams, setPositionParams] = useState({
     lat: marker.latlng[0],
     lng: marker.latlng[1],
     yaw: marker.yaw,
     alt: marker.alt,
-    pitch: marker.pitch
+    pitch: marker.pitch,
+    delay: currentCurvedPath!._delayTime
   });
   const handleChange = useCallback(
     (e: any) => {
@@ -76,6 +84,7 @@ export function MarkerProperties({
           lng: new_position[1],
           alt:0.0, //TODO: must get from interpolate and get position function
           pitch:0.0, //TODO: must get from interpolate and get position function
+          delay:currentCurvedPath!._delayTime,
         }
 
     )
@@ -102,6 +111,11 @@ export function MarkerProperties({
     pane.current.addBinding(positionParams, 'alt', { readonly: true, format: (v: number) => v.toFixed(2), })
     pane.current.addBinding(positionParams, 'yaw', { readonly: true, format: (v: number) => v.toFixed(3), })
     pane.current.addBinding(positionParams, 'pitch', { readonly: true, format: (v: number) => v.toFixed(3), })
+
+    pane.current.addBinding(positionParams, 'delay', {format: (v: number) => v.toFixed(3), }).on('change', (ev) => {
+      updateCurvePathArray(marker.id,ev.value)
+    })
+
 
     const f1 = pane.current.addFolder({
       title: 'Path',

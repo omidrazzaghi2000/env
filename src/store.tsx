@@ -288,7 +288,7 @@ export const selectCameraAtom = atom(
 // Marker Properties
 import AutoAirCraft from './utils/classes/AutoAirCraf.js'
 import Scenario from './utils/classes/scenario.js'
-import {OPath} from "./components/MapPreview/map_marker/path";
+import {CurvePath, OPath} from "./components/MapPreview/map_marker/path";
 import L from "leaflet";
 import {useMap} from "react-leaflet";
 export const markersAtom = atomWithStorage<AutoAirCraft[]>('markers', [])
@@ -439,6 +439,20 @@ export const curvePathArrayAtom = atom([])
 export const timelineCursorLastPostionAtom = atom(0);
 export const timelineStateAtom = atom(null);
 export const timeAtom = atom(0);
+
+export const updateCurvePathAtom = atom(null, (get, set, markerId: AutoAirCraft['id'] , delay:number) =>
+    {
+        const markers = get(markersAtom)
+        const curvePathArray = get(curvePathArrayAtom)
+        const index = markers.findIndex((m)=> m.id === markerId )
+        /* check that found in markers array */
+        if(index > -1){
+            curvePathArray.at(index)!._delayTime = delay;
+        }
+        console.log("AAAA",curvePathArray)
+        set(curvePathArrayAtom,[])
+    }
+)
 
 
 

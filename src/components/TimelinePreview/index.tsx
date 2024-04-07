@@ -42,6 +42,7 @@ const mockEffect: Record<string, TimelineEffect> = {
 
 export const TimelinePreview = (props: any) => {
   const curvedPathArray = useAtomValue(curvePathArrayAtom)
+
   const setTime = useSetAtom(timeAtom);
   const getEditorData = useCallback(function (): TimelineRow[] {
     const markers = useAtomValue(markersAtom);
