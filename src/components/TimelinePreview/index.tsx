@@ -13,12 +13,12 @@ import {
   timelineCursorLastPostionAtom,
   updateMarkerPostionAtom,
   timeAtom,
-  timelineStateAtom
+  timelineStateAtom, curvePathArrayAtom
 } from '../../store'
 import {
   getLatLng,
   calculateDistance,
-  calculateTime
+  calculateTime, CurvePath
 } from '../MapPreview/map_marker/path'
 import TimelinePlayer from './player'
 import { scale, scaleWidth, startLeft } from './mock';
@@ -41,20 +41,22 @@ const mockEffect: Record<string, TimelineEffect> = {
 
 
 export const TimelinePreview = (props: any) => {
+  const curvedPathArray = useAtomValue(curvePathArrayAtom)
   const setTime = useSetAtom(timeAtom);
   const getEditorData = useCallback(function (): TimelineRow[] {
     const markers = useAtomValue(markersAtom);
 
-    return markers.map(function (marker: any) {
+    return markers.map(function (marker: any,index:number) {
       var temp_time = 0;
+      let currCurvedPath:CurvePath|undefined = curvedPathArray.at(index)
+      let delay = currCurvedPath!._delayTime
       return {
         id: marker.id,
-        actions: marker.path.map(function (path: any) {
-
+        actions: marker.path.map(function (path: any,path_index:number) {
           return {
             id: path.id,
-            start: temp_time,
-            end: temp_time+=calculateTime(path),
+            start: temp_time += (path_index == 0 ? delay:0) /* Add deley time for the actions */,
+            end: temp_time+= calculateTime(path) ,
             effectId: 'effect1',
             flexible: marker.selected,
             movable: marker.selected

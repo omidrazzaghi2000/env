@@ -22,3 +22,10 @@
 .arrow-path-cursor{
     cursor: pointer;
 }
+
+.auto-aircraft-icon-selected{
+    animation: oink 0.5s 1;
+}
+@keyframes oink {
+    50% {opacity: 0.5;}
+}

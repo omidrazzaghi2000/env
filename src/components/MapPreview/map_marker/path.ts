@@ -205,7 +205,7 @@ export function generateSplinePath(positions:{x:number,y:number}[],time:number) 
 
 
 export class CurvePath{
-    _delayTime:number = 3;
+    _delayTime:number = 1;
     _timesArray:number[] = [];
     _tracePoints:L.LatLng[] = [];
     _numberOfPoints:number;
@@ -232,13 +232,17 @@ export function calculateTracePointsAndTimesArray(curvePath:CurvePath,currentPat
 
         curveDistance += currPoint.distanceTo(nextPoint)
         if(curvePath._timesArray.length !== 0){
-            curvePath._timesArray.push(currPoint.distanceTo(nextPoint)/currentPathSpeed+curvePath._timesArray[curvePath._timesArray.length-1]+curvePath._delayTime)
+            curvePath._timesArray.push(currPoint.distanceTo(nextPoint)/currentPathSpeed+curvePath._timesArray[curvePath._timesArray.length-1])
         }else{
-            curvePath._timesArray.push(currPoint.distanceTo(nextPoint)/currentPathSpeed + curvePath._delayTime)
+            curvePath._timesArray.push(currPoint.distanceTo(nextPoint)/currentPathSpeed)
         }
     }
     //remove zeros from the first of time array
     curvePath._timesArray.splice(0,number_of_point-1);
+    /*********************************************/
+    /*         Add Delay to time array           */
+    /*********************************************/
+    curvePath._timesArray = curvePath._timesArray.map((t)=>t+curvePath._delayTime)
 
     /*********************************************/
     /*              Trace Points                 */

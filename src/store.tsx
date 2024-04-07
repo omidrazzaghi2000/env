@@ -392,6 +392,7 @@ export const deleteMarkerAtom = atom(null, (get, set, markerId: AutoAirCraft['id
     const mapMarkerArray = get(mapMarkerArrayAtom);
     const checkPointMarkerArray = get<L.Marker[][]>(checkpointMarkerArrayAtom);
     const mapMarkerSplineArray = get(mapMarkerSplineArrayAtom);
+    const curvedPathArray = get(curvePathArrayAtom);
     const map = get<L.Map|null>(mainMapAtom);
 
     /** because two indexes in mapMarkerArray and checkpointMarkerArray is similar so on findIndex is enough. */
@@ -409,6 +410,8 @@ export const deleteMarkerAtom = atom(null, (get, set, markerId: AutoAirCraft['id
     if (index > -1) { // only splice array when item is found
       mapMarkerArray.splice(index, 1); // 2nd parameter means remove one item only
       checkPointMarkerArray.splice(index,1);
+      mapMarkerSplineArray.splice(index,1);
+      curvedPathArray.splice(index,1);
     }
 
 

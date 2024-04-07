@@ -20,7 +20,7 @@ import {
   pathTypeAtom,
   addPathToMarkerAtom,
   curvePathArrayAtom,
-  currentMarkerSelected,
+
   currentMarkerSelectedAtom,
   MarkerTableRow, MarkerTableAtom, toggleMarkerTableSelectionAtom, mainMapAtom, mapMarkerSplineArrayAtom
 } from '../../store'
@@ -31,6 +31,7 @@ import './index.css'
 import Topography from 'leaflet-topography'
 
 import AutoAirCraft from '../../utils/classes/AutoAirCraft.js'
+import generateName from '../../utils/GenerateName.js'
 import {
   LinearOPath,
   OPath,
@@ -46,21 +47,23 @@ import {or} from "three/examples/jsm/nodes/shadernode/ShaderNodeBaseElements";
 import {PropertiesPanelTunnel} from "../Properties";
 import {MarkerADSBProperties} from "../Outliner/MarkerADSBProperties";
 
+
 const center = new L.LatLng(34.641955754083504, 50.878976024718725)
 const AutoAirCraftIcon = L.icon({
   iconUrl: '/textures/arrow-aircraft.png',
   iconSize: [32, 32],
-  iconAnchor: [16, 16]
+  iconAnchor: [16, 16],
+  className: 'auto-aircraft-icon',
 })
 
 const AutoAirCraftSelectedIcon = L.icon({
   iconUrl: '/textures/arrow-marker.png',
   iconSize: [32, 32],
-  iconAnchor: [16, 16]
+  iconAnchor: [16, 16],
+  className: 'auto-aircraft-icon-selected',
 })
 
 function MyComponent () {
-
 
   const map = useMap();
   const setMainMap = useSetAtom(mainMapAtom)
@@ -269,7 +272,7 @@ function MyComponent () {
           // e.preventDefault();
           if (showVHLine) {
             let newMarker = new AutoAirCraft(
-                'Aziz',
+                generateName(),
                 e.latlng.lat,
                 e.latlng.lng,
                 AutoAirCraftIcon
@@ -539,6 +542,15 @@ function MyComponent () {
   }, [showAddPathLine]);
 
 
+  //##################################//
+  //                                  //
+  //  update map add layer function   //
+  //                                  //
+  //##################################//
+  useEffect(() => {
+
+  }, []);
+
   //###############################//
   //                               //
   //    update marker position     //
@@ -553,15 +565,33 @@ function MyComponent () {
           let timesArray = markerCurvedPathArray[i]._timesArray;
           let tracePoints =  markerCurvedPathArray[i]._tracePoints;
 
+          /* check whether path is started */
+          if(timesArray.length > 0 && timesArray[0] > time) {
+            /* hide marker until its time begin */
+            if(map.hasLayer(mapMarkerArray.at(i))){
+              map.removeLayer(mapMarkerArray.at(i))
+            }
+
+            continue
+          }
+
+          /* check that marker on map is visible */
+          if(!map.hasLayer(mapMarkerArray.at(i))){
+            map.addLayer(mapMarkerArray.at(i))
+            }
+
           let currentSubPathIndex = 0;
           for(let t = 0 ; t < timesArray.length-1 ; t++){
-            if(time >= timesArray[t] && time <= timesArray[t+1]){
+
+            if(time >= timesArray[t] && time <= timesArray[t+1]/*for the middle of path*/){
               currentSubPathIndex = t;
               break
             }
-            else if(t == timesArray.length-2){
+
+            else if(t == timesArray.length-2/*for the end of path*/){
               currentSubPathIndex = timesArray.length-2
             }
+
           }
 
           let new_position_new_yaw = interpolateAndGetLatLng(
