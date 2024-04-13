@@ -268,7 +268,40 @@ function MyComponent () {
           }
         }
 
+
+
         map.addEventListener('mousemove', drawShower, true)
+
+
+        function escapeFunction(event:any){
+          if(event.originalEvent.code === "Escape" && showVHLine){
+
+            var element = document.getElementById('mainMapContainer')
+
+            //remove box
+            var LatLongShower = element?.querySelector('.lat-long-shower')
+            if (LatLongShower) {
+              element?.removeChild(LatLongShower)
+            }
+
+            setShowVHLine(false)
+
+            //restore cursor
+            element?.classList.remove('arrow-marker-cursor')
+
+            // remove box shower
+            map.removeEventListener('mousemove', drawShower, true)
+
+            /* remove itself */
+            map.removeEventListener("keydown", escapeFunction,true);
+
+            // remove itself
+            map.removeEventListener('contextmenu', rightClickAddMarker, true)
+
+
+          }
+        }
+
 
         let rightClickAddMarker = function (e: any) {
           // e.preventDefault();
@@ -360,6 +393,9 @@ function MyComponent () {
 
         //add event listener for right click
         map?.addEventListener('contextmenu', rightClickAddMarker, true)
+
+        /*Escape button handler*/
+        map?.addEventListener("keydown",escapeFunction,true);
       },
       [showVHLine]
   )
