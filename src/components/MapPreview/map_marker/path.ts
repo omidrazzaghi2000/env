@@ -185,6 +185,7 @@ export function getLatLng(lpath: LinearOPath, time: number): any {
 }
 
 import Spline from 'typescript-cubic-spline';
+import {useCallback} from "react";
 
 export function generateSplinePath(positions:{x:number,y:number}[],time:number) {
     // Check if the number of positions is sufficient
@@ -205,7 +206,7 @@ export function generateSplinePath(positions:{x:number,y:number}[],time:number) 
 
 
 export class CurvePath{
-    _delayTime:number = 1;
+    _delayTime:number = 0;
     _timesArray:number[] = [];
     _tracePoints:L.LatLng[] = [];
     _numberOfPoints:number;
@@ -216,7 +217,8 @@ export class CurvePath{
     }
 }
 
-export function calculateTracePointsAndTimesArray(curvePath:CurvePath,currentPathSpeed:number){
+
+export function calculateTracePointsAndTimesArray (curvePath:CurvePath,currentPathSpeed:number){
     let number_of_point = curvePath._numberOfPoints;
     let disPoint = Array(number_of_point).fill().map((x,i)=>i/number_of_point);
     let curveDistance = 0;

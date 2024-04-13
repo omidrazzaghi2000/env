@@ -308,6 +308,7 @@ function MyComponent () {
             markerCurvedPathArray.push(newCurvePath)
 
 
+
             //add a checkpoint marker to map and save it as state to show every time refresh the page
             const checkPointMarker = L.marker([e.latlng.lat + 0.05*Math.cos(toRadians(newMarker.yaw)), e.latlng.lng + 0.05*Math.sin(toRadians(newMarker.yaw))],{
               id:newMarker.id/**for deleting**/,
@@ -332,7 +333,8 @@ function MyComponent () {
 
             //update marker path in markers array in store
             addMarker(newMarker)
-            setTimeout(()=>toggleSelection(newMarker.id),100)
+            setMarkerCurvedPathArray([...markerCurvedPathArray])
+            setTimeout(()=>toggleSelection(newMarker.id),200)
 
 
             //remove box
@@ -551,6 +553,8 @@ function MyComponent () {
 
   }, []);
 
+
+
   //###############################//
   //                               //
   //    update marker position     //
@@ -611,6 +615,19 @@ function MyComponent () {
       ,[time]
   )
 
+//######################################################################//
+  //                                                                      //
+  //                      update marker curved path                       //
+  //                                                                      //
+  //######################################################################//
+  useEffect(() => {
+    console.log(" Update Marker Curved Path ")
+
+    // for(let cpIndex = 0; cpIndex < markerCurvedPathArray.length; cpIndex++){
+    //   calculateTracePointsAndTimesArray(markerCurvedPathArray.at(cpIndex),277.77)
+    // }
+
+  }, markerCurvedPathArray);
 
 
 
@@ -897,7 +914,7 @@ function ShowProperties(props:any) {
 }
 
 export function MapPreview () {
-
+  console.log("Map Updated")
   return (
       <MapContainer
           id='mainMapContainer'
@@ -907,7 +924,7 @@ export function MapPreview () {
       >
         <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
         <MyComponent />
-        <ShowADSB/>
+        {/*<ShowADSB/>*/}
         <ShowProperties></ShowProperties>
       </MapContainer>
   )

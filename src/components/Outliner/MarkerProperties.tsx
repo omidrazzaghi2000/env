@@ -114,11 +114,12 @@ export function MarkerProperties({
 
     pane.current.addBinding(positionParams, 'delay', {format: (v: number) => v.toFixed(3), }).on('change', (ev) => {
 
-        currentCurvedPath!._delayTime = ev.value
+
 
         let updatedCurvedPathArray = markerCurvedPathArray.map((cp:CurvePath) => {
           if (cp === currentCurvedPath) {
-            return { ...cp, _delayTime: ev.value };
+            cp._delayTime = ev.value
+            return cp;
           } else {
             return cp;
           }

@@ -41,31 +41,41 @@ const mockEffect: Record<string, TimelineEffect> = {
 
 
 export const TimelinePreview = (props: any) => {
-  const curvedPathArray = useAtomValue(curvePathArrayAtom)
-
+  const [curvedPathArray,setCurvedPathArray] = useAtom(curvePathArrayAtom)
   const setTime = useSetAtom(timeAtom);
+
   const getEditorData = useCallback(function (): TimelineRow[] {
     const markers = useAtomValue(markersAtom);
-
+    console.log("Timeline Preview Updated")
+    console.log(markers,curvedPathArray)
     return markers.map(function (marker: any,index:number) {
       var temp_time = 0;
       let currCurvedPath:CurvePath|undefined = curvedPathArray.at(index)
-      let delay = currCurvedPath!._delayTime
-      return {
-        id: marker.id,
-        actions: marker.path.map(function (path: any,path_index:number) {
-          return {
-            id: path.id,
-            start: temp_time += (path_index == 0 ? delay:0) /* Add deley time for the actions */,
-            end: temp_time+= calculateTime(path) ,
-            effectId: 'effect1',
-            flexible: marker.selected,
-            movable: marker.selected
-          }
-        })
+      // console.log(index , marker , currCurvedPath )
+      if(currCurvedPath !== undefined){
+        let delay = currCurvedPath!._delayTime
+        return {
+          id: marker.id,
+          actions: marker.path.map(function (path: any,path_index:number) {
+            return {
+              id: path.id,
+              start: temp_time += (path_index == 0 ? delay:0) /* Add deley time for the actions */,
+              end: temp_time+= calculateTime(path) ,
+              effectId: 'effect1',
+              flexible: marker.selected,
+              movable: marker.selected
+            }
+          })
+        }
+      }else{
+        return {
+          id: marker.id,
+          actions:[],
+        }
       }
+
     })
-  }, [])
+  }, [curvedPathArray])
 
   const autoScrollWhenPlay = useRef<boolean>(true);
   const [isShowingOption,setIsShowingOption] = useState(false);
