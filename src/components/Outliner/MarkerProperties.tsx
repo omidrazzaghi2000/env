@@ -12,7 +12,13 @@ import {useCallback, useEffect, useRef, useState} from "react";
 import { toast } from "sonner";
 import { ButtonApi, Pane } from "tweakpane";
 import AutoAirCraft from '../../utils/classes/AutoAirCraft.js';
-import {calculateTime, CurvePath, getLatLng, interpolateAndGetLatLng} from "../MapPreview/map_marker/path";
+import {
+  calculateTime,
+  calculateTracePointsAndTimesArray,
+  CurvePath,
+  getLatLng,
+  interpolateAndGetLatLng
+} from "../MapPreview/map_marker/path";
 import './index.css'
 import L from "leaflet";
 export function MarkerProperties({
@@ -28,6 +34,17 @@ export function MarkerProperties({
   const [markerCurvedPathArray,setMarkerCurvedPathArray] = useAtom(curvePathArrayAtom);
   const currentCurvedPath:CurvePath|undefined = markerCurvedPathArray.find((cp:CurvePath) => cp._splinePath.options.id === marker.id)
   const handleChange = useCallback(
+      (e: any) => {
+        setMarker((old: AutoAirCraft) => ({
+          ...old,
+          [e.target.key]: structuredClone(e.value),
+          ts: Date.now(),
+        }));
+      },
+      [marker.id]
+  );
+
+  const handleChangeDelay = useCallback(
       (e: any) => {
         setMarker((old: AutoAirCraft) => ({
           ...old,
@@ -61,8 +78,11 @@ export function MarkerProperties({
       return;
     }
 
+    console.log(currentCurvedPath)
+
     let timesArray = currentCurvedPath._timesArray;
     let tracePoints =  currentCurvedPath._tracePoints;
+
 
 
     let currentSubPathIndex = 0;
@@ -75,6 +95,8 @@ export function MarkerProperties({
         currentSubPathIndex = timesArray.length-2
       }
     }
+
+    console.log(currentSubPathIndex)
 
     let new_position_new_yaw = interpolateAndGetLatLng(
         tracePoints[currentSubPathIndex],tracePoints[currentSubPathIndex+1], time-timesArray[currentSubPathIndex],
@@ -117,19 +139,26 @@ export function MarkerProperties({
     pane.current.addBinding(positionParams, 'yaw', { readonly: true, format: (v: number) => v.toFixed(3), })
     pane.current.addBinding(positionParams, 'pitch', { readonly: true, format: (v: number) => v.toFixed(3), })
 
-    pane.current.addBinding(positionParams, 'delay', {format: (v: number) => v.toFixed(3), }).on('change', (ev) => {
+    pane.current.addBinding(positionParams, 'delay', {format: (v: number) => v.toFixed(3), }).on("change", handleChange).on('change', (ev) => {
 
 
 
         let updatedCurvedPathArray = markerCurvedPathArray.map((cp:CurvePath) => {
           if (cp === currentCurvedPath) {
-            cp._delayTime = ev.value
+            cp._delayTime = ev.value;
+            //update timesarray
+            cp._timesArray = cp._timesArray.map((t:number)=>t-cp._timesArray[0]).map((t:number)=>t+ev.value)
+
+
             return cp;
           } else {
             return cp;
           }
         });
+
         setMarkerCurvedPathArray(updatedCurvedPathArray)
+
+
 
     })
 

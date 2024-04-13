@@ -114,6 +114,7 @@ function MyComponent () {
 
       for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
         let curMarker = markers[markerIndex]
+        console.log(curMarker)
         let mapMarker = L.marker([curMarker.lat, curMarker.long], {
           // It is because it has error when i use curMarker.icon
           icon: L.icon(curMarker.icon.options),
@@ -168,6 +169,7 @@ function MyComponent () {
 
         /* update curve path characteristics */
         let newCurvedPath = new CurvePath(newSpline,60)
+        newCurvedPath._delayTime = curMarker.delay;
         calculateTracePointsAndTimesArray(newCurvedPath,277.77)
         markerCurvedPathArray.push(newCurvedPath)
 
@@ -486,6 +488,8 @@ function MyComponent () {
         /* update curve path characteristics */
         let newCurvedPath = new CurvePath(mapSplineArray[currentSelectedMarkerIndex],60);
         calculateTracePointsAndTimesArray(newCurvedPath,277.77);
+        /*update delay*/
+        newCurvedPath._delayTime = currentMarkerSelected.delay
         markerCurvedPathArray[currentSelectedMarkerIndex] = newCurvedPath;
 
         /* add a checkpoint marker to map and save it as state to show every time refresh the page */
@@ -569,6 +573,8 @@ function MyComponent () {
           let timesArray = markerCurvedPathArray[i]._timesArray;
           let tracePoints =  markerCurvedPathArray[i]._tracePoints;
 
+          console.log(markerCurvedPathArray[i])
+
           /* check whether path is started */
           if(timesArray.length > 0 && timesArray[0] > time) {
             /* hide marker until its time begin */
@@ -614,23 +620,6 @@ function MyComponent () {
       }
       ,[time]
   )
-
-//######################################################################//
-  //                                                                      //
-  //                      update marker curved path                       //
-  //                                                                      //
-  //######################################################################//
-  useEffect(() => {
-    console.log(" Update Marker Curved Path ")
-
-    // for(let cpIndex = 0; cpIndex < markerCurvedPathArray.length; cpIndex++){
-    //   calculateTracePointsAndTimesArray(markerCurvedPathArray.at(cpIndex),277.77)
-    // }
-
-  }, markerCurvedPathArray);
-
-
-
 
   return null
 }
