@@ -25,7 +25,7 @@ export function MarkerProperties({
   const ref = useRef<HTMLDivElement>(null!);
   const pane = useRef<Pane>(null!);
   const time = useAtomValue(timeAtom);
-  const markerCurvedPathArray = useAtomValue(curvePathArrayAtom);
+  const [markerCurvedPathArray,setMarkerCurvedPathArray] = useAtom(curvePathArrayAtom);
   const currentCurvedPath:CurvePath|undefined = markerCurvedPathArray.find((cp:CurvePath) => cp._splinePath.options.id === marker.id)
   const updateCurvePathArray = useSetAtom(updateCurvePathAtom)
   const [positionParams, setPositionParams] = useState({
@@ -113,7 +113,18 @@ export function MarkerProperties({
     pane.current.addBinding(positionParams, 'pitch', { readonly: true, format: (v: number) => v.toFixed(3), })
 
     pane.current.addBinding(positionParams, 'delay', {format: (v: number) => v.toFixed(3), }).on('change', (ev) => {
-      updateCurvePathArray(marker.id,ev.value)
+
+        currentCurvedPath!._delayTime = ev.value
+
+        let updatedCurvedPathArray = markerCurvedPathArray.map((cp:CurvePath) => {
+          if (cp === currentCurvedPath) {
+            return { ...cp, _delayTime: ev.value };
+          } else {
+            return cp;
+          }
+        });
+        setMarkerCurvedPathArray(updatedCurvedPathArray)
+
     })
 
 

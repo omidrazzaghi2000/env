@@ -449,8 +449,7 @@ export const updateCurvePathAtom = atom(null, (get, set, markerId: AutoAirCraft[
         if(index > -1){
             curvePathArray.at(index)!._delayTime = delay;
         }
-        console.log("AAAA",curvePathArray)
-        set(curvePathArrayAtom,[])
+        set(curvePathArrayAtom,curvePathArray)
     }
 )
 
