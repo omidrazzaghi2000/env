@@ -27,25 +27,30 @@ export function MarkerProperties({
   const time = useAtomValue(timeAtom);
   const [markerCurvedPathArray,setMarkerCurvedPathArray] = useAtom(curvePathArrayAtom);
   const currentCurvedPath:CurvePath|undefined = markerCurvedPathArray.find((cp:CurvePath) => cp._splinePath.options.id === marker.id)
-  const updateCurvePathArray = useSetAtom(updateCurvePathAtom)
+  const handleChange = useCallback(
+      (e: any) => {
+        setMarker((old: AutoAirCraft) => ({
+          ...old,
+          [e.target.key]: structuredClone(e.value),
+          ts: Date.now(),
+        }));
+      },
+      [marker.id]
+  );
+
   const [positionParams, setPositionParams] = useState({
     lat: marker.latlng[0],
     lng: marker.latlng[1],
     yaw: marker.yaw,
     alt: marker.alt,
     pitch: marker.pitch,
-    delay: currentCurvedPath!._delayTime
+    delay: currentCurvedPath!==undefined? currentCurvedPath!._delayTime:0
   });
-  const handleChange = useCallback(
-    (e: any) => {
-      setMarker((old: AutoAirCraft) => ({
-        ...old,
-        [e.target.key]: structuredClone(e.value),
-        ts: Date.now(),
-      }));
-    },
-    [marker.id]
-  );
+
+
+
+
+
 
   useEffect(() => {
     pane.current?.refresh();

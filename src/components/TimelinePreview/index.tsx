@@ -46,8 +46,7 @@ export const TimelinePreview = (props: any) => {
 
   const getEditorData = useCallback(function (): TimelineRow[] {
     const markers = useAtomValue(markersAtom);
-    console.log("Timeline Preview Updated")
-    console.log(markers,curvedPathArray)
+
     return markers.map(function (marker: any,index:number) {
       var temp_time = 0;
       let currCurvedPath:CurvePath|undefined = curvedPathArray.at(index)

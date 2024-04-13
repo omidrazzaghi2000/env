@@ -409,10 +409,16 @@ export const deleteMarkerAtom = atom(null, (get, set, markerId: AutoAirCraft['id
 
     if (index > -1) { // only splice array when item is found
       mapMarkerArray.splice(index, 1); // 2nd parameter means remove one item only
+      set(mapMarkerArrayAtom,[...mapMarkerArray])
       checkPointMarkerArray.splice(index,1);
+      set(checkpointMarkerArrayAtom,[...checkPointMarkerArray]);
       mapMarkerSplineArray.splice(index,1);
+      set(mapMarkerSplineArrayAtom,[...mapMarkerSplineArray]);
       curvedPathArray.splice(index,1);
+      set(curvePathArrayAtom, [...curvedPathArray])
     }
+
+
 
 
     const newMarkers = markers.filter(m => m.id !== markerId)
