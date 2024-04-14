@@ -1,5 +1,6 @@
 import L from 'leaflet';
 import { uuid } from 'vue-uuid';
+import Topography from 'leaflet-topography';
 export function toDegrees(angle: number) {
     return angle * (180 / Math.PI);
 }
@@ -211,12 +212,16 @@ export class CurvePath{
     _tracePoints:L.LatLng[] = [];
     _numberOfPoints:number;
     _splinePath:L.Spline;
+    _elevations:number[]=[];
     constructor(splinePath_:L.Spline,number_of_points:number){
        this._splinePath = splinePath_;
         this._numberOfPoints = number_of_points;
     }
 }
 
+const leaflet_topography_options = {
+    token: 'pk.eyJ1Ijoib21pZHJhenphZ2hpMjAwMCIsImEiOiJjbGo1YTFzdXgwYzh2M3BxeWN2Yzg5MzVhIn0.-Ju3wtd6vIMP7YL1VKh4XQ'
+}
 
 export function calculateTracePointsAndTimesArray (curvePath:CurvePath,currentPathSpeed:number){
     let number_of_point = curvePath._numberOfPoints;
@@ -250,6 +255,18 @@ export function calculateTracePointsAndTimesArray (curvePath:CurvePath,currentPa
     /*              Trace Points                 */
     /*********************************************/
     curvePath._tracePoints = currSpline.trace(disPoint);
+    console.log("OMID")
+    curvePath._tracePoints.map((point: L.LatLng) => {
+
+        Topography.getTopography(point, leaflet_topography_options).then(
+            (m)=>{
+                curvePath._elevations.push(m.elevation)
+            }
+        )
+
+    })
+
+    console.log("NAVID")
     curvePath._tracePoints.splice(0,number_of_point);
 
 }

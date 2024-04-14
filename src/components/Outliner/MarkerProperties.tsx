@@ -30,6 +30,38 @@ import './index.css'
 import L from "leaflet";
 import {DialogDeletePath} from "../Dialog";
 import {Modal} from "antd";
+import {Area} from "@ant-design/plots";
+
+
+const ElevationChart = (props:any) => {
+
+
+
+  const config = {
+    data: {
+      value: [{
+        "elevation":1,
+      },],
+    },
+    xField: (d) => new Date(d.date),
+    yField: 'elevation',
+    style: {
+      fill: 'linear-gradient(-90deg, white 0%, darkblue 100%)',
+    },
+    axis: {
+      y: { labelFormatter: '~s' },
+    },
+    line: {
+      style: {
+        stroke: 'darkblue',
+        strokeWidth: 2,
+      },
+    },
+  };
+  return <Area {...config} />;
+};
+
+
 export function MarkerProperties({
   markerAtom,markerIndex
 }: {
@@ -323,6 +355,7 @@ export function MarkerProperties({
             {dialogText}
           </p>
         </Modal>
+        <ElevationChart elevations={currentCurvedPath?._elevations}></ElevationChart>
       </>
 
   );
