@@ -5,7 +5,14 @@ import {
   timeAtom,
   isPathPaletteOpenAtom,
   curvePathArrayAtom,
-  updateCurvePathAtom
+  updateCurvePathAtom,
+  markersAtom,
+  deleteLastPathMarkerAtom,
+  isDialogOpenAtom,
+  mapRefAtom,
+  mapAtom,
+  mainMapAtom,
+  checkpointMarkerArrayAtom, mapMarkerSplineArrayAtom, deleteMarkerAtom
 } from "../../store";
 import {PrimitiveAtom, useAtom, useAtomValue, useSetAtom} from "jotai";
 import {useCallback, useEffect, useRef, useState} from "react";
@@ -21,30 +28,97 @@ import {
 } from "../MapPreview/map_marker/path";
 import './index.css'
 import L from "leaflet";
+import {DialogDeletePath} from "../Dialog";
+import {Modal} from "antd";
 export function MarkerProperties({
-  markerAtom,
+  markerAtom,markerIndex
 }: {
   markerAtom: PrimitiveAtom<AutoAirCraft>;
+  markerIndex:number;
 }) {
+
   const [marker, setMarker] = useAtom(markerAtom);
   const setPathPalleteShow = useSetAtom(isPathPaletteOpenAtom);
   const ref = useRef<HTMLDivElement>(null!);
   const pane = useRef<Pane>(null!);
   const time = useAtomValue(timeAtom);
+
   const [markerCurvedPathArray,setMarkerCurvedPathArray] = useAtom(curvePathArrayAtom);
   const currentCurvedPath:CurvePath|undefined = markerCurvedPathArray.find((cp:CurvePath) => cp._splinePath.options.id === marker.id)
-  const handleChange = useCallback(
-      (e: any) => {
-        setMarker((old: AutoAirCraft) => ({
-          ...old,
-          [e.target.key]: structuredClone(e.value),
-          ts: Date.now(),
-        }));
-      },
-      [marker.id]
-  );
+  const [mapCheckpointArray,setMapCheckpointArray] = useAtom<any[][]>(checkpointMarkerArrayAtom)
+  const [mapSplineArray, setMapSplineArray] = useAtom<L.Spline[]>(mapMarkerSplineArrayAtom)
 
-  const handleChangeDelay = useCallback(
+  const deleteMarker = useSetAtom(deleteMarkerAtom)
+  const deleteLastPathFromMarker = useSetAtom(deleteLastPathMarkerAtom)
+  const setDialogOpen = useSetAtom(isDialogOpenAtom)
+  const map = useAtomValue(mainMapAtom)
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+  const handleOkDeleteLastPath = () => {
+    setIsModalOpen(false);
+    /* check that marker after deleting this path can be existed or not
+     * because marker without path can not be existed in the application */
+    if(marker.path.length === 1){
+      deleteMarker(marker.id)
+    }else{
+      /* Delete last path from marker with its id */
+      deleteLastPathFromMarker(
+          marker.id
+      )
+      /* Calculate positions */
+      let positions = []
+      for (let i = 0; i < marker.path.length; i++) {
+        positions.push([marker.path[i].src.lat, marker.path[i].src.lng]);
+        /* Last one */
+        if (i == marker.path.length - 1) {
+          positions.push([marker.path[i].dest.lat, marker.path[i].dest.lng]);
+        }
+      }
+      if (map !== null) {
+        /* Delete its spline and then replace it with new spline */
+        map.removeLayer(mapSplineArray[markerIndex]);
+        mapSplineArray[markerIndex] = L.spline(positions, {
+          color: "#222",
+          opacity: 0.2,
+          weight: 2,
+          dashArray: '5, 5', dashOffset: '0',
+          smoothing: 0.08,
+          id: marker.id//for deleting
+        })
+        mapSplineArray[markerIndex].addTo(map)
+        setMapSplineArray([...mapSplineArray])
+
+
+        /* update curve path characteristics */
+        let newCurvedPath = new CurvePath(mapSplineArray[markerIndex], 60);
+        calculateTracePointsAndTimesArray(newCurvedPath, 277.77);
+        /*update delay*/
+        newCurvedPath._delayTime = marker.delay
+        markerCurvedPathArray[markerIndex] = newCurvedPath;
+        setMarkerCurvedPathArray([...markerCurvedPathArray])
+
+
+        /* delete checkpoint marker */
+        map.removeLayer(mapCheckpointArray[markerIndex].at(mapCheckpointArray[markerIndex].length - 1))
+        mapCheckpointArray[markerIndex].splice(mapCheckpointArray[markerIndex].length - 1, 1);
+        setMapCheckpointArray([...mapCheckpointArray])
+      }
+    }
+
+
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  const [dialogOk,setDialogOk] = useState(false)
+  const [dialogText, setDialogText]=useState('')
+
+
+  const handleChange = useCallback(
       (e: any) => {
         setMarker((old: AutoAirCraft) => ({
           ...old,
@@ -78,7 +152,6 @@ export function MarkerProperties({
       return;
     }
 
-    console.log(currentCurvedPath)
 
     let timesArray = currentCurvedPath._timesArray;
     let tracePoints =  currentCurvedPath._tracePoints;
@@ -95,8 +168,6 @@ export function MarkerProperties({
         currentSubPathIndex = timesArray.length-2
       }
     }
-
-    console.log(currentSubPathIndex)
 
     let new_position_new_yaw = interpolateAndGetLatLng(
         tracePoints[currentSubPathIndex],tracePoints[currentSubPathIndex+1], time-timesArray[currentSubPathIndex],
@@ -158,8 +229,6 @@ export function MarkerProperties({
 
         setMarkerCurvedPathArray(updatedCurvedPathArray)
 
-
-
     })
 
 
@@ -171,11 +240,39 @@ export function MarkerProperties({
     /** Add path button */
     f1.addButton({
       title: 'Add new Path',
-      label: '',   // optional
     }).on("click",
         function (){
         setPathPalleteShow(true);
       })
+
+    f1.addBlade({view:'separator'})
+
+    f1.addButton({
+      title: 'Remove Last Path',
+
+    }).on("click",
+        function (){
+
+          /* check that marker after deleting this path can be existed or not
+           * because marker without path can not be existed in the application */
+          if(marker.path.length === 1) {
+            setDialogText("Because it is the last path for this marker after deleting this path this marker is going to be deleted.\n" +
+                "            Are you sure you want to do this?")
+          }else{
+            setDialogText("Are you sure you want to delete the last path?")
+          }
+
+          showModal()
+        })
+
+
+
+
+
+
+
+
+
 
 
 
@@ -214,18 +311,23 @@ export function MarkerProperties({
     }
 
 
-
-
-
-
     return () => {
       pane.current.dispose();
     };
-  }, [marker.name, marker.path, positionParams]);
+  }, [marker.name, marker.path, positionParams,currentCurvedPath]);
 
 
 
 
 
-  return <div ref={ref} />;
+  return (<>
+        <div ref={ref}/>
+        <Modal title={"Warning"} open={isModalOpen} onOk={handleOkDeleteLastPath} onCancel={handleCancel} okButtonProps={{ type: "default" }}>
+          <p>
+            {dialogText}
+          </p>
+        </Modal>
+      </>
+
+  );
 }

@@ -121,8 +121,8 @@ export function Outliner() {
             items={lightIds}
             strategy={verticalListSortingStrategy}
           >
-            {markerAtoms.map((markerAtom) => (
-              <MarkerListItem key={markerAtom.toString()} markerAtom={markerAtom} />
+            {markerAtoms.map((markerAtom, index) => (
+              <MarkerListItem key={markerAtom.toString()} markerAtom={markerAtom} markerIndex={index}/>
             ))}
           </SortableContext>
         </DndContext>

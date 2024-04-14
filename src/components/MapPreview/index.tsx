@@ -22,7 +22,7 @@ import {
   curvePathArrayAtom,
 
   currentMarkerSelectedAtom,
-  MarkerTableRow, MarkerTableAtom, toggleMarkerTableSelectionAtom, mainMapAtom, mapMarkerSplineArrayAtom
+  MarkerTableRow, MarkerTableAtom, toggleMarkerTableSelectionAtom, mainMapAtom, mapMarkerSplineArrayAtom, mapAtom
 } from '../../store'
 import L, {LatLng, latLng, marker} from 'leaflet'
 import "leaflet-spline";
@@ -66,6 +66,7 @@ const AutoAirCraftSelectedIcon = L.icon({
 function MyComponent () {
 
   const map = useMap();
+
   const setMainMap = useSetAtom(mainMapAtom)
   setMainMap(map)
 
@@ -114,7 +115,6 @@ function MyComponent () {
 
       for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
         let curMarker = markers[markerIndex]
-        console.log(curMarker)
         let mapMarker = L.marker([curMarker.lat, curMarker.long], {
           // It is because it has error when i use curMarker.icon
           icon: L.icon(curMarker.icon.options),
@@ -135,7 +135,7 @@ function MyComponent () {
         curMarker.latlng = [curMarker.lat,curMarker.long]
 
         let positions:[number, number][] = []
-
+        console.log(curMarker.path)
         //show checkpoint for each path and save it in mapCheckpoint array
         for(let pathIndex = 0 ; pathIndex < curMarker.path.length; pathIndex++){
           let currPath = curMarker.path[pathIndex];
@@ -157,6 +157,7 @@ function MyComponent () {
             positions.push([currPath.dest.lat, currPath.dest.lng])
           }
         }
+
         const newSpline = L.spline(positions,{
           color: "#222",
           opacity:0.2,
@@ -498,7 +499,7 @@ function MyComponent () {
                 pointB
             )
         )
-
+        setCurrentMarkerSelected(markers.at(currentSelectedMarkerIndex))
         /* Calculate positions */
         let positions = []
         for(let i = 0 ; i < currentMarkerSelected.path.length; i++){
@@ -520,13 +521,20 @@ function MyComponent () {
           id:currentMarkerSelected.id//for deleting
         })
         mapSplineArray[currentSelectedMarkerIndex].addTo(map)
+        setMapSplineArray([...mapSplineArray])
+
 
         /* update curve path characteristics */
         let newCurvedPath = new CurvePath(mapSplineArray[currentSelectedMarkerIndex],60);
-        calculateTracePointsAndTimesArray(newCurvedPath,277.77);
+
         /*update delay*/
-        newCurvedPath._delayTime = currentMarkerSelected.delay
+        newCurvedPath._delayTime = markerCurvedPathArray[currentSelectedMarkerIndex]._delayTime
         markerCurvedPathArray[currentSelectedMarkerIndex] = newCurvedPath;
+
+        /*after updating delay calculate new times array and new trace points*/
+        calculateTracePointsAndTimesArray(newCurvedPath,277.77);
+        setMarkerCurvedPathArray([...markerCurvedPathArray])
+
 
         /* add a checkpoint marker to map and save it as state to show every time refresh the page */
         const checkPointMarker = L.marker(pointB, {
@@ -538,6 +546,7 @@ function MyComponent () {
 
         /* save this marker to mapCheckpointArray */
         mapCheckpointArray[currentSelectedMarkerIndex].push(checkPointMarker);
+        setMapCheckpointArray([...mapCheckpointArray])
       }
 
 
@@ -568,6 +577,7 @@ function MyComponent () {
       map.removeEventListener("contextmenu", addPathToSelectedMarker,true);
       /* remove escape function */
       map.removeEventListener("keydown",escapeFunction,true);
+
 
     }
 
@@ -608,8 +618,6 @@ function MyComponent () {
 
           let timesArray = markerCurvedPathArray[i]._timesArray;
           let tracePoints =  markerCurvedPathArray[i]._tracePoints;
-
-          console.log(markerCurvedPathArray[i])
 
           /* check whether path is started */
           if(timesArray.length > 0 && timesArray[0] > time) {

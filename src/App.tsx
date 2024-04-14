@@ -5,6 +5,7 @@ import { AppToolbar } from "./components/AppToolbar";
 import { CommandPalette } from "./components/CommandPalette";
 import { PathPalette } from "./components/PathPalette";
 import {ScenarioPaette} from "./components/ScenarioPalette";
+import {DialogDeletePath} from "./components/Dialog";
 
 export default function App() {
   console.log("App created");
@@ -14,6 +15,7 @@ export default function App() {
       <ScenarioPaette/>
       <CommandPalette />
       <PathPalette/>
+
       <AppLayout>
         <AppToolbar />
         <AppContent />

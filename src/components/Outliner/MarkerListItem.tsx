@@ -51,9 +51,10 @@ function MarkerIcon (props: any) {
 }
 
 export function MarkerListItem ({
-  markerAtom
+  markerAtom, markerIndex
 }: {
   markerAtom: PrimitiveAtom<AtuoAirCraft>
+  markerIndex:number
 }) {
   const [marker, setMarker] = useAtom(markerAtom)
   const deleteMarker = useSetAtom(deleteMarkerAtom);
@@ -104,7 +105,7 @@ export function MarkerListItem ({
       </ContextMenu.Root>
       {marker.selected && (
         <PropertiesPanelTunnel.In>
-          <MarkerProperties markerAtom={markerAtom} />
+          <MarkerProperties markerAtom={markerAtom} markerIndex={markerIndex} />
         </PropertiesPanelTunnel.In>
       )}
     </>

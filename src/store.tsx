@@ -376,12 +376,33 @@ export const addPathToMarkerAtom = atom(
                 if (markerIndex === i) {
                     m.path.push(newPath);
                 }
-                return { ...m }
+                return m;
             })
+
         )
+
     }
 )
 
+
+export const deleteLastPathMarkerAtom = atom(
+    null,
+    (
+        get,
+        set,
+        markerId: number,
+    ) => {
+        set(markersAtom, markers =>
+            markers.map(function (m, i) {
+                if (markerId === m.id) {
+                        m.path.splice(m.path.length-1,1);
+                }
+                return m;
+            })
+        )
+
+    }
+)
 
 
 export const deleteMarkerAtom = atom(null, (get, set, markerId: AutoAirCraft['id']) => {
@@ -440,6 +461,9 @@ export const mapMarkerSplineArrayAtom = atom<L.Spline[]>([])
 
 //marker properties
 export const isPathPaletteOpenAtom = atom(false);
+
+export const isDialogOpenAtom = atom(false);
+
 export const curvePathArrayAtom = atom([])
 //timeline
 export const timelineCursorLastPostionAtom = atom(0);
