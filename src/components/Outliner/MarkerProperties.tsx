@@ -41,7 +41,7 @@ export function MarkerProperties({
   const setPathPalleteShow = useSetAtom(isPathPaletteOpenAtom);
   const ref = useRef<HTMLDivElement>(null!);
   const pane = useRef<Pane>(null!);
-  const time = useAtomValue(timeAtom);
+  const [time,setTime] = useAtom(timeAtom);
 
   const [markerCurvedPathArray,setMarkerCurvedPathArray] = useAtom(curvePathArrayAtom);
   const currentCurvedPath:CurvePath|undefined = markerCurvedPathArray.find((cp:CurvePath) => cp._splinePath.options.id === marker.id)
@@ -94,10 +94,11 @@ export function MarkerProperties({
 
         /* update curve path characteristics */
         let newCurvedPath = new CurvePath(mapSplineArray[markerIndex], 60);
-        calculateTracePointsAndTimesArray(newCurvedPath, 277.77);
+
         /*update delay*/
         newCurvedPath._delayTime = marker.delay
         markerCurvedPathArray[markerIndex] = newCurvedPath;
+        calculateTracePointsAndTimesArray(newCurvedPath, 277.77);
         setMarkerCurvedPathArray([...markerCurvedPathArray])
 
 
@@ -229,6 +230,10 @@ export function MarkerProperties({
 
         setMarkerCurvedPathArray(updatedCurvedPathArray)
 
+        /* update markers visibility after adding delay */
+        setTime(time+1)
+        setTime(time-1)
+
     })
 
 
@@ -264,15 +269,6 @@ export function MarkerProperties({
 
           showModal()
         })
-
-
-
-
-
-
-
-
-
 
 
 

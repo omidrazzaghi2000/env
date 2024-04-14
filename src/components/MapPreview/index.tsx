@@ -46,6 +46,7 @@ import {BoltIcon} from "@heroicons/react/24/solid";
 import {or} from "three/examples/jsm/nodes/shadernode/ShaderNodeBaseElements";
 import {PropertiesPanelTunnel} from "../Properties";
 import {MarkerADSBProperties} from "../Outliner/MarkerADSBProperties";
+import {MarkerProperties} from "../Outliner/MarkerProperties";
 
 
 const center = new L.LatLng(34.641955754083504, 50.878976024718725)
@@ -83,7 +84,7 @@ function MyComponent () {
   const [mapCheckpointArray,setMapCheckpointArray] = useAtom<any[][]>(checkpointMarkerArrayAtom)
   const [mapSplineArray, setMapSplineArray] = useAtom<L.Spline[]>(mapMarkerSplineArrayAtom)
   const toggleSelection = useSetAtom(toggleMarkerSelectionAtom)
-  const time = useAtomValue(timeAtom);
+  const [time,setTime] = useAtom(timeAtom);
   const [currentMarkerSelected,setCurrentMarkerSelected] = useState<AutoAirCraft>(null);
   const findIndex=function(arr:AutoAirCraft[],element:AutoAirCraft){
     for(let i = 0 ; i <= arr.length ; i++){
@@ -578,7 +579,6 @@ function MyComponent () {
       /* remove escape function */
       map.removeEventListener("keydown",escapeFunction,true);
 
-
     }
 
     if(showAddPathLine){
@@ -610,60 +610,63 @@ function MyComponent () {
   //    update marker position     //
   //                               //
   //###############################//
-  useEffect(
-      function(){
+  function updatePosition(){
 
-        for(let i = 0 ; i < markers.length ; i++)
-        {
+    for(let i = 0 ; i < markers.length ; i++)
+    {
 
-          let timesArray = markerCurvedPathArray[i]._timesArray;
-          let tracePoints =  markerCurvedPathArray[i]._tracePoints;
+      let timesArray = markerCurvedPathArray[i]._timesArray;
+      let tracePoints =  markerCurvedPathArray[i]._tracePoints;
 
-          /* check whether path is started */
-          if(timesArray.length > 0 && timesArray[0] > time) {
-            /* hide marker until its time begin */
-            if(map.hasLayer(mapMarkerArray.at(i))){
-              map.removeLayer(mapMarkerArray.at(i))
-            }
-
-            continue
-          }
-
-          /* check that marker on map is visible */
-          if(!map.hasLayer(mapMarkerArray.at(i))){
-            map.addLayer(mapMarkerArray.at(i))
-            }
-
-          let currentSubPathIndex = 0;
-          for(let t = 0 ; t < timesArray.length-1 ; t++){
-
-            if(time >= timesArray[t] && time <= timesArray[t+1]/*for the middle of path*/){
-              currentSubPathIndex = t;
-              break
-            }
-
-            else if(t == timesArray.length-2/*for the end of path*/){
-              currentSubPathIndex = timesArray.length-2
-            }
-
-          }
-
-          let new_position_new_yaw = interpolateAndGetLatLng(
-              tracePoints[currentSubPathIndex],tracePoints[currentSubPathIndex+1], time-timesArray[currentSubPathIndex],
-              277.77)
-          let new_position = new_position_new_yaw[0]
-          let new_yaw = new_position_new_yaw[1]
-
-          mapMarkerArray.at(i).setLatLng( new L.LatLng(new_position[0],new_position[1]));
-          mapMarkerArray.at(i).setRotationAngle(new_yaw)
-
-
-
-
+      /* check whether path is started */
+      if(timesArray.length > 0 && timesArray[0] > time) {
+        /* hide marker until its time begin */
+        if(map.hasLayer(mapMarkerArray.at(i))){
+          map.removeLayer(mapMarkerArray.at(i))
         }
+
+        continue
       }
+
+      /* check that marker on map is visible */
+      if(!map.hasLayer(mapMarkerArray.at(i))){
+        map.addLayer(mapMarkerArray.at(i))
+      }
+
+      let currentSubPathIndex = 0;
+      for(let t = 0 ; t < timesArray.length-1 ; t++){
+
+        if(time >= timesArray[t] && time <= timesArray[t+1]/*for the middle of path*/){
+          currentSubPathIndex = t;
+          break
+        }
+
+        else if(t == timesArray.length-2/*for the end of path*/){
+          currentSubPathIndex = timesArray.length-2
+        }
+
+      }
+
+      let new_position_new_yaw = interpolateAndGetLatLng(
+          tracePoints[currentSubPathIndex],tracePoints[currentSubPathIndex+1], time-timesArray[currentSubPathIndex],
+          277.77)
+      let new_position = new_position_new_yaw[0]
+      let new_yaw = new_position_new_yaw[1]
+
+      mapMarkerArray.at(i).setLatLng( new L.LatLng(new_position[0],new_position[1]));
+      mapMarkerArray.at(i).setRotationAngle(new_yaw)
+
+
+
+
+    }
+  }
+  useEffect(
+      updatePosition
       ,[time]
   )
+
+
 
   return null
 }
@@ -945,6 +948,7 @@ function ShowProperties(props:any) {
       </PropertiesPanelTunnel.In>
   );
 }
+
 
 export function MapPreview () {
   console.log("Map Updated")
