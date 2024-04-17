@@ -88,6 +88,7 @@ export function MarkerProperties({
   const [time,setTime] = useAtom(timeAtom);
 
   const [markerCurvedPathArray,setMarkerCurvedPathArray] = useAtom(curvePathArrayAtom);
+  const currentTraceIndex = useAtomValue(currentTracePointAtom)
   const [currentCurvedPath,setCurrentCurvedPath] = useState(markerCurvedPathArray.find((cp:CurvePath) => cp._splinePath.options.id === marker.id))
 
   const [mapCheckpointArray,setMapCheckpointArray] = useAtom<any[][]>(checkpointMarkerArrayAtom)
@@ -181,7 +182,8 @@ export function MarkerProperties({
     yaw: marker.yaw,
     alt: marker.alt,
     pitch: marker.pitch,
-    delay: currentCurvedPath!==undefined? currentCurvedPath!._delayTime:0
+    delay: currentCurvedPath!==undefined? currentCurvedPath!._delayTime:0,
+    elevation: currentTraceIndex!==undefined&&currentCurvedPath!==undefined&&currentCurvedPath!._elevations.length>0?currentCurvedPath!._elevations[currentTraceIndex].elevation:-1,
   });
 
 
@@ -229,6 +231,7 @@ export function MarkerProperties({
           alt:0.0, //TODO: must get from interpolate and get position function
           pitch:0.0, //TODO: must get from interpolate and get position function
           delay:currentCurvedPath!._delayTime,
+         elevation:currentTraceIndex!==undefined&&currentCurvedPath!==undefined&&currentCurvedPath!._elevations.length>0?currentCurvedPath!._elevations[currentTraceIndex].elevation:-1,
         }
 
     )
@@ -255,7 +258,7 @@ export function MarkerProperties({
     pane.current.addBinding(positionParams, 'alt', { readonly: true, format: (v: number) => v.toFixed(2), })
     pane.current.addBinding(positionParams, 'yaw', { readonly: true, format: (v: number) => v.toFixed(3), })
     pane.current.addBinding(positionParams, 'pitch', { readonly: true, format: (v: number) => v.toFixed(3), })
-
+    pane.current.addBinding(positionParams, 'elevation', { readonly: true, format: (v: number) => v.toFixed(2), })
     pane.current.addBinding(positionParams, 'delay', {format: (v: number) => v.toFixed(3), }).on("change", handleChange).on('change', (ev) => {
 
 
