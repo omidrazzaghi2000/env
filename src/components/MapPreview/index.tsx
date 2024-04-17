@@ -22,7 +22,13 @@ import {
   curvePathArrayAtom,
 
   currentMarkerSelectedAtom,
-  MarkerTableRow, MarkerTableAtom, toggleMarkerTableSelectionAtom, mainMapAtom, mapMarkerSplineArrayAtom, mapAtom
+  MarkerTableRow,
+  MarkerTableAtom,
+  toggleMarkerTableSelectionAtom,
+  mainMapAtom,
+  mapMarkerSplineArrayAtom,
+  mapAtom,
+  updateCurvePathAtom, currentTracePointAtom
 } from '../../store'
 import L, {LatLng, latLng, marker} from 'leaflet'
 import "leaflet-spline";
@@ -39,7 +45,7 @@ import {
   toRadians,
   calculateTime,
   generateSplinePath,
-  interpolateAndGetLatLng, CurvePath, calculateTracePointsAndTimesArray
+  interpolateAndGetLatLng, CurvePath, calculateTracePointsAndTimesArray, updateElevations
 } from './map_marker/path'
 import {toast} from "sonner";
 import {BoltIcon} from "@heroicons/react/24/solid";
@@ -86,6 +92,7 @@ function MyComponent () {
   const toggleSelection = useSetAtom(toggleMarkerSelectionAtom)
   const [time,setTime] = useAtom(timeAtom);
   const [currentMarkerSelected,setCurrentMarkerSelected] = useState<AutoAirCraft>(null);
+  const setCurrentTracePoint = useSetAtom(currentTracePointAtom);
   const findIndex=function(arr:AutoAirCraft[],element:AutoAirCraft){
     for(let i = 0 ; i <= arr.length ; i++){
       if(element.id === arr[i].id){
@@ -172,9 +179,22 @@ function MyComponent () {
         /* update curve path characteristics */
         let newCurvedPath = new CurvePath(newSpline,60)
         newCurvedPath._delayTime = curMarker.delay;
+
         calculateTracePointsAndTimesArray(newCurvedPath,277.77)
         markerCurvedPathArray.push(newCurvedPath)
 
+        /* after 2 seconds update elevations */
+        setTimeout(()=>
+        {
+          updateElevations(markerCurvedPathArray,markerIndex).then(
+              (updatedCurvePath)=>{
+                markerCurvedPathArray[markerIndex]=updatedCurvePath
+                console.log([...markerCurvedPathArray])
+                setMarkerCurvedPathArray([...markerCurvedPathArray])
+              }
+          )
+
+        },2001)
 
 
         if(curMarker.selected){
@@ -344,7 +364,18 @@ function MyComponent () {
             calculateTracePointsAndTimesArray(newCurvePath,277.77);
             markerCurvedPathArray.push(newCurvePath)
 
+            /* after 2 seconds update elevations */
+            setTimeout(()=>
+            {
+              updateElevations(markerCurvedPathArray,markerCurvedPathArray.length-1).then(
+                  (updatedCurvePath)=>{
+                    markerCurvedPathArray[markerCurvedPathArray.length-1]=updatedCurvePath
+                    console.log([...markerCurvedPathArray])
+                    setMarkerCurvedPathArray([...markerCurvedPathArray])
+                  }
+              )
 
+            },2001)
 
             //add a checkpoint marker to map and save it as state to show every time refresh the page
             const checkPointMarker = L.marker([e.latlng.lat + 0.05*Math.cos(toRadians(newMarker.yaw)), e.latlng.lng + 0.05*Math.sin(toRadians(newMarker.yaw))],{
@@ -536,6 +567,18 @@ function MyComponent () {
         calculateTracePointsAndTimesArray(newCurvedPath,277.77);
         setMarkerCurvedPathArray([...markerCurvedPathArray])
 
+        /* after 2 seconds update elevations */
+        setTimeout(()=>
+        {
+          updateElevations(markerCurvedPathArray,currentSelectedMarkerIndex).then(
+              (updatedCurvePath)=>{
+                markerCurvedPathArray[currentSelectedMarkerIndex]=updatedCurvePath
+                console.log([...markerCurvedPathArray])
+                setMarkerCurvedPathArray([...markerCurvedPathArray])
+              }
+          )
+
+        },100)
 
         /* add a checkpoint marker to map and save it as state to show every time refresh the page */
         const checkPointMarker = L.marker(pointB, {
@@ -646,6 +689,9 @@ function MyComponent () {
         }
 
       }
+
+
+      setCurrentTracePoint(currentSubPathIndex)
 
       let new_position_new_yaw = interpolateAndGetLatLng(
           tracePoints[currentSubPathIndex],tracePoints[currentSubPathIndex+1], time-timesArray[currentSubPathIndex],
@@ -961,7 +1007,7 @@ export function MapPreview () {
       >
         <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
         <MyComponent />
-        {/*<ShowADSB/>*/}
+        <ShowADSB/>
         <ShowProperties></ShowProperties>
       </MapContainer>
   )

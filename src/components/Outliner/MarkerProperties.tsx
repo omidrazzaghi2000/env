@@ -10,9 +10,8 @@ import {
   deleteLastPathMarkerAtom,
   isDialogOpenAtom,
   mapRefAtom,
-  mapAtom,
   mainMapAtom,
-  checkpointMarkerArrayAtom, mapMarkerSplineArrayAtom, deleteMarkerAtom
+  checkpointMarkerArrayAtom, mapMarkerSplineArrayAtom, deleteMarkerAtom, currentTracePointAtom
 } from "../../store";
 import {PrimitiveAtom, useAtom, useAtomValue, useSetAtom} from "jotai";
 import {useCallback, useEffect, useRef, useState} from "react";
@@ -24,7 +23,7 @@ import {
   calculateTracePointsAndTimesArray,
   CurvePath,
   getLatLng,
-  interpolateAndGetLatLng
+  interpolateAndGetLatLng,
 } from "../MapPreview/map_marker/path";
 import './index.css'
 import L from "leaflet";
@@ -34,31 +33,45 @@ import {Area} from "@ant-design/plots";
 
 
 const ElevationChart = (props:any) => {
+  const [curvedPathArray,setCurvedPathArray] = useAtom(curvePathArrayAtom)
+  const currentTraceIndex = useAtomValue(currentTracePointAtom)
+
+  const [config,setConfig]=useState({})
+  const [currentTracePoint, setCurrentTracePoint]=useState(-1)
+
+  useEffect(() => {
+    console.log("EC")
+    try{
+      setConfig({
+        data: {
+          value: curvedPathArray.at(props.markerIndex)._elevations,
+        },
+        xField: (d:any,index:number) => index,
+        yField: 'elevation',
+        style: {
+          fill: 'linear-gradient(-90deg, #FADA5E  0%,  #F9A602 100%)',
+        },
+        axis: {
+          y: { labelFormatter: '~s' },
+        },
+        annotations:currentTraceIndex>0&&[
+          {
+            type: "lineX",
+            xField: currentTraceIndex,
+            style: { stroke: "#d31111", strokeOpacity: 1, lineWidth: 1 },
+          },
+        ],
+
+        theme: "classicDark",
+      });
+    }catch (e){
+      console.log(e)
+    }
+
+  }, [curvedPathArray,currentTraceIndex]);
 
 
-
-  const config = {
-    data: {
-      value: [{
-        "elevation":1,
-      },],
-    },
-    xField: (d) => new Date(d.date),
-    yField: 'elevation',
-    style: {
-      fill: 'linear-gradient(-90deg, white 0%, darkblue 100%)',
-    },
-    axis: {
-      y: { labelFormatter: '~s' },
-    },
-    line: {
-      style: {
-        stroke: 'darkblue',
-        strokeWidth: 2,
-      },
-    },
-  };
-  return <Area {...config} />;
+  return <Area height={200} {...config} paddingLeft={24}/>;
 };
 
 
@@ -76,7 +89,8 @@ export function MarkerProperties({
   const [time,setTime] = useAtom(timeAtom);
 
   const [markerCurvedPathArray,setMarkerCurvedPathArray] = useAtom(curvePathArrayAtom);
-  const currentCurvedPath:CurvePath|undefined = markerCurvedPathArray.find((cp:CurvePath) => cp._splinePath.options.id === marker.id)
+  const [currentCurvedPath,setCurrentCurvedPath] = useState(markerCurvedPathArray.find((cp:CurvePath) => cp._splinePath.options.id === marker.id))
+
   const [mapCheckpointArray,setMapCheckpointArray] = useAtom<any[][]>(checkpointMarkerArrayAtom)
   const [mapSplineArray, setMapSplineArray] = useAtom<L.Spline[]>(mapMarkerSplineArrayAtom)
 
@@ -271,6 +285,7 @@ export function MarkerProperties({
 
     const f1 = pane.current.addFolder({
       title: 'Path',
+      expanded:false,
     });
     
 
@@ -344,10 +359,6 @@ export function MarkerProperties({
     };
   }, [marker.name, marker.path, positionParams,currentCurvedPath]);
 
-
-
-
-
   return (<>
         <div ref={ref}/>
         <Modal title={"Warning"} open={isModalOpen} onOk={handleOkDeleteLastPath} onCancel={handleCancel} okButtonProps={{ type: "default" }}>
@@ -355,7 +366,10 @@ export function MarkerProperties({
             {dialogText}
           </p>
         </Modal>
-        <ElevationChart elevations={currentCurvedPath?._elevations}></ElevationChart>
+        <h2 className="p-4 font-light text-xs tracking-widest text-gray-300 border-b border-white/10">
+          Elevation
+        </h2>
+        <ElevationChart markerIndex={markerIndex}></ElevationChart>
       </>
 
   );
