@@ -337,7 +337,20 @@ export function MarkerProperties({
       });
 
       tempPathFolder.addBinding(PARAMS, 'speed', {
-        readonly: true,
+
+
+      }).on("change",(ev)=>{
+        /* edit path in markers array*/
+        setMarker((m:AutoAirCraft)=>{
+          m.path[pathIndex].speed = ev.value;
+          return {...m};
+        })
+
+        /* edit curve path */
+
+
+
+
       });
       tempPathFolder.addBinding(PARAMS, 'src', {
         x: { step: 0.0001 },
