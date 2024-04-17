@@ -40,7 +40,6 @@ const ElevationChart = (props:any) => {
   const [currentTracePoint, setCurrentTracePoint]=useState(-1)
 
   useEffect(() => {
-    console.log("EC")
     try{
       setConfig({
         data: {
