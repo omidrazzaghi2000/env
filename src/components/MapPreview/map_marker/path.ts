@@ -22,7 +22,7 @@ export abstract class OPath {
 
 export class LinearOPath extends OPath {
     speed: number = 277.77;// default speed
-    time: number = null;
+
     isFinished: boolean = false;
     constructor(_src: L.LatLng, _dest: L.LatLng) {
         super(_src, _dest);
@@ -47,6 +47,10 @@ export function calculateTime(lpath: any) {
 }
 
 export function calculateTimeWithCurvedPath(curvedPath:CurvePath,pathIndex:number) {
+
+    if(curvedPath._timesArray[curvedPath._checkPointIndex[pathIndex]]===undefined){
+        return -1
+    }
     return curvedPath._timesArray[curvedPath._checkPointIndex[pathIndex]]
 }
 
@@ -223,6 +227,7 @@ export class CurvePath{
     _numberOfPoints:number;
     _splinePath:L.Spline;
     _elevations=[];
+    _lengthArray:number[] = [];/** to calculate length of this spline for each linear path **/
     constructor(splinePath_:L.Spline,number_of_points:number){
        this._splinePath = splinePath_;
         this._numberOfPoints = number_of_points;
@@ -275,19 +280,25 @@ export function calculateTracePointsAndTimesArray (curvePath:CurvePath,marker:Au
     curvePath._timesArray = []
     curvePath._timesArray.push(0)
     curvePath._checkPointIndex =[]
+    curvePath._lengthArray = []
+    let temp_length = 0;
+
     for (let i = 0 ; i  <  curvePath._tracePoints.length-1 ; i++){
         const currPoint = curvePath._tracePoints[i]
         const nextPoint = curvePath._tracePoints[i+1]
 
 
         let currentPathSpeed = marker.path[currentPathIndex].speed
-        console.log(currentPathSpeed)
+
         curveDistance += currPoint.distanceTo(nextPoint)
         if(curvePath._timesArray.length !== 0){
             curvePath._timesArray.push(currPoint.distanceTo(nextPoint)/currentPathSpeed+curvePath._timesArray[curvePath._timesArray.length-1])
         }else{
             curvePath._timesArray.push(currPoint.distanceTo(nextPoint)/currentPathSpeed)
         }
+
+        /** to calculate length of this spline for each linear path **/
+        temp_length+=currPoint.distanceTo(nextPoint);
 
         /** update current path index **/
         curvePath._tracePointsPathIndex.push(currentPathIndex)
@@ -299,6 +310,12 @@ export function calculateTracePointsAndTimesArray (curvePath:CurvePath,marker:Au
 
             /*save current index*/
             curvePath._checkPointIndex.push(i)
+
+            /*save this path length to curved path length array*/
+            curvePath._lengthArray.push(temp_length)
+
+            /*reset length_temp variable */
+            temp_length = 0;
 
             currentPathIndex+=1
         }

@@ -189,7 +189,6 @@ function MyComponent () {
           updateElevations(markerCurvedPathArray,markerIndex).then(
               (updatedCurvePath)=>{
                 markerCurvedPathArray[markerIndex]=updatedCurvePath
-                console.log([...markerCurvedPathArray])
                 setMarkerCurvedPathArray([...markerCurvedPathArray])
               }
           )
@@ -573,7 +572,6 @@ function MyComponent () {
           updateElevations(markerCurvedPathArray,currentSelectedMarkerIndex).then(
               (updatedCurvePath)=>{
                 markerCurvedPathArray[currentSelectedMarkerIndex]=updatedCurvePath
-                console.log([...markerCurvedPathArray])
                 setMarkerCurvedPathArray([...markerCurvedPathArray])
               }
           )
@@ -669,8 +667,9 @@ function MyComponent () {
           map.removeLayer(mapMarkerArray.at(i))
         }
 
-
+        /** To remove annotation in elevation chart **/
         setCurrentTracePoint(-1)
+
         continue
       }
 

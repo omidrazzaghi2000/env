@@ -388,9 +388,20 @@ export function MarkerProperties({
       }).on("change",(ev)=>{
         /* edit path in markers array*/
         setMarker((m:AutoAirCraft)=>{
-          m.path[pathIndex].speed = ev.value;
+          /* again change speed with this new time that operator enters into this field */
+          m.path[pathIndex].speed = (currentCurvedPath._lengthArray[pathIndex])/ev.value;
           return {...m};
         })
+
+        /* edit curve path */
+        calculateTracePointsAndTimesArray(currentCurvedPath,marker)
+        setCurrentCurvedPath({...currentCurvedPath})
+        let markerIndex = markerCurvedPathArray.findIndex((cp:CurvePath) => cp._splinePath.options.id === marker.id)
+        if(markerIndex !== undefined){
+          markerCurvedPathArray[markerIndex]= currentCurvedPath
+          setMarkerCurvedPathArray([...markerCurvedPathArray])
+        }
+
       });
 
     }
