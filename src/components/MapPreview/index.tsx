@@ -180,7 +180,7 @@ function MyComponent () {
         let newCurvedPath = new CurvePath(newSpline,60)
         newCurvedPath._delayTime = curMarker.delay;
 
-        calculateTracePointsAndTimesArray(newCurvedPath,277.77)
+        calculateTracePointsAndTimesArray(newCurvedPath,curMarker)
         markerCurvedPathArray.push(newCurvedPath)
 
         /* after 2 seconds update elevations */
@@ -361,7 +361,7 @@ function MyComponent () {
 
             /* update curve path characteristics */
             let newCurvePath = new CurvePath(newSpline,60);
-            calculateTracePointsAndTimesArray(newCurvePath,277.77);
+            calculateTracePointsAndTimesArray(newCurvePath,newMarker);
             markerCurvedPathArray.push(newCurvePath)
 
             /* after 2 seconds update elevations */
@@ -564,7 +564,7 @@ function MyComponent () {
         markerCurvedPathArray[currentSelectedMarkerIndex] = newCurvedPath;
 
         /*after updating delay calculate new times array and new trace points*/
-        calculateTracePointsAndTimesArray(newCurvedPath,277.77);
+        calculateTracePointsAndTimesArray(newCurvedPath,markers[currentSelectedMarkerIndex]);
         setMarkerCurvedPathArray([...markerCurvedPathArray])
 
         /* after 2 seconds update elevations */

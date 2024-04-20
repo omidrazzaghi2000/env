@@ -86,6 +86,8 @@ export function MarkerProperties({
   const ref = useRef<HTMLDivElement>(null!);
   const pane = useRef<Pane>(null!);
   const [time,setTime] = useAtom(timeAtom);
+  const [pathExpanded,setPathExpanded] = useState(false)
+
 
   const [markerCurvedPathArray,setMarkerCurvedPathArray] = useAtom(curvePathArrayAtom);
   const currentTraceIndex = useAtomValue(currentTracePointAtom)
@@ -144,7 +146,7 @@ export function MarkerProperties({
         /*update delay*/
         newCurvedPath._delayTime = marker.delay
         markerCurvedPathArray[markerIndex] = newCurvedPath;
-        calculateTracePointsAndTimesArray(newCurvedPath, 277.77);
+        calculateTracePointsAndTimesArray(newCurvedPath,marker);
         setMarkerCurvedPathArray([...markerCurvedPathArray])
 
 
@@ -183,7 +185,7 @@ export function MarkerProperties({
     alt: marker.alt,
     pitch: marker.pitch,
     delay: currentCurvedPath!==undefined? currentCurvedPath!._delayTime:0,
-    elevation: currentTraceIndex!==undefined&&currentCurvedPath!==undefined&&currentCurvedPath!._elevations.length>0?currentCurvedPath!._elevations[currentTraceIndex].elevation:-1,
+    elevation: currentTraceIndex!==undefined&&currentTraceIndex!==-1&&currentCurvedPath!==undefined&&currentCurvedPath!._elevations.length>0?currentCurvedPath!._elevations[currentTraceIndex].elevation:-1,
   });
 
 
@@ -231,7 +233,9 @@ export function MarkerProperties({
           alt:0.0, //TODO: must get from interpolate and get position function
           pitch:0.0, //TODO: must get from interpolate and get position function
           delay:currentCurvedPath!._delayTime,
-         elevation:currentTraceIndex!==undefined&&currentCurvedPath!==undefined&&currentCurvedPath!._elevations.length>0?currentCurvedPath!._elevations[currentTraceIndex].elevation:-1,
+         elevation:currentTraceIndex!==undefined&&
+         currentTraceIndex!==-1
+         && currentCurvedPath!==undefined&&currentCurvedPath!._elevations.length>0?currentCurvedPath!._elevations[currentTraceIndex].elevation:-1,
         }
 
     )
@@ -287,9 +291,12 @@ export function MarkerProperties({
 
     const f1 = pane.current.addFolder({
       title: 'Path',
-      expanded:false,
+      expanded:pathExpanded,
     });
-    
+
+    /** expanded updated **/
+    f1.on("fold",(ev)=>
+    setPathExpanded(ev.expanded))
 
     /** Add path button */
     f1.addButton({

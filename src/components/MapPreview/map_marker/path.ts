@@ -188,6 +188,7 @@ export function getLatLng(lpath: LinearOPath, time: number): any {
 import Spline from 'typescript-cubic-spline';
 import {useCallback} from "react";
 import {useAtom} from "jotai";
+import AutoAirCraft from "../../../utils/classes/AutoAirCraft";
 
 export function generateSplinePath(positions:{x:number,y:number}[],time:number) {
     // Check if the number of positions is sufficient
@@ -211,6 +212,7 @@ export class CurvePath{
     _delayTime:number = 0;
     _timesArray:number[] = [];
     _tracePoints:L.LatLng[] = [];
+    _tracePointsPathIndex:number[] = [];/** for saving path number for each trace point**/
     _numberOfPoints:number;
     _splinePath:L.Spline;
     _elevations=[];
@@ -244,33 +246,13 @@ export async function updateElevations(curvePathArray,index){
     return currCurvePath
 }
 
-export function calculateTracePointsAndTimesArray (curvePath:CurvePath,currentPathSpeed:number){
+export function calculateTracePointsAndTimesArray (curvePath:CurvePath,marker:AutoAirCraft){
     let number_of_point = curvePath._numberOfPoints;
     let disPoint = Array(number_of_point).fill().map((x,i)=>i/number_of_point);
     let curveDistance = 0;
     let currSpline:L.Spline = curvePath._splinePath;
+    let currentPathIndex = 0; /** for saving path number for each trace point**/
 
-
-    /*********************************************/
-    /*              Times Array                  */
-    /*********************************************/
-    for (let i = 0 ; i  <  currSpline.trace(disPoint).length-1 ; i++){
-        const currPoint = currSpline.trace(disPoint)[i]
-        const nextPoint = currSpline.trace(disPoint)[i+1]
-
-        curveDistance += currPoint.distanceTo(nextPoint)
-        if(curvePath._timesArray.length !== 0){
-            curvePath._timesArray.push(currPoint.distanceTo(nextPoint)/currentPathSpeed+curvePath._timesArray[curvePath._timesArray.length-1])
-        }else{
-            curvePath._timesArray.push(currPoint.distanceTo(nextPoint)/currentPathSpeed)
-        }
-    }
-    //remove zeros from the first of time array
-    curvePath._timesArray.splice(0,number_of_point-1);
-    /*********************************************/
-    /*         Add Delay to time array           */
-    /*********************************************/
-    curvePath._timesArray = curvePath._timesArray.map((t)=>t+curvePath._delayTime)
 
     /*********************************************/
     /*              Trace Points                 */
@@ -279,6 +261,48 @@ export function calculateTracePointsAndTimesArray (curvePath:CurvePath,currentPa
 
     curvePath._tracePoints.splice(0,number_of_point);
 
+    /*********************************************/
+    /*              Times Array                  */
+    /*********************************************/
+    /** First time initialization **/
+    curvePath._timesArray.push(0)
+    for (let i = 0 ; i  <  curvePath._tracePoints.length-1 ; i++){
+        const currPoint = curvePath._tracePoints[i]
+        const nextPoint = curvePath._tracePoints[i+1]
+
+
+        let currentPathSpeed = marker.path[currentPathIndex].speed
+
+        curveDistance += currPoint.distanceTo(nextPoint)
+        if(curvePath._timesArray.length !== 0){
+            curvePath._timesArray.push(currPoint.distanceTo(nextPoint)/currentPathSpeed+curvePath._timesArray[curvePath._timesArray.length-1])
+        }else{
+            curvePath._timesArray.push(currPoint.distanceTo(nextPoint)/currentPathSpeed)
+        }
+
+        /** update current path index **/
+        curvePath._tracePointsPathIndex.push(currentPathIndex)
+
+        // to check that is this trace point is so close to the destination point of the current path
+        // check that distance to the destination point of is less than 14. 14 is small number that I
+        // see with some experiment.
+        if(nextPoint.distanceTo(L.latLng(marker.path[currentPathIndex].dest.lat,marker.path[currentPathIndex].dest.lng)) < 14){
+            currentPathIndex+=1
+        }
+
+    }
+
+    /** update current path index for the last point **/
+    curvePath._tracePointsPathIndex.push(currentPathIndex)
+
+    //remove zeros from the first of time array
+    // curvePath._timesArray.splice(0,number_of_point-1);
+    /*********************************************/
+    /*         Add Delay to time array           */
+    /*********************************************/
+    curvePath._timesArray = curvePath._timesArray.map((t)=>t+curvePath._delayTime)
+
+    console.log(curvePath)
 }
 
 /* Example usage  */
