@@ -205,7 +205,7 @@ export function MarkerProperties({
 
     let timesArray = currentCurvedPath._timesArray;
     let tracePoints =  currentCurvedPath._tracePoints;
-
+    let tracePointsIndex = currentCurvedPath._tracePointsPathIndex;
 
 
     let currentSubPathIndex = 0;
@@ -221,7 +221,7 @@ export function MarkerProperties({
 
     let new_position_new_yaw = interpolateAndGetLatLng(
         tracePoints[currentSubPathIndex],tracePoints[currentSubPathIndex+1], time-timesArray[currentSubPathIndex],
-        277.77)
+        marker.path[tracePointsIndex[currentSubPathIndex]].speed)
     let new_position = new_position_new_yaw[0]
     let new_yaw = new_position_new_yaw[1]
 

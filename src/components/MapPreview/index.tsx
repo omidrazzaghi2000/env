@@ -660,6 +660,7 @@ function MyComponent () {
 
       let timesArray = markerCurvedPathArray[i]._timesArray;
       let tracePoints =  markerCurvedPathArray[i]._tracePoints;
+      let tracePointsIndex = markerCurvedPathArray[i]._tracePointsPathIndex;
 
       /* check whether path is started */
       if(timesArray.length > 0 && timesArray[0] > time) {
@@ -695,7 +696,7 @@ function MyComponent () {
 
       let new_position_new_yaw = interpolateAndGetLatLng(
           tracePoints[currentSubPathIndex],tracePoints[currentSubPathIndex+1], time-timesArray[currentSubPathIndex],
-          277.77)
+          markers.at(i).path.at(tracePointsIndex).speed)
       let new_position = new_position_new_yaw[0]
       let new_yaw = new_position_new_yaw[1]
 
