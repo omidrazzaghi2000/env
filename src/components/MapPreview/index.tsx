@@ -669,6 +669,8 @@ function MyComponent () {
           map.removeLayer(mapMarkerArray.at(i))
         }
 
+
+        setCurrentTracePoint(-1)
         continue
       }
 

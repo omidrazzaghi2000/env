@@ -57,7 +57,6 @@ const ElevationChart = (props:any) => {
         scale: {
           x: {
             type: 'point',
-            /* 其他配置项 */
           }
         },
         annotations:currentTraceIndex>0&&[
