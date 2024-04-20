@@ -47,7 +47,7 @@ export function calculateTime(lpath: any) {
 }
 
 export function calculateTimeWithCurvedPath(curvedPath:CurvePath,pathIndex:number) {
-
+    console.log(curvedPath)
     if(curvedPath._timesArray[curvedPath._checkPointIndex[pathIndex]]===undefined){
         return -1
     }
@@ -303,22 +303,22 @@ export function calculateTracePointsAndTimesArray (curvePath:CurvePath,marker:Au
         /** update current path index **/
         curvePath._tracePointsPathIndex.push(currentPathIndex)
 
-        // to check that is this trace point is so close to the destination point of the current path
-        // check that distance to the destination point of is less than 14. 14 is small number that I
-        // see with some experiment.
-        if(nextPoint.distanceTo(L.latLng(marker.path[currentPathIndex].dest.lat,marker.path[currentPathIndex].dest.lng)) < 14){
 
-            /*save current index*/
-            curvePath._checkPointIndex.push(i)
+        // to check that we are going to next path we see number of points in curvedPath
+            if(i%curvePath._numberOfPoints===-1){
+                /*save current index*/
+                curvePath._checkPointIndex.push(i)
 
-            /*save this path length to curved path length array*/
-            curvePath._lengthArray.push(temp_length)
+                /*save this path length to curved path length array*/
+                curvePath._lengthArray.push(temp_length)
 
-            /*reset length_temp variable */
-            temp_length = 0;
+                /*reset length_temp variable */
+                temp_length = 0;
 
-            currentPathIndex+=1
-        }
+                currentPathIndex+=1
+            }
+
+
 
     }
 

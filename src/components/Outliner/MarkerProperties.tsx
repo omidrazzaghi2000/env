@@ -94,12 +94,13 @@ export function MarkerProperties({
   const ref = useRef<HTMLDivElement>(null!);
   const pane = useRef<Pane>(null!);
   const [time,setTime] = useAtom(timeAtom);
-  const [pathExpanded,setPathExpanded] = useState(false)
+  const [pathExpanded,setPathExpanded] = useState(true)
 
 
   const [markerCurvedPathArray,setMarkerCurvedPathArray] = useAtom(curvePathArrayAtom);
   const currentTraceIndex = useAtomValue(currentTracePointAtom)
-  const [currentCurvedPath,setCurrentCurvedPath] = useState(markerCurvedPathArray.find((cp:CurvePath) => cp._splinePath.options.id === marker.id))
+  const currentCurvedPath:CurvePath|undefined = markerCurvedPathArray.find((cp:CurvePath) => cp._splinePath.options.id === marker.id)
+  // const [currentCurvedPath,setCurrentCurvedPath] = useState(markerCurvedPathArray.find((cp:CurvePath) => cp._splinePath.options.id === marker.id))
 
   const [mapCheckpointArray,setMapCheckpointArray] = useAtom<any[][]>(checkpointMarkerArrayAtom)
   const [mapSplineArray, setMapSplineArray] = useAtom<L.Spline[]>(mapMarkerSplineArrayAtom)
@@ -363,14 +364,16 @@ export function MarkerProperties({
 
         /* edit curve path */
         calculateTracePointsAndTimesArray(currentCurvedPath,marker)
-        setCurrentCurvedPath({...currentCurvedPath})
+        // setCurrentCurvedPath({...currentCurvedPath})
         let markerIndex = markerCurvedPathArray.findIndex((cp:CurvePath) => cp._splinePath.options.id === marker.id)
         if(markerIndex !== undefined){
           markerCurvedPathArray[markerIndex]= currentCurvedPath
           setMarkerCurvedPathArray([...markerCurvedPathArray])
         }
 
-
+        /* update marker properties */
+        setTime(time+1)
+        setTime(time-1)
 
       });
       tempPathFolder.addBinding(PARAMS, 'src', {
@@ -395,12 +398,16 @@ export function MarkerProperties({
 
         /* edit curve path */
         calculateTracePointsAndTimesArray(currentCurvedPath,marker)
-        setCurrentCurvedPath({...currentCurvedPath})
+
         let markerIndex = markerCurvedPathArray.findIndex((cp:CurvePath) => cp._splinePath.options.id === marker.id)
         if(markerIndex !== undefined){
           markerCurvedPathArray[markerIndex]= currentCurvedPath
           setMarkerCurvedPathArray([...markerCurvedPathArray])
         }
+
+        /* update marker properties */
+        setTime(time+1)
+        setTime(time-1)
 
       });
 
