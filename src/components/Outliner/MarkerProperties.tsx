@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import { ButtonApi, Pane } from "tweakpane";
 import AutoAirCraft from '../../utils/classes/AutoAirCraft.js';
 import {
-  calculateTime,
+  calculateTime, calculateTimeWithCurvedPath,
   calculateTracePointsAndTimesArray,
   CurvePath,
   getLatLng,
@@ -42,6 +42,7 @@ const ElevationChart = (props:any) => {
   useEffect(() => {
     try{
       setConfig({
+        
         data: {
           value: curvedPathArray.at(props.markerIndex)._elevations,
         },
@@ -53,8 +54,15 @@ const ElevationChart = (props:any) => {
         axis: {
           y: { labelFormatter: '~s' },
         },
+        scale: {
+          x: {
+            type: 'point',
+            /* 其他配置项 */
+          }
+        },
         annotations:currentTraceIndex>0&&[
           {
+            animate: false,
             type: "lineX",
             xField: currentTraceIndex,
             style: { stroke: "#d31111", strokeOpacity: 1, lineWidth: 1 },
@@ -62,6 +70,7 @@ const ElevationChart = (props:any) => {
         ],
 
         theme: "classicDark",
+
       });
     }catch (e){
       console.log(e)
@@ -70,7 +79,7 @@ const ElevationChart = (props:any) => {
   }, [curvedPathArray,currentTraceIndex]);
 
 
-  return <Area height={200} {...config} paddingLeft={24}/>;
+  return <Area height={200} {...config} paddingLeft={24} />;
 };
 
 
@@ -336,7 +345,7 @@ export function MarkerProperties({
         speed: currPath.speed,
         src: { x: currPath.src.lat, y: currPath.src.lng, z: -1 },
         dest: { x: currPath.dest.lat, y: currPath.dest.lng, z: -1 },
-        time: calculateTime(currPath),
+        time: calculateTimeWithCurvedPath(currentCurvedPath,pathIndex),
       };
 
       const tempPathFolder = f1.addFolder({
@@ -354,7 +363,13 @@ export function MarkerProperties({
         })
 
         /* edit curve path */
-
+        calculateTracePointsAndTimesArray(currentCurvedPath,marker)
+        setCurrentCurvedPath({...currentCurvedPath})
+        let markerIndex = markerCurvedPathArray.findIndex((cp:CurvePath) => cp._splinePath.options.id === marker.id)
+        if(markerIndex !== undefined){
+          markerCurvedPathArray[markerIndex]= currentCurvedPath
+          setMarkerCurvedPathArray([...markerCurvedPathArray])
+        }
 
 
 
@@ -370,7 +385,13 @@ export function MarkerProperties({
         z: { step: 1, readonly: true }
       })
       tempPathFolder.addBinding(PARAMS, 'time', {
-        readonly: true,
+
+      }).on("change",(ev)=>{
+        /* edit path in markers array*/
+        setMarker((m:AutoAirCraft)=>{
+          m.path[pathIndex].speed = ev.value;
+          return {...m};
+        })
       });
 
     }

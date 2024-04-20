@@ -22,6 +22,7 @@ export abstract class OPath {
 
 export class LinearOPath extends OPath {
     speed: number = 277.77;// default speed
+    time: number = null;
     isFinished: boolean = false;
     constructor(_src: L.LatLng, _dest: L.LatLng) {
         super(_src, _dest);
@@ -44,6 +45,11 @@ export function calculateTime(lpath: any) {
     let distance = calculateDistance(lpath);
     return Math.abs(distance / lpath.speed);
 }
+
+export function calculateTimeWithCurvedPath(curvedPath:CurvePath,pathIndex:number) {
+    return curvedPath._timesArray[curvedPath._checkPointIndex[pathIndex]]
+}
+
 
 export function calDis(src: number[], dest: number[]) {
     let x0 = src[0];
@@ -213,6 +219,7 @@ export class CurvePath{
     _timesArray:number[] = [];
     _tracePoints:L.LatLng[] = [];
     _tracePointsPathIndex:number[] = [];/** for saving path number for each trace point**/
+    _checkPointIndex:number[] = [] /** contains list of index that path of the marker changed **/
     _numberOfPoints:number;
     _splinePath:L.Spline;
     _elevations=[];
@@ -265,14 +272,16 @@ export function calculateTracePointsAndTimesArray (curvePath:CurvePath,marker:Au
     /*              Times Array                  */
     /*********************************************/
     /** First time initialization **/
+    curvePath._timesArray = []
     curvePath._timesArray.push(0)
+    curvePath._checkPointIndex =[]
     for (let i = 0 ; i  <  curvePath._tracePoints.length-1 ; i++){
         const currPoint = curvePath._tracePoints[i]
         const nextPoint = curvePath._tracePoints[i+1]
 
 
         let currentPathSpeed = marker.path[currentPathIndex].speed
-
+        console.log(currentPathSpeed)
         curveDistance += currPoint.distanceTo(nextPoint)
         if(curvePath._timesArray.length !== 0){
             curvePath._timesArray.push(currPoint.distanceTo(nextPoint)/currentPathSpeed+curvePath._timesArray[curvePath._timesArray.length-1])
@@ -287,10 +296,17 @@ export function calculateTracePointsAndTimesArray (curvePath:CurvePath,marker:Au
         // check that distance to the destination point of is less than 14. 14 is small number that I
         // see with some experiment.
         if(nextPoint.distanceTo(L.latLng(marker.path[currentPathIndex].dest.lat,marker.path[currentPathIndex].dest.lng)) < 14){
+
+            /*save current index*/
+            curvePath._checkPointIndex.push(i)
+
             currentPathIndex+=1
         }
 
     }
+
+    /*save current index*/
+    curvePath._checkPointIndex.push(curvePath._tracePoints.length-1)
 
     /** update current path index for the last point **/
     curvePath._tracePointsPathIndex.push(currentPathIndex)
@@ -302,7 +318,6 @@ export function calculateTracePointsAndTimesArray (curvePath:CurvePath,marker:Au
     /*********************************************/
     curvePath._timesArray = curvePath._timesArray.map((t)=>t+curvePath._delayTime)
 
-    console.log(curvePath)
 }
 
 /* Example usage  */
