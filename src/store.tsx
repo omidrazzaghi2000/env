@@ -485,6 +485,7 @@ export const updateCurvePathAtom = atom(null, (get, set, markerId: AutoAirCraft[
 
 export const currentTracePointAtom = atom(-1)
 
+export const SetPathDestinationAtom = atom({markerId:-1,markerIndex:-1,pathIndex:-1})
 
 
 /////////////////////////////// ADSB ////////////////////////////////////////////

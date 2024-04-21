@@ -11,7 +11,7 @@ import {
   isDialogOpenAtom,
   mapRefAtom,
   mainMapAtom,
-  checkpointMarkerArrayAtom, mapMarkerSplineArrayAtom, deleteMarkerAtom, currentTracePointAtom
+  checkpointMarkerArrayAtom, mapMarkerSplineArrayAtom, deleteMarkerAtom, currentTracePointAtom, SetPathDestinationAtom
 } from "../../store";
 import {PrimitiveAtom, useAtom, useAtomValue, useSetAtom} from "jotai";
 import {useCallback, useEffect, useRef, useState} from "react";
@@ -99,6 +99,8 @@ export function MarkerProperties({
 
   const [markerCurvedPathArray,setMarkerCurvedPathArray] = useAtom(curvePathArrayAtom);
   const currentTraceIndex = useAtomValue(currentTracePointAtom)
+  const setUpdateDestSetting = useSetAtom(SetPathDestinationAtom)
+
   const currentCurvedPath:CurvePath|undefined = markerCurvedPathArray.find((cp:CurvePath) => cp._splinePath.options.id === marker.id)
   // const [currentCurvedPath,setCurrentCurvedPath] = useState(markerCurvedPathArray.find((cp:CurvePath) => cp._splinePath.options.id === marker.id))
 
@@ -342,7 +344,7 @@ export function MarkerProperties({
 
       const PARAMS = {
         speed: currPath.speed,
-        src: { x: currPath.src.lat, y: currPath.src.lng, z: -1 },
+        src: { x: currPath.src.lat, y: currPath.src.lng, z: -1 ,readonly:true},
         dest: { x: currPath.dest.lat, y: currPath.dest.lng, z: -1 },
         time: calculateTimeWithCurvedPath(currentCurvedPath,pathIndex),
       };
@@ -350,10 +352,17 @@ export function MarkerProperties({
       const tempPathFolder = f1.addFolder({
         title: `Path_${pathIndex}`,
       });
+      tempPathFolder.addButton({
+        title:"Change destination",
 
+      }).on("click",()=>{
+        /** trigger a variable in map preview component to show and get new point */
+        setUpdateDestSetting({markerId:marker.id,markerIndex: markerIndex ,markerpathIndex:pathIndex})
+      })
+      tempPathFolder.addBlade({view:'separator'})
       tempPathFolder.addBinding(PARAMS, 'speed', {
 
-
+          format:(v)=>v.toFixed(3)
       }).on("change",(ev)=>{
         /* edit path in markers array*/
         setMarker((m:AutoAirCraft)=>{
@@ -376,17 +385,18 @@ export function MarkerProperties({
 
       });
       tempPathFolder.addBinding(PARAMS, 'src', {
-        x: { step: 0.0001 },
-        y: { step: 0.0001 },
-        z: { step: 1 }
+        x: { step: 0.001,format:(v)=>v.toFixed(3) },
+        y: { step: 0.001,format:(v)=>v.toFixed(3) },
+        z: { step: 1 },
+
       })
       tempPathFolder.addBinding(PARAMS, 'dest', {
-        x: { step: 0.0001, },
-        y: { step: 0.0001 },
+        x: { step: 0.001,format:(v)=>v.toFixed(3) },
+        y: { step: 0.001,format:(v)=>v.toFixed(3) },
         z: { step: 1, readonly: true }
       })
       tempPathFolder.addBinding(PARAMS, 'time', {
-
+          format:(v)=>v.toFixed(3)
       }).on("change",(ev)=>{
         /* edit path in markers array*/
         setMarker((m:AutoAirCraft)=>{

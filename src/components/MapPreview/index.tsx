@@ -28,7 +28,7 @@ import {
   mainMapAtom,
   mapMarkerSplineArrayAtom,
   mapAtom,
-  updateCurvePathAtom, currentTracePointAtom
+  updateCurvePathAtom, currentTracePointAtom, SetPathDestinationAtom
 } from '../../store'
 import L, {LatLng, latLng, marker} from 'leaflet'
 import "leaflet-spline";
@@ -93,6 +93,7 @@ function MyComponent () {
   const [time,setTime] = useAtom(timeAtom);
   const [currentMarkerSelected,setCurrentMarkerSelected] = useState<AutoAirCraft>(null);
   const setCurrentTracePoint = useSetAtom(currentTracePointAtom);
+  const [updateDestSetting,setUpdateDestSetting] = useAtom(SetPathDestinationAtom)
   const findIndex=function(arr:AutoAirCraft[],element:AutoAirCraft){
     for(let i = 0 ; i <= arr.length ; i++){
       if(element.id === arr[i].id){
@@ -715,6 +716,14 @@ function MyComponent () {
   )
 
 
+  //################################//
+  //                                //
+  //for show change dest for marker //
+  //                                //
+  //################################//
+  useEffect(() => {
+    console.log(updateDestSetting)
+  }, [updateDestSetting]);
 
   return null
 }
