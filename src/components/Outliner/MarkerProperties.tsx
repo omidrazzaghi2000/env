@@ -336,7 +336,6 @@ export function MarkerProperties({
         })
 
 
-
     for(let pathIndex = 0 ; pathIndex < marker.path.length ; pathIndex++){
       let currPath = marker.path[pathIndex]
 

@@ -47,11 +47,22 @@ export function calculateTime(lpath: any) {
 }
 
 export function calculateTimeWithCurvedPath(curvedPath:CurvePath,pathIndex:number) {
-    console.log(curvedPath)
-    if(curvedPath._timesArray[curvedPath._checkPointIndex[pathIndex]]===undefined){
+
+    if(curvedPath!==undefined){
+        if(curvedPath._timesArray[curvedPath._checkPointIndex[pathIndex]]===undefined){
+            return -1
+        }
+        if(pathIndex > 0){
+            /* return difference of destination point time from source point */
+            return curvedPath._timesArray[curvedPath._checkPointIndex[pathIndex]]-curvedPath._timesArray[curvedPath._checkPointIndex[pathIndex-1]]
+        }
+        if(pathIndex === 0){
+            return curvedPath._timesArray[curvedPath._checkPointIndex[pathIndex]]
+        }
+    }else{
         return -1
     }
-    return curvedPath._timesArray[curvedPath._checkPointIndex[pathIndex]]
+
 }
 
 
@@ -282,7 +293,7 @@ export function calculateTracePointsAndTimesArray (curvePath:CurvePath,marker:Au
     curvePath._checkPointIndex =[]
     curvePath._lengthArray = []
     let temp_length = 0;
-
+    let numberOfPointCounter = 0;
     for (let i = 0 ; i  <  curvePath._tracePoints.length-1 ; i++){
         const currPoint = curvePath._tracePoints[i]
         const nextPoint = curvePath._tracePoints[i+1]
@@ -305,18 +316,20 @@ export function calculateTracePointsAndTimesArray (curvePath:CurvePath,marker:Au
 
 
         // to check that we are going to next path we see number of points in curvedPath
-            if(i%curvePath._numberOfPoints===-1){
-                /*save current index*/
-                curvePath._checkPointIndex.push(i)
+        if((numberOfPointCounter+1)%curvePath._numberOfPoints===0){
+            /*save current index*/
+            curvePath._checkPointIndex.push(i)
 
-                /*save this path length to curved path length array*/
-                curvePath._lengthArray.push(temp_length)
+            /*save this path length to curved path length array*/
+            curvePath._lengthArray.push(temp_length)
 
-                /*reset length_temp variable */
-                temp_length = 0;
+            /*reset length_temp variable */
+            temp_length = 0;
 
-                currentPathIndex+=1
-            }
+            currentPathIndex+=1
+        }
+
+        numberOfPointCounter+=1
 
 
 
@@ -324,6 +337,9 @@ export function calculateTracePointsAndTimesArray (curvePath:CurvePath,marker:Au
 
     /*save current index*/
     curvePath._checkPointIndex.push(curvePath._tracePoints.length-1)
+
+    /*save last path length to curved path length array*/
+    curvePath._lengthArray.push(temp_length)
 
     /** update current path index for the last point **/
     curvePath._tracePointsPathIndex.push(currentPathIndex)
