@@ -28,7 +28,7 @@ import {
   mainMapAtom,
   mapMarkerSplineArrayAtom,
   mapAtom,
-  updateCurvePathAtom, currentTracePointAtom, SetPathDestinationAtom
+  updateCurvePathAtom, currentTracePointAtom, SetPathDestinationAtom, updatePathInMarkerAtom
 } from '../../store'
 import L, {LatLng, latLng, marker} from 'leaflet'
 import "leaflet-spline";
@@ -81,6 +81,7 @@ function MyComponent () {
   const [showAddPathLine, setShowAddPathLine] = useAtom(showAddPathLineAtom)
   const [pathType,setPathType] = useAtom(pathTypeAtom)
   const addPathToMarker = useSetAtom(addPathToMarkerAtom);
+  const updatePathDest = useSetAtom(updatePathInMarkerAtom)
 
   const [isCreatedMarker,setIsCreatedMarker] = useState(false);
   const markers = useAtomValue(markersAtom)
@@ -567,7 +568,7 @@ function MyComponent () {
         calculateTracePointsAndTimesArray(newCurvedPath,markers[currentSelectedMarkerIndex]);
         setMarkerCurvedPathArray([...markerCurvedPathArray])
 
-        /* after 2 seconds update elevations */
+        /* after some seconds update elevations */
         setTimeout(()=>
         {
           updateElevations(markerCurvedPathArray,currentSelectedMarkerIndex).then(
@@ -723,6 +724,202 @@ function MyComponent () {
   //################################//
   useEffect(() => {
     console.log(updateDestSetting)
+    function drawHelperLinesForChangingDest(event:any){
+      if(pathType === "linear_path"){
+        const element = document.getElementById('mainMapContainer')
+
+        /* Change cursor */
+        element?.classList.add('arrow-path-cursor')
+
+        var curMouseLat = event.latlng.lat;
+        var curMouseLng = event.latlng.lng;
+
+
+        map.eachLayer(function (layer:any){
+          if(layer.options.id === "helper_linear_path_for_add_path"){
+            /* remove this line and again create line */
+            map.removeLayer(layer);
+
+          }
+        })
+
+        let pointA = markers.at(updateDestSetting.markerIndex).path.at(updateDestSetting.pathIndex).src;
+        let pointB = new L.LatLng(curMouseLat,curMouseLng)
+
+        new L.Polyline([pointA,pointB],{
+          color:'blue',
+          weight:3,
+          opacity:0.5,
+          smoothFactor:1,
+          id:"helper_linear_path_for_add_path"/*this value used for checking that line added to map or not */
+        }).addTo(map);
+
+        if(markers.at(updateDestSetting.markerIndex).path.length > 1 && updateDestSetting.pathIndex !== markers.at(updateDestSetting.markerIndex).path.length-1){
+          let pointC = markers.at(updateDestSetting.markerIndex).path.at(updateDestSetting.pathIndex+1).dest;
+          new L.Polyline([pointB,pointC],{
+            color:'blue',
+            weight:3,
+            opacity:0.5,
+            smoothFactor:1,
+            id:"helper_linear_path_for_add_path"/*this value used for checking that line added to map or not */
+          }).addTo(map);
+        }
+
+      }
+    }
+
+    function escapeUpdatePath(event:any){
+      if(event.originalEvent.code === "Escape"){
+
+        var element = document.getElementById('mainMapContainer')
+
+        /* remove draw helper line function */
+        map.removeEventListener("mousemove",drawHelperLinesForChangingDest,true);
+
+        /* remove helper line */
+        map.eachLayer(function (layer:any){
+          if(layer.options.id === "helper_linear_path_for_add_path"){
+            /* remove helper line  layer*/
+            map.removeLayer(layer);
+          }
+        })
+
+        /* restore cursor*/
+        element?.classList.remove('arrow-path-cursor')
+
+        /* remove itself */
+        map.removeEventListener("keydown", escapeUpdatePath,true);
+
+        /* remove right click listener */
+        map.removeEventListener("contextmenu", updateCurrentPathDestination,true);
+
+        /* update show helper line variable */
+        updateDestSetting.showHelperLine = false
+
+      }
+    }
+
+    function updateCurrentPathDestination(event:any){
+
+      /* update path */
+      const curMouseLat = event.latlng.lat;
+      const curMouseLng = event.latlng.lng;
+      const MousePoint = new L.LatLng(curMouseLat, curMouseLng);
+
+      updatePathDest(updateDestSetting.markerIndex,updateDestSetting.pathIndex,MousePoint)
+
+      setCurrentMarkerSelected(markers.at(updateDestSetting.markerIndex))
+
+      /* Calculate positions */
+      let positions = []
+      for(let i = 0 ; i < currentMarkerSelected.path.length; i++){
+        positions.push([currentMarkerSelected.path[i].src.lat,currentMarkerSelected.path[i].src.lng]);
+        /* Last one */
+        if(i == currentMarkerSelected.path.length-1){
+          positions.push([currentMarkerSelected.path[i].dest.lat,currentMarkerSelected.path[i].dest.lng]);
+        }
+      }
+
+
+      /* Delete its spline and then replace it with new spline */
+      map.removeLayer(mapSplineArray[updateDestSetting.markerIndex]);
+      mapSplineArray[updateDestSetting.markerIndex] = L.spline(positions,{
+        color: "#222",
+        opacity:0.2,
+        weight: 2,
+        dashArray: '5, 5', dashOffset: '0',
+        smoothing: 0.08,
+        id:currentMarkerSelected.id//for deleting
+      })
+      mapSplineArray[updateDestSetting.markerIndex].addTo(map)
+      setMapSplineArray([...mapSplineArray])
+
+      /* update curve path characteristics */
+      let newCurvedPath = new CurvePath(mapSplineArray[updateDestSetting.markerIndex],60);
+
+      /*update delay*/
+      newCurvedPath._delayTime = markerCurvedPathArray[updateDestSetting.markerIndex]._delayTime
+      markerCurvedPathArray[updateDestSetting.markerIndex] = newCurvedPath;
+
+      /*after updating delay calculate new times array and new trace points*/
+      calculateTracePointsAndTimesArray(newCurvedPath,markers[updateDestSetting.markerIndex]);
+      setMarkerCurvedPathArray([...markerCurvedPathArray])
+
+      /* after some seconds update elevations */
+      setTimeout(()=>
+      {
+        updateElevations(markerCurvedPathArray,updateDestSetting.markerIndex).then(
+            (updatedCurvePath)=>{
+              markerCurvedPathArray[updateDestSetting.markerIndex]=updatedCurvePath
+              setMarkerCurvedPathArray([...markerCurvedPathArray])
+            }
+        )
+
+      },100)
+
+      /* remove the former checkpoint in the map */
+      map.removeLayer(mapCheckpointArray[updateDestSetting.markerIndex][updateDestSetting.pathIndex]);
+
+      /* add a checkpoint marker to map and save it as state to show every time refresh the page */
+      const checkPointMarker = L.marker(MousePoint, {
+        icon:L.icon({
+          iconUrl:'/textures/pointIcon.png',
+          iconSize:[20,20],
+        }),
+        id: currentMarkerSelected.id/**for deleting**/}).addTo(map);
+
+      /* update marker mapCheckpointArray */
+      mapCheckpointArray[updateDestSetting.markerIndex][updateDestSetting.pathIndex] = checkPointMarker;
+      setMapCheckpointArray([...mapCheckpointArray])
+
+      /* remove helper line drawer */
+      map.removeEventListener("mousemove",drawHelperLinesForChangingDest,true);
+
+      map.eachLayer(function (layer:any){
+        if(layer.options.id === "helper_linear_path_for_add_path"){
+          /* remove this line and again create line */
+          map.removeLayer(layer);
+        }
+      })
+
+      var element = document.getElementById('mainMapContainer')
+      /* restore cursor*/
+      element?.classList.remove('arrow-path-cursor')
+
+      /* remove itself */
+      map.removeEventListener("contextmenu", updateCurrentPathDestination,true);
+
+      /* update show helper line variable */
+      updateDestSetting.showHelperLine = false
+    }
+
+
+    if(updateDestSetting.showHelperLine) {
+
+      /**************************************************************/
+      /* Listeners                                                  */
+      /**************************************************************/
+      /* Add listener for showing helper line */
+      map.addEventListener("mousemove", drawHelperLinesForChangingDest, true);
+
+      /*Escape button handler*/
+      map.addEventListener("keydown", escapeUpdatePath, true);
+
+      /* Add listener for right click to updateNewDestPosition */
+      map.addEventListener("contextmenu", updateCurrentPathDestination, true);
+
+      /* remove helper line */
+      map.eachLayer(function (layer: any) {
+        if (layer.options.id === "helper_linear_path_for_add_path") {
+          /* remove helper line  layer*/
+          map.removeLayer(layer);
+        }
+      })
+
+    }
+
+
+
   }, [updateDestSetting]);
 
   return null

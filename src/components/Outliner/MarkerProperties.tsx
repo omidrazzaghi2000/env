@@ -11,7 +11,12 @@ import {
   isDialogOpenAtom,
   mapRefAtom,
   mainMapAtom,
-  checkpointMarkerArrayAtom, mapMarkerSplineArrayAtom, deleteMarkerAtom, currentTracePointAtom, SetPathDestinationAtom
+  checkpointMarkerArrayAtom,
+  mapMarkerSplineArrayAtom,
+  deleteMarkerAtom,
+  currentTracePointAtom,
+  SetPathDestinationAtom,
+  pathTypeAtom
 } from "../../store";
 import {PrimitiveAtom, useAtom, useAtomValue, useSetAtom} from "jotai";
 import {useCallback, useEffect, useRef, useState} from "react";
@@ -100,6 +105,7 @@ export function MarkerProperties({
   const [markerCurvedPathArray,setMarkerCurvedPathArray] = useAtom(curvePathArrayAtom);
   const currentTraceIndex = useAtomValue(currentTracePointAtom)
   const setUpdateDestSetting = useSetAtom(SetPathDestinationAtom)
+  const setPathType = useSetAtom(pathTypeAtom);
 
   const currentCurvedPath:CurvePath|undefined = markerCurvedPathArray.find((cp:CurvePath) => cp._splinePath.options.id === marker.id)
   // const [currentCurvedPath,setCurrentCurvedPath] = useState(markerCurvedPathArray.find((cp:CurvePath) => cp._splinePath.options.id === marker.id))
@@ -356,8 +362,13 @@ export function MarkerProperties({
         title:"Change destination",
 
       }).on("click",()=>{
+
+        setPathType("linear_path")
+
         /** trigger a variable in map preview component to show and get new point */
-        setUpdateDestSetting({markerId:marker.id,markerIndex: markerIndex ,markerpathIndex:pathIndex})
+        setUpdateDestSetting({markerId:marker.id,markerIndex: markerIndex ,pathIndex:pathIndex,showHelperLine: true})
+
+
       })
       tempPathFolder.addBlade({view:'separator'})
       tempPathFolder.addBinding(PARAMS, 'speed', {

@@ -384,6 +384,45 @@ export const addPathToMarkerAtom = atom(
     }
 )
 
+export const updatePathInMarkerAtom = atom(
+    null,
+    (
+        get,
+        set,
+        markerIndex: number,
+        pathIndex:number,
+        newPathDest: L.LatLng,
+    ) => {
+        set(markersAtom, markers =>
+            markers.map(function (m, i) {
+                if (markerIndex === i) {
+
+                    m.path = m.path.map((p:OPath,pIndex:number)=>{
+                        /*update dest of current path*/
+                        if(pathIndex === pIndex){
+                            p.dest = newPathDest;
+                        }
+
+                        /*update src of next path*/
+                        if(pathIndex === pIndex){
+                            if(pathIndex+1 <= m.path.length-1){
+                               m.path[pathIndex+1].src=newPathDest
+                            }
+
+                        }
+                        return p
+                    });
+
+                }
+                return m;
+            })
+
+        )
+
+    }
+)
+
+
 
 export const deleteLastPathMarkerAtom = atom(
     null,
@@ -485,7 +524,7 @@ export const updateCurvePathAtom = atom(null, (get, set, markerId: AutoAirCraft[
 
 export const currentTracePointAtom = atom(-1)
 
-export const SetPathDestinationAtom = atom({markerId:-1,markerIndex:-1,pathIndex:-1})
+export const SetPathDestinationAtom = atom({showHelperLine:false,markerId:-1,markerIndex:-1,pathIndex:-1})
 
 
 /////////////////////////////// ADSB ////////////////////////////////////////////
