@@ -981,7 +981,7 @@ function ShowADSB () {
    *********************************/
   const [page,setPage] = useState(1)
   useEffect(() => {
-    fetch(`http://localhost:3000/api/adsb?page=${page}`).then(
+    fetch(`http://localhost:3001/api/adsb?page=${page}`).then(
       function (res){
         res.json().then(function(jsonRes){
 
@@ -1058,7 +1058,7 @@ function ShowADSB () {
 
 
 
-      fetch(`http://localhost:3000/api/adsb?page=${page}`).then(
+      fetch(`http://localhost:3001/api/adsb?page=${page}`).then(
           function(rec){
             rec.json().then(
                 function(jsonRes){
@@ -1193,11 +1193,18 @@ function ShowADSB () {
 
 function ShowProperties(props:any) {
 
-
+  const MarkerTables = useAtomValue(MarkerTableAtom)
+  let isAnythingSelected = false;
+  MarkerTables.map((marker_table:MarkerTableRow)=>{
+   if(marker_table.selected){
+    isAnythingSelected = true
+   }
+  })
+  console.log(isAnythingSelected)
   return (
       <PropertiesPanelTunnel.In>
-
-        <MarkerADSBProperties></MarkerADSBProperties>
+        {isAnythingSelected &&(
+        <MarkerADSBProperties></MarkerADSBProperties>)}
 
       </PropertiesPanelTunnel.In>
   );
