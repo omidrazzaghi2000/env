@@ -43,7 +43,7 @@ export function CommandPalette() {
         <MagnifyingGlassIcon className="text-neutral-600 w-5 h-5 translate-y-[1px]" />
         <Command.Input
           autoFocus
-          placeholder="Add lights, backgrounds, and flags..."
+          placeholder="Add markers, auto aircraft and ..."
           className="border-none bg-transparent flex-1 outline-none text-neutral-100 placeholder:text-neutral-600"
         />
       </div>
