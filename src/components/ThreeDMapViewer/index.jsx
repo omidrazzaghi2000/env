@@ -41,6 +41,8 @@ export default function ThreeDMapViewer (){
           [-0.113049, 51.498568, 500]
       );
 
+      
+
 
 
       new maptalks.VectorLayer('vector', [ point], {
