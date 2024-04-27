@@ -49,10 +49,11 @@ import {
 } from './map_marker/path'
 import {toast} from "sonner";
 import {BoltIcon} from "@heroicons/react/24/solid";
-import {or} from "three/examples/jsm/nodes/shadernode/ShaderNodeBaseElements";
+import {func, or} from "three/examples/jsm/nodes/shadernode/ShaderNodeBaseElements";
 import {PropertiesPanelTunnel} from "../Properties";
 import {MarkerADSBProperties} from "../Outliner/MarkerADSBProperties";
 import {MarkerProperties} from "../Outliner/MarkerProperties";
+import {deg_to_dms} from "../../utils/coordinates";
 
 
 const center = new L.LatLng(34.641955754083504, 50.878976024718725)
@@ -112,6 +113,8 @@ function MyComponent () {
 
   if(map !== undefined)
   map.attributionControl.setPrefix(false)
+
+
 
   //#############################################################//
   //                                                             //
@@ -1200,7 +1203,6 @@ function ShowProperties(props:any) {
     isAnythingSelected = true
    }
   })
-  console.log(isAnythingSelected)
   return (
       <PropertiesPanelTunnel.In>
         {isAnythingSelected &&(
@@ -1212,8 +1214,19 @@ function ShowProperties(props:any) {
 
 
 export function MapPreview () {
-  console.log("Map Updated")
+
+  const [mouseLatLong,setMoutLatLon] = useState({lat:-1,lon:-1})
+
+
+  function updateMouseLatLon(e:any){
+    setMoutLatLon({lat:e.latlng.lat,lng:e.latlng.lng})
+  }
+
+  const map = useAtomValue(mainMapAtom);
+
+  map?.addEventListener("mousemove",updateMouseLatLon,true);
   return (
+
       <MapContainer
           id='mainMapContainer'
           center={center}
@@ -1221,7 +1234,15 @@ export function MapPreview () {
           style={{ height: '100%' }}
       >
         <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
-        <MyComponent />
+        <div className='lat-long-box'>
+          <div>
+            Lat: {deg_to_dms(mouseLatLong.lat)}
+          </div>
+          <div>
+            Lon: {deg_to_dms(mouseLatLong.lng)}
+          </div>
+        </div>
+        <MyComponent id='simulator-map'/>
         <ShowADSB/>
         <ShowProperties></ShowProperties>
       </MapContainer>
