@@ -1,20 +1,64 @@
 import {
-  ArrowTopRightOnSquareIcon,
-  CodeBracketIcon,
-  PaintBrushIcon,
-  MapIcon,
-   CubeIcon,
-  PhotoIcon,
+    ArrowTopRightOnSquareIcon,
+    CodeBracketIcon,
+    PaintBrushIcon,
+    MapIcon,
+    CubeIcon,
+    PhotoIcon, BoltIcon,
 } from "@heroicons/react/24/solid";
 import * as Toolbar from "@radix-ui/react-toolbar";
-import { activeModesAtom, modeAtom } from "../../store";
+import {activeModesAtom, markersAtom, modeAtom} from "../../store";
 import { Logo } from "./Logo";
 import { useAtomValue, useSetAtom } from "jotai";
+import {Button, Input} from "antd";
+import {CaretRightOutlined, PauseOutlined, DeleteColumnOutlined} from "@ant-design/icons";
+import Search from "antd/es/input/Search";
+import {useState} from "react";
+import { toast } from "sonner";
 
 export function AppToolbar() {
   const setMode = useSetAtom(modeAtom);
   const activeModes = useAtomValue(activeModesAtom);
 
+
+  const markers = useAtomValue(markersAtom)
+  const [isSending,setIsSending] = useState(false);
+  const [serverAddress,setserverAddress] = useState("")
+
+  function pauseSend (){
+      setIsSending(false);
+      toast("Stopped Sending to the server", {
+          icon: <BoltIcon className="w-4 h-4" />,
+      });
+  }
+
+  function startSend(){
+
+
+          fetch(`http://${serverAddress}`, {
+                  method: "post",
+                  body:JSON.stringify(
+                      markers
+                  )
+              }
+          ).then((e)=>{
+              setIsSending(true)
+              //send Again
+              startSend()
+          }).catch(
+              (error)=>{
+                  console.log(error)
+                  setIsSending(false)
+                  toast.error(`Error Occured ${error}`, {
+                      icon: <DeleteColumnOutlined  className="w-4 h-4" />,
+                      duration: 1000,
+
+                  });
+              }
+          )
+
+
+  }
   return (
     <Toolbar.Root
       aria-label="Editing options"
@@ -71,7 +115,21 @@ export function AppToolbar() {
       </Toolbar.ToggleGroup>
       {/* dumb division to set map and timeline toggle item at center */}
       <div  className="w-1/4"
-      ></div>
+      >
+          <form>
+
+              <div className="flex">
+                  <Input value={serverAddress} onChange={(v)=>setserverAddress(v.target.value)} placeholder="Insert a server address " type={"text"} className="mr-1"/>
+                  {
+                     isSending ? <Button type="primary" shape="circle" icon={<PauseOutlined className="w-4 h-4"/>} onClick={pauseSend}/>:
+                         <Button type="primary" shape="circle" icon={<CaretRightOutlined className="w-4 h-4"/>} onClick={startSend}/>
+                  }
+
+              </div>
+
+          </form>
+
+      </div>
     </Toolbar.Root>
   );
 }
