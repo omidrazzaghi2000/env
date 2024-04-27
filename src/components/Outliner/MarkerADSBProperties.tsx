@@ -15,7 +15,7 @@ import AutoAirCraft from '../../utils/classes/AutoAirCraft.js';
 import {calculateTime, getLatLng, interpolateAndGetLatLng} from "../MapPreview/map_marker/path";
 import './index.css'
 import L from "leaflet";
-import { Line,Column } from '@ant-design/plots';
+import {Line, Column, Area} from '@ant-design/plots';
 
 
 
@@ -25,7 +25,7 @@ export const SpeedChart: React.FC = () => {
   const [data,setData] = useState<{index:number,speed:number}[]>([])
   const DEFAULT_UPDATE_RATE = 5
   const [updateRate,setUpdateRate] = useState(DEFAULT_UPDATE_RATE);
-
+  const [config, setConfig] = useState({})
   useEffect(() => {
 
     if(currentMarkerSelected !== undefined) {
@@ -53,41 +53,62 @@ export const SpeedChart: React.FC = () => {
   }, [currentMarkerSelected]);
 
 
-  const props = {
-    data,
-    xField: 'index',
-    yField: 'speed',
-    smooth: false,
-    height: 120,
-    padding:-10,
+  // const props = {
+  //   data,
+  //   xField: 'index',
+  //   yField: 'speed',
+  //   smooth: false,
+  //   height: 120,
+  //   padding:-10,
+  //
+  //   animation: false,
+  //   style:{
+  //     animation:false,
+  //     // stroke:'#848484',
+  //     // shadowColor:'red'
+  //     stroke: '#848484',
+  //     lineWidth: 2,
+  //     lineDash : [ 4 , 5 ] ,
+  //     strokeOpacity: 0.7,
+  //     shadowColor: 'black',
+  //     shadowBlur: 10,
+  //     shadowOffsetX: 5,
+  //     shadowOffsetY : 5 ,
+  //     cursor: 'pointer',
+  //
+  //   }
+  // };
 
-    animation: false,
-    style:{
-      animation:false,
-      // stroke:'#848484',
-      // shadowColor:'red'
-      stroke: '#848484',
-      lineWidth: 2,
-      lineDash : [ 4 , 5 ] ,
-      strokeOpacity: 0.7,
-      shadowColor: 'black',
-      shadowBlur: 10,
-      shadowOffsetX: 5,
-      shadowOffsetY : 5 ,
-      cursor: 'pointer',
+  useEffect(() => {
+    setConfig({
 
-    }
-  };
+      data: {
+        value: data,
+      },
+      xField: (d:any,index:number) => index,
+      yField: 'speed',
+
+      axis: {
+        y: { labelFormatter: '~s' },
+      },
+      scale: {
+        x: {
+          type: 'point',
+        }
+      },
+
+      theme: "classicDark",
+
+    })
+  }, [currentMarkerSelected]);
 
   return currentMarkerSelected!== undefined && (<div>
-    <label>
+    <h2 className="p-4 font-light text-xs tracking-widest text-gray-300 border-b border-white/10">
       Speed
-    </label>
-    <Line {...props} className={'height-line-chart'} /></div>)
+    </h2>
+    <Line {...config} className={'height-line-chart'} height={200}/></div>)
 
 };
-
-
 
 
 export const HeightChart: React.FC = () => {
@@ -124,45 +145,72 @@ export const HeightChart: React.FC = () => {
   }, [currentMarkerSelected]);
 
 
-  const props = {
-    data,
-    xField: 'index',
-    yField: 'height',
-    smooth: false,
-    height: 120,
-    padding:-10,
+  // const props = {
+  //   data,
+  //   xField: 'index',
+  //   yField: 'height',
+  //   smooth: false,
+  //   height: 120,
+  //   padding:-10,
+  //
+  //   animation: false,
+  //   style:{
+  //     animation:false,
+  //     // stroke:'#848484',
+  //     // shadowColor:'red'
+  //     stroke: '#848484',
+  //     lineWidth: 2,
+  //     lineDash : [ 4 , 5 ] ,
+  //     strokeOpacity: 0.7,
+  //     shadowColor: 'black',
+  //     shadowBlur: 10,
+  //     shadowOffsetX: 5,
+  //     shadowOffsetY : 5 ,
+  //     cursor: 'pointer',
+  //
+  //   }
+  // };
+  const [config, setConfig] = useState({})
 
-    animation: false,
-    style:{
-      animation:false,
-      // stroke:'#848484',
-      // shadowColor:'red'
-      stroke: '#848484',
-      lineWidth: 2,
-      lineDash : [ 4 , 5 ] ,
-      strokeOpacity: 0.7,
-      shadowColor: 'black',
-      shadowBlur: 10,
-      shadowOffsetX: 5,
-      shadowOffsetY : 5 ,
-      cursor: 'pointer',
+  useEffect(() => {
+    setConfig(
+        {
 
-    }
-  };
+          data: {
+            value: data,
+          },
+          xField: (d:any,index:number) => index,
+          yField: 'height',
+          style: {
+            fill: 'linear-gradient(-90deg, #FADA5E  0%,  #F9A602 100%)',
+          },
+          axis: {
+            y: { labelFormatter: '~s' },
+          },
+          scale: {
+            x: {
+              type: 'point',
+            }
+          },
+
+          theme: "classicDark",
+
+        }
+    )
+  }, [currentMarkerSelected]);
+
+
 
   return currentMarkerSelected!== undefined && (<div>
-    <label>
-    Height
-  </label>
-    <Line {...props} className={'height-line-chart'} /></div>)
+    <h2 className="p-4 font-light text-xs tracking-widest text-gray-300 border-b border-white/10">
+      Height
+    </h2>
+    <Area {...config} className={'height-line-chart'} height={200}/></div>)
 
 };
 
 
-
-export function MarkerADSBProperties({
-}: {
-}) {
+export function MarkerADSBProperties({}: {}) {
 
   const ref = useRef<HTMLDivElement>(null!);
   const pane = useRef<Pane>(null!);
