@@ -957,13 +957,13 @@ function ShowADSB () {
 
   const filledIconMarker=L.icon({
     iconUrl: '/textures/airplane_vondy_orange.png',
-    iconSize: [40, 40],
-    iconAnchor: [16, 16]
+    iconSize: [30, 30],
+    iconAnchor: [8, 8]
   })
   const ordinaryIcon=L.icon({
     iconUrl: '/textures/airplane_vondy_3.png',
-    iconSize: [40, 40],
-    iconAnchor: [16, 16]
+    iconSize: [30, 30],
+    iconAnchor: [8, 8]
   })
 
 
@@ -984,28 +984,43 @@ function ShowADSB () {
    *********************************/
   const [page,setPage] = useState(1)
   useEffect(() => {
-    fetch(`http://localhost:3001/api/adsb?page=${page}`).then(
-      function (res){
-        res.json().then(function(jsonRes){
+    let first_error = false
+    function getFirstADSB_Record(){
+      fetch(`http://localhost:3001/api/adsb?page=${page}`).then(
+          function (res){
+            res.json().then(function(jsonRes){
 
 
-          jsonRes.forEach(
-              function(record:ADSBRecord){
-                  createNewMarker(record)
-              }
-          )
-        })
-      }
-    ).catch(function(error){
+              jsonRes.forEach(
+                  function(record:ADSBRecord){
+                    createNewMarker(record)
+                  }
+              )
 
-      toast("Error Occured in fetching data from adsb", {
-        description:
-            error.toString(),
-        icon: <BoltIcon className="w-4 h-4" />,
-      });
-    })
+              setPage(page+1)
+            })
+          }
+      ).catch(function(error){
+        if(!first_error){
+          toast.error("Error Occured in fetching data from adsb", {
+            description:
+                error.toString(),
+            icon: <BoltIcon className="w-4 h-4" />,
+          });
+          first_error = true
+        }
 
-  }, []);
+
+
+        getFirstADSB_Record()
+      })
+    }
+    if(page === 1){
+      getFirstADSB_Record()
+    }
+
+
+  }, [page]);
 
   const createNewMarker =useCallback(
       (record:ADSBRecord)=>{
@@ -1181,13 +1196,34 @@ function ShowADSB () {
             setTimeout(()=>setPage(page+1),100)
 
           }
-      )
+      ).catch((error)=>{
+
+        /* restart adsb request */
+        setPage(1)
+
+        /* remove all former elements in the map contain makers and history points */
+        markerTable.forEach((m)=>map.removeLayer(m.markerMap))
+
+        //remove bread crumbs
+        markerTable.forEach((row,index)=> {
+          row.history.Positions.forEach(
+              (circle)=>{
+                map.removeLayer(circle)
+              }
+          )
+        })
+
+        //remove marker table
+        setMarkerTable([])
+
+
+      })
     }
 
   }, [page]);
 
   useEffect(() => {
-    setPage(page+1)
+    // setPage(page+1)
   }, []);
 
   return null;
