@@ -1,45 +1,18 @@
-import React, { useRef, useEffect } from "react"
+import React, {useRef, useEffect, useState} from "react"
 import mapboxgl from "mapbox-gl"
+import {useAtomValue} from "jotai";
+import {markersAtom} from "../../store";
 // Grab the access token from your Mapbox account
 // I typically like to store sensitive things like this
 // in a .env file
 mapboxgl.accessToken = "pk.eyJ1Ijoib21pZHJhenphZ2hpMjAwMCIsImEiOiJjbGo1YTFzdXgwYzh2M3BxeWN2Yzg5MzVhIn0.-Ju3wtd6vIMP7YL1VKh4XQ"
 export const ThreeDMapViewer2 = () => {
     const mapContainer = useRef()
-    // this is where all of our map logic is going to live
-    // adding the empty dependency array ensures that the map
-    // is only created once
-    // useEffect(() => {
-    //     // create the map and configure it
-    //     // check out the API reference for more options
-    //     // https://docs.mapbox.com/mapbox-gl-js/api/map/
-    //     const map = new mapboxgl.Map({
-    //         container: "map",
-    //         style: "mapbox://styles/mapbox/satellite-streets-v11",
-    //         center: [-119.99959421984575, 38.619551620333496],
-    //         zoom: 14,
-    //         pitch: 60,
-    //     })
-    //     map.on("load", () => {
-    //         map.addSource("mapbox-dem", {
-    //             type: "raster-dem",
-    //             url: "mapbox://mapbox.mapbox-terrain-dem-v1",
-    //             tileSize: 512,
-    //             maxZoom: 16,
-    //         })
-    //         map.setTerrain({ source: "mapbox-dem", exaggeration: 1.5 })
-    //         map.addLayer({
-    //             id: "sky",
-    //             type: "sky",
-    //             paint: {
-    //                 "sky-type": "atmosphere",
-    //                 "sky-atmosphere-sun": [0.0, 90.0],
-    //                 "sky-atmosphere-sun-intensity": 15,
-    //             },
-    //         })
-    //     })
-    // }, [])
+    const [modelOrigin,setModelOrigin] = useState([50.62002,36.65828 ])
+    const [mapCenter, setMapCenter] = useState([50.62002,36.65828 ])
+    const markers = useAtomValue(markersAtom)
 
+    const [modelAltitude,setModelAltitude] = useState(7500);
 
     useEffect(() => {
 
@@ -48,14 +21,19 @@ export const ThreeDMapViewer2 = () => {
             // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
             style: 'mapbox://styles/mapbox/satellite-streets-v12',
             zoom: 14,
-            center: [36.65828, 50.62002],
+            center: mapCenter,
             pitch: 30,
             antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
         });
 
+
+        map.on('click',(e)=>{
+            console.log(e)
+        })
+
         // parameters to ensure the model is georeferenced correctly on the map
-        const modelOrigin = [36.65828, 50.62002];
-        const modelAltitude = 1000;
+        const modelOrigin = [50.62002,36.65828 ];
+
         const modelRotate = [Math.PI / 2, 0, 0];
 
         const modelAsMercatorCoordinate = mapboxgl.MercatorCoordinate.fromLngLat(
@@ -159,19 +137,35 @@ export const ThreeDMapViewer2 = () => {
 
         map.on('style.load', () => {
 
+
+            map.addSource('mapbox-dem', {
+                'type': 'raster-dem',
+                'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+                'tileSize': 512,
+                'maxzoom': 14
+            });
+            // add the DEM source as a terrain layer with exaggerated height
+            map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 2 });
             map.addLayer(customLayer, 'waterway-label');
         });
 
 
-    }, []);
+    }, [mapCenter,modelOrigin]);
+
+
 
     return (
-        <div
-            id="map"
-            ref={mapContainer}
-            style={{width: "100%", height: "100vh"}}
-        />
+        <div style={{position:'relative'}}>
+            <div
+                id="map"
+                ref={mapContainer}
+                style={{width: "100%", height: "100vh"}}
+            />
+            {/*<div className='edit-model-test text-black' style={{position:'absolute',left:0,top:0,zIndex:9999}}>*/}
+            {/*    <input type='number' value={modelAltitude} onChange={(e)=>setModelAltitude(parseInt(e.target.value))}/>*/}
+            {/*</div>*/}
+        </div>
 
 
-)
+    )
 }
