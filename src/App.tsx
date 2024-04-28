@@ -4,7 +4,7 @@ import { AppLayout } from "./components/AppLayout";
 import { AppToolbar } from "./components/AppToolbar";
 import { CommandPalette } from "./components/CommandPalette";
 import { PathPalette } from "./components/PathPalette";
-import {ScenarioPaette} from "./components/ScenarioPalette";
+import {ScenarioPalette} from "./components/ScenarioPalette";
 import {DialogDeletePath} from "./components/Dialog";
 
 export default function App() {
@@ -12,7 +12,7 @@ export default function App() {
   return (
     <>
       <Toaster theme="dark" richColors position="bottom-center" />
-      <ScenarioPaette/>
+      <ScenarioPalette/>
       <CommandPalette />
       <PathPalette/>
 

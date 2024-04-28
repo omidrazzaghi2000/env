@@ -8,10 +8,14 @@ import {
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { useAtom, useSetAtom } from "jotai";
-import {Light, lightsAtom, showVHLineAtom, isScenarioPaletteOpenAtom} from "../../store";
+import {Light, lightsAtom, showVHLineAtom, isScenarioPaletteOpenAtom, ADSB_SourcesAtom} from "../../store";
 import { useFilePicker } from 'use-file-picker';
 import { toast } from "sonner";
-export function ScenarioPaette() {
+import {Button, Form, Input, Modal} from "antd";
+import {func} from "three/examples/jsm/nodes/shadernode/ShaderNodeBaseElements";
+import {uuid} from "vue-uuid";
+
+export function ScenarioPalette() {
   const [open, setOpen] = useAtom(isScenarioPaletteOpenAtom);
 
   const [value, setValue] = useState("softbox");
@@ -29,6 +33,7 @@ export function ScenarioPaette() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
+
   return (
       <Command.Dialog
           loop
@@ -42,7 +47,7 @@ export function ScenarioPaette() {
           <MagnifyingGlassIcon className="text-neutral-600 w-5 h-5 translate-y-[1px]" />
           <Command.Input
               autoFocus
-              placeholder="Add custom scenarion ..."
+              placeholder="Add custom scenario ..."
               className="border-none bg-transparent flex-1 outline-none text-neutral-100 placeholder:text-neutral-600"
           />
         </div>
@@ -66,8 +71,17 @@ export function ScenarioPaette() {
                 <Item
                     label="ADS-B"
                     value="adsb"
-                    subtitle="Automatic Dependent Surveillance-Broadcast (ADS-B)"
+                    subtitle="Read ADS-B file from a server."
                     colorTheme="orange"
+                >
+                  <ADSBIcon />
+                </Item>
+
+                <Item
+                    label="ADS-B Offline"
+                    value="adsb_offline"
+                    subtitle="Read ADS-B file from local."
+                    colorTheme="red"
                 >
                   <ADSBIcon />
                 </Item>
@@ -84,12 +98,85 @@ export function ScenarioPaette() {
                   <div className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 absolute w-16 h-16 rounded-full bg-white blur-3xl" />
               )}
 
-              {value === "adsb" && <ADSBImage />}
+              {value === "adsb" &&
+                  <>
+                    <ADSB_Form></ADSB_Form>
+
+                  </>}
+              {value === "adsb_offline" &&
+
+                    <h3 className='text-white'>
+                      Not Implemented!
+                    </h3>}
+
             </div>
           </div>
         </Command.List>
       </Command.Dialog>
+
   );
+}
+
+function ADSB_Form(){
+  const [name,setName] = useState("")
+  const [type,setType] = useState("")
+  const [src,setSrc] = useState("")
+  const [delay,setDelay] = useState(0)
+  const [page,setPage] = useState(1)
+  const [updateTime,setUpdateTime] = useState(100)/*each 100 ms update page and request for the next page*/
+  const [ADSB_Array,setADSB_Array] = useAtom(ADSB_SourcesAtom)
+
+  function addNewOnlineADSB(){
+    ADSB_Array.push(
+        {
+          id:uuid.v4(),
+          name:name,
+          type:'Online',
+          src:src,
+          delay:delay,
+          page:page,
+          updateTime:updateTime,
+          selected:false
+        }
+    )
+    setADSB_Array([...ADSB_Array])
+  }
+
+  return (
+      <div style={{backgroundColor: 'transparent'}} className='flex relative'>
+        <div className='m-2' style={{position: 'absolute', top: 0, right: 0 , opacity:0.5}}>
+          <ADSBImage/>
+        </div>
+
+        <Form style={{zIndex:100}}>
+          <label className='text-white'>Name</label>
+          <Input type='text' value={name} onChange={(e) => setName(e.target.value)}/>
+
+          <label className='text-white'>Server Address</label>
+          <Input type='text' value={src} onChange={(e) => setSrc(e.target.value)}/>
+          <div className="flex">
+            <div className='block'>
+              <label className='text-white'>Delay</label>
+              <Input type='number' value={delay} onChange={(e) => setDelay(e.target.value)}/>
+            </div>
+            <div className='block ml-3'>
+              <label className='text-white'>Page</label>
+              <Input type='number' value={page} onChange={(e) => setPage(e.target.value)}/>
+            </div>
+
+          </div>
+          <div className='block'>
+            <label className='text-white'>Update Time(ms)</label>
+            <Input type='number' value={updateTime} onChange={(e) => setUpdateTime(e.target.value)}/>
+          </div>
+          <Button className="text-white bg-blue-600 mt-1" onClick={addNewOnlineADSB}>
+            Add
+          </Button>
+        </Form>
+
+
+      </div>
+  )
 }
 
 function Item({
@@ -139,9 +226,10 @@ function Item({
   function handleSelect(value: string) {
 
     if (value === "adsb"){
-    openFilePicker();
-
+    // openFilePicker();
+    //
     }
+
 
     setOpen(false);
   }
@@ -191,8 +279,9 @@ function ADSBImage() {
       <img
           src="/textures/scenario_palette/adsb-logo.png"
           alt="Gradient"
-          className="w-48 h-48"
+          className="w-48 h-48 object-cover"
           loading="lazy"
+
       />
   );
 }

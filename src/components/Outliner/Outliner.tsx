@@ -27,10 +27,10 @@ import {
   selectedCameraAtom,
 
   markersAtom,
-  markerAtomsAtom, isScenarioPaletteOpenAtom
+  markerAtomsAtom, isScenarioPaletteOpenAtom, ADSB_SourceAtomAtom
 } from "../../store";
 import { LightListItem } from "./LightListItem";
-import { CameraListItem } from "./CameraListItem";
+import { ADSB_ScenarioListItem } from "./ADSB_ScenarioListItem";
 import { useAtomValue, useSetAtom } from "jotai";
 import { toast } from "sonner";
 import { MarkerListItem } from "./MarkerListItem";
@@ -46,7 +46,9 @@ export function Outliner() {
   const setCameras = useSetAtom(camerasAtom);
   const currentCamera = useAtomValue(selectedCameraAtom);
 
-  const markerAtoms = useAtomValue(markerAtomsAtom);
+  const markerAtoms = useAtomValue(markerAtomsAtom)
+
+  const ADSB_ScenarioAtoms = useAtomValue(ADSB_SourceAtomAtom)
 
   const addCamera = (camera: Camera) =>
     setCameras((cameras) => [...cameras, camera]);
@@ -88,11 +90,11 @@ export function Outliner() {
       </div>
 
       <ul className="m-0 p-2 flex flex-col gap-1">
-        {cameraAtoms.map((cameraAtom, index) => (
-          <CameraListItem
-            key={cameraAtom.toString()}
+        {ADSB_ScenarioAtoms.map((adsbAtom, index) => (
+          <ADSB_ScenarioListItem
+            key={adsbAtom.toString()}
             index={index}
-            cameraAtom={cameraAtom}
+            adsbAtom={adsbAtom}
           />
         ))}
       </ul>

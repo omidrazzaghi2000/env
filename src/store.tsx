@@ -528,6 +528,21 @@ export const SetPathDestinationAtom = atom({showHelperLine:false,markerId:-1,mar
 
 
 /////////////////////////////// ADSB ////////////////////////////////////////////
+
+
+export type ADSB_Source ={
+    id:string,
+    name:string,
+    type:string,
+    src:string,
+    delay:number,
+    page:number,
+    updateTime:number,
+    selected:boolean,
+}
+export const ADSB_SourcesAtom=atomWithStorage<ADSB_Source[]>('adsb_sources',[])
+
+export const ADSB_SourceAtomAtom = splitAtom(ADSB_SourcesAtom)
 export const isScenarioPaletteOpenAtom = atom(false)
 
 export type MarkerHistory = {
@@ -573,4 +588,6 @@ export const toggleMarkerTableSelectionAtom = atom(
       )
     }
 )
+
+
 

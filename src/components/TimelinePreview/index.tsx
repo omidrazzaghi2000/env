@@ -13,7 +13,7 @@ import {
   timelineCursorLastPostionAtom,
   updateMarkerPostionAtom,
   timeAtom,
-  timelineStateAtom, curvePathArrayAtom
+  timelineStateAtom, curvePathArrayAtom, ADSB_SourcesAtom
 } from '../../store'
 import {
   getLatLng,
@@ -35,14 +35,20 @@ const mockEffect: Record<string, TimelineEffect> = {
   },
   effect1: {
     id: 'effect1',
-    name: '效果1'
-  }
+    name: '效果1',
+  },
+  adsbEffect: {
+    id: 'adsbEffect',
+    name: '效果1',
+  },
+
 }
 
 
 export const TimelinePreview = (props: any) => {
   const [curvedPathArray,setCurvedPathArray] = useAtom(curvePathArrayAtom)
   const setTime = useSetAtom(timeAtom);
+  const [startOfOnlineADSB,setStartOfOnlineADSB] = useState(0)
 
   const getEditorData = useCallback(function (): TimelineRow[] {
     const markers = useAtomValue(markersAtom);
@@ -75,6 +81,30 @@ export const TimelinePreview = (props: any) => {
 
     })
   }, [curvedPathArray])
+
+  const getADSBEditorData = useCallback(function (): TimelineRow[] {
+    const ADSB_Scenarios = useAtomValue(ADSB_SourcesAtom);
+
+    return ADSB_Scenarios.map(function (adsbScenario: any,index:number) {
+
+        let delay = adsbScenario.delay
+        return {
+          id: adsbScenario.id,
+          actions:
+            [{
+              id: adsbScenario.id,
+              start: startOfOnlineADSB /* Add deley time for the actions */,
+              end: 10 ,//TODO _))_ we must get total time of a adsb
+              effectId: 'adsbEffect',
+              flexible: adsbScenario.selected,
+              movable: adsbScenario.selected
+            }
+            ]
+
+        }
+
+    })
+  }, [startOfOnlineADSB])
 
   const autoScrollWhenPlay = useRef<boolean>(true);
   const [isShowingOption,setIsShowingOption] = useState(false);
@@ -123,7 +153,7 @@ export const TimelinePreview = (props: any) => {
         scaleSplitCount={scaleSplitCount}
         style={{ width: '100%' }}
         gridSnap={false}
-        editorData={getEditorData()}
+        editorData={getADSBEditorData().concat(getEditorData())}
         effects={mockEffect}
         onClickRow={function (e, params) {
           toggleSelection(params.row.id)
@@ -136,6 +166,7 @@ export const TimelinePreview = (props: any) => {
           // for (let i = 0; i < markerAtoms.length; i++) {
           //   updateMarker(i, e)
           // }
+          setStartOfOnlineADSB(time)
           setTime(time);
         }}
         onClickTimeArea={function (t, e) {
