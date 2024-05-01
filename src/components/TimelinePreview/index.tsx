@@ -153,7 +153,7 @@ export const TimelinePreview = (props: any) => {
         scaleSplitCount={scaleSplitCount}
         style={{ width: '100%' }}
         gridSnap={false}
-        editorData={getADSBEditorData().concat(getEditorData())}
+        editorData={getEditorData()}
         effects={mockEffect}
         onClickRow={function (e, params) {
           toggleSelection(params.row.id)

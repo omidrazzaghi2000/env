@@ -5,13 +5,15 @@ import {
   ADSB_SourcesAtom,
   Camera,
   selectCameraAtom,
-  toggleCameraSelectionAtom,
+  toggleADSBSelectionAtom,
 } from "../../store";
 import { useKeyPress } from "../../hooks/useKeyPress";
 import { PrimitiveAtom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import {RadarChartOutlined} from '@ant-design/icons'
+import {RadarChartOutlined,EyeInvisibleOutlined,EyeOutlined} from '@ant-design/icons'
 import {PropertiesPanelTunnel} from "../Properties";
 import {MarkerProperties} from "./MarkerProperties";
+import {Button} from "antd";
+import {ADSB_ScenarioProperties} from "./ADSB_ScenarioProperties";
 
 export function ADSB_ScenarioListItem({
   index,
@@ -21,8 +23,9 @@ export function ADSB_ScenarioListItem({
   adsbAtom: PrimitiveAtom<ADSB_Source>;
 }) {
   const scenario = useAtomValue(adsbAtom);
+  const setScenario = useSetAtom(adsbAtom);
 
-  const toggleCameraSelection = useSetAtom(toggleCameraSelectionAtom);
+  const toggleADSB_SelectionItem = useSetAtom(toggleADSBSelectionAtom);
   const selectCamera = useSetAtom(selectCameraAtom);
 
   const key = String(index + 1);
@@ -33,10 +36,10 @@ export function ADSB_ScenarioListItem({
       role="button"
       className={clsx(
         "group flex relative list-none p-2 gap-2 rounded-md bg-transparent cursor-pointer transition-colors",
-        scenario.selected && "bg-white/20",
-        !scenario.selected && "hover:bg-white/10"
+          scenario.selected && "bg-white/20",
+          !scenario.selected && "hover:bg-white/10"
       )}
-      onClick={() => toggleCameraSelection(scenario.id)}
+      onClick={() => toggleADSB_SelectionItem(scenario.id)}
     >
       <RadarChartOutlined  className="w-4 h-4 text-red-400" />
       <input
@@ -51,19 +54,26 @@ export function ADSB_ScenarioListItem({
         {scenario.name}
       </span>
 
-      {/*<kbd*/}
-      {/*  className={clsx(*/}
-      {/*    "absolute right-1.5 top-1.5 text-xs font-mono text-gray-300 bg-white/10 flex items-center justify-center rounded",*/}
-      {/*    scenario.selected && "bg-white/100 text-gray-900"*/}
-      {/*  )}*/}
-      {/*>*/}
-      {/*  {scenario.src}*/}
-      {/*</kbd>*/}
+      <kbd
+        className={clsx(
+          "absolute right-1.5 top-2 text-xs font-mono text-gray-300  flex items-center justify-center rounded",
+
+        )}
+      >
+        {scenario.hidden ? (
+            /*because when click on hidden button it is triggering toggleSelection for adsb I invert selected when click on hidden icon */
+            <button  onClick={()=>{setScenario(s=>({...s,selected:!scenario.selected,hidden:false}))}}><EyeInvisibleOutlined className='w-4 h-4' /></button>
+
+        ): <button onClick={()=>{setScenario(s=>({...s,selected:!scenario.selected,hidden:true}))}}><EyeOutlined className='w-4 h-4'  /></button>}
+      </kbd>
+
+
+
 
       {scenario.selected && (
           <PropertiesPanelTunnel.In>
             <></>
-            {/*<ADSB_ScenarioProperties />*/}
+            <ADSB_ScenarioProperties adsbAtom={adsbAtom}/>
           </PropertiesPanelTunnel.In>
       )}
 

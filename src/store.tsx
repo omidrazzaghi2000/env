@@ -261,17 +261,6 @@ export const isCameraSelectedAtom = atom(get => {
   return cameras.length > 0 && cameras.some(c => c.selected)
 })
 
-export const toggleCameraSelectionAtom = atom(
-  null,
-  (get, set, cameraId: Camera['id']) => {
-    set(camerasAtom, cameras =>
-      cameras.map(c => ({
-        ...c,
-        selected: c.id === cameraId ? !c.selected : false
-      }))
-    )
-  }
-)
 
 export const selectCameraAtom = atom(
   null,
@@ -320,7 +309,16 @@ export const toggleMarkerSelectionAtom = atom(
   null,
   (get, set, markerId: AutoAirCraft['id']) => {
 
-    set(MarkerTableAtom, markers =>
+
+      /* deselect all atoms */
+      set(ADSB_SourcesAtom, adsbs =>
+          adsbs.map(a => ({
+              ...a,
+              selected: false
+          }))
+      )
+
+      set(MarkerTableAtom, markers =>
         markers.map(m => ({
           ...m,
           selected: false
@@ -539,8 +537,40 @@ export type ADSB_Source ={
     page:number,
     updateTime:number,
     selected:boolean,
+    hidden:boolean,
 }
 export const ADSB_SourcesAtom=atomWithStorage<ADSB_Source[]>('adsb_sources',[])
+
+export const toggleADSBSelectionAtom = atom(
+    null,
+    (get, set, scenarioId: ADSB_Source['id']) => {
+
+
+        /* deselect all markers */
+        set(MarkerTableAtom, markers =>
+            markers.map(m => ({
+                ...m,
+                selected: false
+            }))
+        )
+
+        set(markersAtom, markers =>
+            markers.map(m => ({
+                ...m,
+                selected: false
+            }))
+        )
+
+
+        set(ADSB_SourcesAtom, adsbScenario =>
+            adsbScenario.map(s => ({
+                ...s,
+                selected: s.id === scenarioId ? !s.selected : false
+            }))
+        )
+    }
+)
+
 
 export const ADSB_SourceAtomAtom = splitAtom(ADSB_SourcesAtom)
 export const isScenarioPaletteOpenAtom = atom(false)
@@ -573,6 +603,14 @@ export const toggleMarkerTableSelectionAtom = atom(
     (get, set, markerId: MarkerTableRow["markerId"]) => {
 
       //deselect all markers
+
+        set(ADSB_SourcesAtom, adsbs =>
+            adsbs.map(a => ({
+                ...a,
+                selected: false
+            }))
+        )
+
       set(markersAtom, markers =>
           markers.map(m => ({
             ...m,

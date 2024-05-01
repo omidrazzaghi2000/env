@@ -28,7 +28,12 @@ import {
   mainMapAtom,
   mapMarkerSplineArrayAtom,
   mapAtom,
-  updateCurvePathAtom, currentTracePointAtom, SetPathDestinationAtom, updatePathInMarkerAtom
+  updateCurvePathAtom,
+  currentTracePointAtom,
+  SetPathDestinationAtom,
+  updatePathInMarkerAtom,
+  ADSB_SourcesAtom,
+  ADSB_Source, ADSB_SourceAtomAtom
 } from '../../store'
 import L, {LatLng, latLng, marker} from 'leaflet'
 import "leaflet-spline";
@@ -54,6 +59,7 @@ import {PropertiesPanelTunnel} from "../Properties";
 import {MarkerADSBProperties} from "../Outliner/MarkerADSBProperties";
 import {MarkerProperties} from "../Outliner/MarkerProperties";
 import {deg_to_dms} from "../../utils/coordinates";
+import {PrimitiveAtom} from "jotai/index";
 
 
 const center = new L.LatLng(34.641955754083504, 50.878976024718725)
@@ -943,7 +949,7 @@ export type ADSBRecord= {
   VerticalSpeed:number
 }
 
-function ShowADSB () {
+function ShowADSB ({adsbAtom}:{adsbAtom: PrimitiveAtom<ADSB_Source>}) {
   let map = useMap()
   const [markerTable,setMarkerTable] = useAtom(MarkerTableAtom)
   const MAX_TIME_TO_LEAVE:number = 64
@@ -953,7 +959,6 @@ function ShowADSB () {
   const MAXIMUM_BUFFER_SIZE_FOR_SAVING_HISTORY = 50
   const BREAD_CRUMB_RADIUS = 10
   const CIRCLE_COLOR = "#FFA259"
-
 
   const filledIconMarker=L.icon({
     iconUrl: '/textures/airplane_vondy_orange.png',
@@ -966,7 +971,7 @@ function ShowADSB () {
     iconAnchor: [8, 8]
   })
 
-
+  const scenario = useAtomValue(adsbAtom)
 
 
   useEffect(() => {
@@ -982,11 +987,11 @@ function ShowADSB () {
   /*********************************
    Get ADSB From NodeJs Server
    *********************************/
-  const [page,setPage] = useState(1)
+  const [page,setPage] = useState(scenario.page)
   useEffect(() => {
     let first_error = false
     function getFirstADSB_Record(){
-      fetch(`http://localhost:3001/api/adsb?page=${page}`).then(
+      fetch(`http://${scenario.src}?page=${page}`).then(
           function (res){
             res.json().then(function(jsonRes){
 
@@ -1015,7 +1020,7 @@ function ShowADSB () {
         getFirstADSB_Record()
       })
     }
-    if(page === 1){
+    if(page === scenario.page){
       getFirstADSB_Record()
     }
 
@@ -1076,7 +1081,7 @@ function ShowADSB () {
 
 
 
-      fetch(`http://localhost:3001/api/adsb?page=${page}`).then(
+      fetch(`http://${scenario.src}?page=${page}`).then(
           function(rec){
             rec.json().then(
                 function(jsonRes){
@@ -1193,13 +1198,13 @@ function ShowADSB () {
 
             )
 
-            setTimeout(()=>setPage(page+1),100)
+            setTimeout(()=>setPage(page+1),scenario.updateTime)
 
           }
       ).catch((error)=>{
 
         /* restart adsb request */
-        setPage(1)
+        setPage(scenario.page)
 
         /* remove all former elements in the map contain makers and history points */
         markerTable.forEach((m)=>map.removeLayer(m.markerMap))
@@ -1259,6 +1264,7 @@ export function MapPreview () {
   }
 
   const map = useAtomValue(mainMapAtom);
+  const scenarioAtoms = useAtomValue(ADSB_SourceAtomAtom);
 
   map?.addEventListener("mousemove",updateMouseLatLon,true);
   return (
@@ -1279,7 +1285,12 @@ export function MapPreview () {
           </div>
         </div>
         <MyComponent id='simulator-map'/>
-        <ShowADSB/>
+        {
+          scenarioAtoms.map((adsbAtom,index)=>
+              (<ShowADSB adsbAtom={adsbAtom} key={index}/>))
+
+        }
+
         <ShowProperties></ShowProperties>
       </MapContainer>
   )

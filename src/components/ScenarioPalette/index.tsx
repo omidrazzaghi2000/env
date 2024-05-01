@@ -136,7 +136,8 @@ function ADSB_Form(){
           delay:delay,
           page:page,
           updateTime:updateTime,
-          selected:false
+          selected:false,
+          hidden:false,
         }
     )
     setADSB_Array([...ADSB_Array])
