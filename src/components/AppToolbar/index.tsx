@@ -7,7 +7,7 @@ import {
     PhotoIcon, BoltIcon,
 } from "@heroicons/react/24/solid";
 import * as Toolbar from "@radix-ui/react-toolbar";
-import {activeModesAtom, markersAtom, modeAtom} from "../../store";
+import {activeModesAtom, curvePathArrayAtom, markersAtom, modeAtom} from "../../store";
 import { Logo } from "./Logo";
 import { useAtomValue, useSetAtom } from "jotai";
 import {Button, Input} from "antd";
@@ -17,6 +17,9 @@ import {useState} from "react";
 import { toast } from "sonner";
 import {saveAs} from 'file-saver';
 import {useFilePicker} from "use-file-picker";
+import {interpolateAndGetLatLng} from "../MapPreview/map_marker/path";
+import L from "leaflet";
+import {useAtom} from "jotai/index";
 
 export function AppToolbar() {
   const setMode = useSetAtom(modeAtom);
@@ -26,7 +29,13 @@ export function AppToolbar() {
   const markers = useAtomValue(markersAtom)
   const setMarkers = useSetAtom(markersAtom)
   const [isSending,setIsSending] = useState(false);
-  const [serverAddress,setserverAddress] = useState("")
+  const [serverAddress,setserverAddress] = useState("");
+
+  //for recording
+    const [markerCurvedPathArray, setMarkerCurvedPathArray] = useAtom(curvePathArrayAtom);
+    const [from,setFrom] = useState();
+    const [to,setTo] = useState();
+
 
     const { openFilePicker, filesContent, loading } = useFilePicker({
         accept: '.json',
@@ -59,6 +68,74 @@ export function AppToolbar() {
       toast("Stopped Sending to the server", {
           icon: <BoltIcon className="w-4 h-4" />,
       });
+  }
+
+
+  function recordStart(from:number,to:number,sps:number){
+
+       if(from >= to)
+       {
+        toast.error("Input times are not valid.");
+        return;
+       }
+
+       let time = from;
+       let csvString = "";
+       while(time <= to){
+           for(let i = 0 ; i < markers.length ; i++)
+           {
+
+               let timesArray = markerCurvedPathArray[i]._timesArray;
+               let tracePoints =  markerCurvedPathArray[i]._tracePoints;
+               let tracePointsIndex = markerCurvedPathArray[i]._tracePointsPathIndex;
+
+               /* check whether path is started */
+               if(timesArray.length > 0 && timesArray[0] > time) {
+
+                   continue
+               }
+
+
+               let currentSubPathIndex = 0;
+               for(let t = 0 ; t < timesArray.length-1 ; t++){
+
+                   if(time >= timesArray[t] && time <= timesArray[t+1]/*for the middle of path*/){
+                       currentSubPathIndex = t;
+                       break
+                   }
+
+                   else if(t == timesArray.length-2/*for the end of path*/){
+                       currentSubPathIndex = timesArray.length-2
+                   }
+
+               }
+
+
+               let new_position_new_yaw = interpolateAndGetLatLng(
+                   tracePoints[currentSubPathIndex],tracePoints[currentSubPathIndex+1], time-timesArray[currentSubPathIndex],
+                   markers.at(i).path.at(tracePointsIndex).speed)
+               let new_position = new_position_new_yaw[0]
+               let new_yaw = new_position_new_yaw[1]
+
+               csvString += `${markers.at(i).id},${time},${new_position[0]},${new_position[1]},${new_yaw}\n`;
+
+
+
+
+           }
+
+           time+=1/sps;
+
+       }
+
+      // Create blob object with file content
+      let blob = new Blob([csvString], {
+          type: "text/plain;charset=utf-8",
+      });
+
+      // Create and save the file using the FileWriter library
+      saveAs(blob, `${from}-${to}-${Date.now()}.csv`);
+
   }
 
   function startSend(){
@@ -146,6 +223,20 @@ export function AppToolbar() {
 
           <div className="flex w-1/4" style={{display: 'flex', justifyContent: 'right'}}
           >
+
+
+
+              <div className="flex"
+              >
+                  <Input value={from} onChange={(v) => setFrom(v.target.value)}
+                         placeholder="From time ... " type={"number"} className="mx-1"/>
+                  <Input value={to} onChange={(v) => setTo(v.target.value)}
+                         placeholder="From time ... " type={"number"} className="mx-1"/>
+                  <Button type="primary" shape="circle" icon={<SaveOutlined className="w-4 h-4"/>}
+                          onClick={/////////TODO:recordStart(from,to,sps)} title="Save Scenario "></Button>
+              </div>
+
+
               <div
               >
                   <Button type="primary" shape="circle" icon={<SaveOutlined className="w-4 h-4"/>}
